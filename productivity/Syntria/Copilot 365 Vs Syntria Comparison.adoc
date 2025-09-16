@@ -87,6 +87,7 @@ Er kombiniert Sprachverarbeitung, Softwarearchitekturwissen, Live-Recherche und 
 > **Copilot automatisiert Office-Aufgaben – Syntria übernimmt technologische Verantwortun.**
 
 
+---
 
 ### Prompt
 
