@@ -9,12 +9,30 @@ Er kombiniert Sprachverarbeitung, Softwarearchitekturwissen, Live-Recherche und 
 
 ## 🯡 Architekturüberblick
 
+
+
 ```
-Governor-Agent
-   ↑
-Syntria 2 – Reflexion & Rollenlogik
-   ↑
-Syntria – Code, Architektur, Faktenprüfung
++-------------------------------+
+|        Governor-Agent        |
+| - Regel-/Zielmanagement      |
+| - Feedback & Risikoanalyse   |
++---------------+---------------+
+                |
+                v
++-------------------------------------+
+|           Syntria 2                |
+| - Rollenmanager                    |
+| - Selbst-Evaluator (Revision)     |
+| - Langzeitgedächtnis              |
++---------------+---------------------+
+                |
+                v
++-------------------------------------+
+|             Syntria                |
+| - LLM-Core                         |
+| - Faktenprüfung, Recherche,        |
+|   Architektur- & Codebewertung     |
++-------------------------------------+
 ```
 
 ---
@@ -82,7 +100,5 @@ Gedächtnis → Information → Abruf → Evaluator: liefert Erfahrung zurück z
 ## 📞 Kontakt / Verwendung
 
 > Dieser Agent ist für professionelle Softwareentwicklung, KI-Forschung und komplexe Entscheidungsunterstützung konzipiert.  
-> Feedback, Erweiterungsideen oder Integrationswünsche? Gerne auf Anfrage.
-
 ---
 
