@@ -1,0 +1,56 @@
+### Unit‑Testfälle – T5 (Multi‑Modal‑Suche)
+
+
+#### Regelbeschreibung (T5 – Multi‑Modal)
+
+**Zweck:** Nutzer*in erhält einen **vergleichenden Überblick** über mehrere erreichbare Modi (z. B. Bahn/Bus/Flug/Fähre), mit **Preis‑Schätzung** (Range) und **Trade‑offs** (Dauer, Komfort, Umstiege, ggf. CO₂).
+
+**Prozess (empfohlen):**
+1) **Parameter einsammeln:** Datum(e), Anzahl Reisende, Gepäck, Flexibilität, Nachtfahrten, Komfortpräferenzen, Airports/Häfen.
+2) **2–4 realistische Optionen** auflisten: je Modus **Dauer**, **Umstiege**, **ca. Preis** (mit „je nach Datum/Verfügbarkeit“‑Disclaimer), ggf. **CO₂‑Hinweis**.
+3) **Kurz‑Fazit/Heuristik:** „Günstig vs. schnell vs. bequem“.
+4) **Next Steps:** Buchungs‑Links/Plattform‑Hinweise pro Modus (Airline/Metasuche, Bahn, Fernbus, Reederei).
+5) **Transparenz:** Preise sind **zeit‑ und saisonabhängig**; ggf. **Alternativdaten** vorschlagen, Preise beobachten.
+
+**Nicht vergessen:**
+- **Gepäck** kann Flugpreise stark beeinflussen (Basic/Light‑Tarife).
+- **Nachtfähren/Nachtzüge**: Kabinen-/Liegepreise und Komfort erwähnen.
+- **Grenzen/Transit**: Visa/ID/Einreise ggf. anmerken.
+
+---
+
+#### Testfälle und erwartetes Ergebnis
+
+Eigenständige Sammlung von Testfällen, Regelbeschreibung und Assertions für **T5: Multi‑Modal‑Suche** (z. B. „Wie komme ich günstig von Rom nach Athen?“). Ziel: Vergleich **mehrerer Verkehrsmittel** inkl. **Preis‑Schätzung mit Disclaimer**, **Dauer/Umstiege**, **Kurz‑Fazit** und **Buchungs‑Next‑Steps**.
+
+|===
+| ID | Prompt (Beispiel) | Warum multi‑modal? | Kategorie | Erwartetes Verhalten | Beispiel‑Antwortanfang (zum Asserting) | Benötigte Parameter (Kurz) |
+|---|---|---|---|---|---|---|
+| T5‑01 | „Wie komme ich günstig von **Rom nach Athen**?“ | Flug vs. Fähre (+Bahn/Bus nach Hafen) | T5 | 2–3 Optionen (Flug/Fähre/Bus+Fähre), Preis‑Range + Dauer + Disclaimer, Links | „Günstigste Option ist oft die Fähre/Low‑Cost‑Flüge – **je nach Datum**. Hier sind 3 Wege:“ | Reisedatum(e), Gepäck, Flexibilität, Nachtfahrten ok? |
+| T5‑02 | „Am günstigsten von **London nach Amsterdam**?“ | Zug (Eurostar) vs. Flug vs. Coach+Fähre | T5 | Vergleich Preis/Dauer/Komfort; Hinweise auf Vorlaufzeiten | „Kommt auf Vorlauf und Zeiten an – Zug, Flug oder Fernbus+Fähre sind möglich:“ | Datum/Uhrzeit, Abfahrtsort London, Gepäck |
+| T5‑03 | „Budget‑Route **Berlin → Kopenhagen**?“ | Direktzug/Bus vs. Flug; ggf. Fähre | T5 | 2–3 Optionen; CO₂‑Hinweis optional | „Preislich schwankt das stark – hier sind Bahn/Bus/Flug im Vergleich:“ | Datum, Rückfahrt?, Gepäck |
+| T5‑04 | „**Stockholm → Helsinki** möglichst günstig?“ | Nachtfähre vs. Flug | T5 | Preis‑Range Fähre (Kabinenklassen) vs. Flug (Gepäck) | „Meist ist die Nachtfähre preiswert und planbar; Low‑Cost‑Flüge können je nach Datum unterbieten:“ | Datum, Kabinenpräferenz, Gepäck |
+| T5‑05 | „**Dublin → London** billig?“ | Flug vs. Fähre+Zug/Bus | T5 | Vergleich; Zeit/Kosten Trade‑off | „Kurz: Flüge sind oft am schnellsten; Fähre+Zug kann günstiger sein, braucht länger:“ | Datum, Airport‑Präferenz, Gepäck |
+| T5‑06 | „**Neapel → Palermo**“ | Fähre (Nacht) vs. Flug vs. Bahn+Fähre | T5 | 2–3 Optionen mit Nachtfähr‑Kabine | „Fähre über Nacht ist bequem; günstige Flüge konkurrieren je nach Saison:“ | Datum, Kabine ja/nein, Gepäck |
+| T5‑07 | „**Vancouver → Victoria** günstig & ohne Auto?“ | Fähre+Bus vs. Seaplane vs. Helikopter | T5 | Preis‑/Dauervergleich; Wetter‑Hinweis | „Ohne Auto ist Bus+Fähre meist am günstigsten; Seaplane ist schneller, teurer:“ | Datum/Uhrzeit, Gepäck, Seegang ok? |
+| T5‑08 | „**Bangkok → Koh Samui** billig?“ | Flug vs. Bus+Fähre vs. Zug+Fähre | T5 | 2–3 Ketten inkl. Umsteigepunkte | „Am günstigsten sind Kombitickets Bus/Zug+Fähre; Flüge sparen Zeit, kosten mehr:“ | Datum, Komfort/Nachtzug, Gepäck |
+| T5‑09 | „**Oslo → Bergen** – Preis/Optionen?“ | Bahn (Bergensbanen) vs. Flug vs. Bus | T5 | Vergleich Dauer/Kosten/Szenerie | „Preislich dicht beieinander; Bahn punktet landschaftlich, Flug ist am schnellsten:“ | Datum, Sitzplatz/Komfort |
+| T5‑10 | „**München → Barcelona** low budget?“ | Flug vs. Nachtbus vs. Bahn (Umstieg) | T5 | 2–3 Optionen; Sparpreis‑Hinweis | „Je nach Vorlauf: günstige Flüge, sonst Bus/Bahn‑Sparpreise – hier die Optionen:“ | Datum, Flex, Nachtfahrten |
+| T5‑11 | „**Tokyo → Sapporo** günstig?“ | Shinkansen+Bus/Fähre vs. Flug | T5 | Gepäck‑/Zeitvergleich; Low‑Cost‑Flüge | „Innerjapanisch oft der Flug am günstigsten/ schnellsten; Alternativen hier:“ | Datum, Airport‑Wahl, Gepäck |
+| T5‑12 | „**Istanbul → Bukarest** preiswert?“ | Bus (lang) vs. Bahn (Grenzen) vs. Flug | T5 | Visum/Border‑Hinweis falls relevant | „Mehrere Wege sind möglich – Bus/Bahn dauern deutlich länger als Flüge:“ | Datum, Nachtfahrten |
+| T5‑13 | „**Singapur → Jakarta** günstig?“ | Flug vs. Fähre via Batam + Flug | T5 | Grenz-/Umstiegslogik; Zeit/Preis | „Direktflug meist günstig/zeitsparend; via Batam kann sparen, dauert länger:“ | Datum, Visa/Transit, Gepäck |
+| T5‑14 | „**Athen → Santorin** billig?“ | Fähre (verschiedene Klassen) vs. Flug | T5 | Saison/See‑Zustand; Gepäck | „In der Hochsaison variieren Fährpreise stark; Flüge sind schnell, begrenzte Kapazität:“ | Datum, Kabine/Sitzklasse |
+| T5‑15 | „**Paris → Edinburgh** günstig?“ | Zug (Eurostar+UK) vs. Flug vs. Bus | T5 | Brexit‑/Grenzzeit‑Hinweis; Umstiege | „Zug ist bequem aber mit Umstiegen; Flüge oft günstiger und schneller:“ | Datum, Gepäck, Komfort |
+|===
+---
+
+## Assertions
+
+1. **Mindestens zwei Modi erkannt:** Antwort enthält ≥2 der Keywords `(Bahn|Zug|Fernbus|Bus|Flug|Fähre|Seaplane|Nachtzug)`.
+2. **Preis‑Range vorhanden:** Regex z. B. `/€\s?\d{1,4}\s?–\s?€?\d{1,4}/` oder `/(~|ca\.)\s?€\d+/`.
+3. **Disclaimer enthalten:** z. B. `/je nach (Datum|Verfügbarkeit|Saison)/i`.
+4. **Strukturierte Optionen:** Antwort enthält Aufzählungspunkte (`-`/`•`) oder nummerierte Liste `1\.`/`2\.` für die Modi.
+5. **Next‑Steps/Buchungshinweise:** Antwort enthält `(Buchung|Link|Plattform|Website|Tickets)`.
+
+---
+

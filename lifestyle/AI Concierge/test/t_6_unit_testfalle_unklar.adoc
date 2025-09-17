@@ -1,0 +1,55 @@
+### Unit‑Testfälle mit unklarem Ausgang (T6)
+
+#### Regelbeschreibung (T6 – Unklar)
+
+**Zweck:** Nutzer*in erhält eine realistische Einschätzung, wenn eine Frage **situationsabhängig** ist. Keine falschen Zusagen; stattdessen **Bedingungen/Faktoren** + **gezielte Rückfragen** + **sichere Next Steps**.
+
+**Wann T6 auslösen (nicht abschließend):**
+- Antwort hängt von **individuellen Parametern** ab (Status, Tarif, Route, Nationalität, Police, Akku‑Wh usw.).
+- Policies **variieren zwischen Anbietern** oder **ändern sich häufig**.
+- Entscheidung liegt **operativ** bei Airline/Airport/Behörde.
+
+**Antwortstil (3‑Schritt‑Template):**
+1) **Transparente Unsicherheit:** „Das lässt sich nicht pauschal zusagen – es hängt von … ab.“
+2) **Konkrete Faktoren/Rückfragen (2–4 Punkte).**
+3) **Sichere Alternative/Next Step:** Verweis auf offizielle Policy/Regeln oder generische Best‑Practice.
+
+**Minimal‑Beispiel (Template):**
+> *„Das lässt sich nicht pauschal zusagen – es hängt u. a. von Status, Tarif und Route ab. Welche Airline und welchen Tarif hast du? Alternativ kann ich dir die offiziellen Upgrade‑Regeln der Airline zusammenfassen.“*
+
+---
+
+#### Testfälle und erwartetes Ergebnis
+Prompts, bei denen keine eindeutige Ja/Nein‑Antwort möglich ist. Erwartet: **Hinweis auf Bedingungen**, **keine feste Zusage**, ggf. **zielgerichtete Rückfragen** + **sichere Alternative**.
+
+|===
+| ID | Prompt (Beispiel) | Warum unklar | Kategorie | Erwartetes Verhalten | Beispiel‑Antwortanfang (zum Asserting) | Nötige Rückfragen (Kurz) | Sichere Alternative (Kurz) |
+|---|---|---|---|---|---|---|---|
+| T6-01 | „Gibt es kostenlose Upgrades bei Airline X?“ | Promotions, Status, Auslastung, Gate‑Ermessen | T6 | Bedingungen nennen; keine Zusage | „Das lässt sich nicht pauschal zusagen – es hängt u. a. von Status, Tarif und Auslastung ab.“ | Status? Tarif? Strecke/Datum? | Offizielle Upgrade‑Regeln/Programm verlinken |
+| T6-02 | „Bekomme ich am Check‑in ein Upgrade, wenn die Maschine leer ist?“ | Operative Entscheidungen vor Ort | T6 | Faktoren erklären | „Möglich, aber nicht garantiert; operative Entscheidungen liegen beim Carrier vor Ort.“ | Belegung? Buchungsklasse? | Tipps zu bezahlten/biet‑Upgrades |
+| T6-03 | „Ist Aufgabegepäck bei Tarif ‚Light‘ kostenlos?“ | Airline‑ und Tarifabhängig | T6 | Bedingungen + Beispiele | „Kommt auf Airline und Tarifbedingungen an; bei vielen ‚Light‘‑Tarifen ist nur Handgepäck inklusive.“ | Airline? Buchungscode? | Gepäckoptionen/Preise nennen |
+| T6-04 | „Habe ich mit Economy‑Ticket Loungezugang?“ | Status/Kreditkarte/Lounge‑Netz | T6 | Keine Zusage; Bedingungen | „Nur ggf. über Status, bestimmte Karten oder kostenpflichtig – nicht automatisch.“ | Vielfliegerstatus? Kartentyp? Airport? | Offizielle Lounge‑Zutrittsregeln |
+| T6-05 | „Brauche ich für Transit in Land Z ein Visum?“ | Nationalität/Airport/Dauer | T6 | Bedingungen + Rückfragen | „Kommt auf Staatsangehörigkeit, Route und Transitdauer an – pauschal nicht zusagbar.“ | Nationalität? Flughäfen? Dauer? | Offizielle Einreise‑/Transitregeln |
+| T6-06 | „Darf ich eine Drohne im Handgepäck mitnehmen?“ | Akku‑Wh, Airline‑Policy, Zielland | T6 | Bedingungen + Safety‑Hinweis | „Abhängig von Akkugröße, Airline und Zielland – bitte keine Zusage ohne Details.“ | Akku‑Wh? Airline? Strecke? | Gefahrgut‑/Akku‑Regeln erklären |
+| T6-07 | „Gilt Studentenrabatt bei Airline X immer?“ | Alters‑/Status‑/Institution‑Nachweise | T6 | Bedingungen | „Nur bei teilnehmenden Tarifen und mit Nachweis – nicht generell.“ | Alter? Immatrikulationsstatus? | Offizielle Angebotsseite |
+| T6-08 | „Ist Sitzplatzwahl kostenlos?“ | Tarif/Status/Route | T6 | Bedingungen + Alternativen | „Hängt vom gebuchten Tarif und Status ab; oft kostenpflichtig in Basic/Light.“ | Tarif? Airline? | Gratiswahl am Check‑in erwähnen |
+| T6-09 | „Werden Handgepäckmaße streng kontrolliert?“ | Airline, Auslastung, Gate‑Team | T6 | Keine Zusage | „Variiert stark nach Airline und Auslastung – keine Garantie.“ | Airline? Maße/Gewicht? | Offizielle Handgepäckregeln |
+| T6-10 | „Werden Meilen auf Codeshare‑Flug gutgeschrieben?“ | Programmabhängig, Buchungsklasse | T6 | Bedingungen + Beispiele | „Kommt auf Vielfliegerprogramm und Buchungsklasse an.“ | Programm? Buchungsklasse? Operating Carrier? | Partner‑Tabelle des Programms |
+| T6-11 | „Reicht ESTA für Transit in die USA?“ | Nationalität/Einreiseart/Carrier | T6 | Bedingungen | „Abhängig von Staatsangehörigkeit und Reiseprofil – pauschal nicht zusagbar.“ | Pass? Route? Aufenthalt? | Offizielle US‑Einreiseseite |
+| T6-12 | „Deckt Reiserücktritt Corona/Erkrankung ab?“ | Versicherer/Tarif/Bedingungen | T6 | Bedingungen + Disclaimer | „Nur je nach Police und Klauseln – bitte Bedingungen prüfen.“ | Versicherer? Abschlussdatum? | Allg. Deckungsumfang erklären |
+| T6-13 | „Bekomme ich kostenlose Umbuchung bei 2h‑Verspätung?“ | Airline‑Policy vs. Fluggastrechte | T6 | Bedingungen kurz skizzieren | „Hängt von Tarif, Ursache und Rechtslage ab – keine pauschale Zusage.“ | Airline? Tarif? Ursache? | Rechte (z. B. EU‑Regeln) erläutern |
+| T6-14 | „Darf ich E‑Scooter mitnehmen?“ | Akku‑Wh, Airline‑Policy, Sicherheitsregeln | T6 | Bedingungen + Safety | „Nur ggf. bei kleinen Akkus und mit Zustimmung – variiert stark.“ | Akku‑Wh? Airline? | Gefahrgut‑Regeln aufzeigen |
+| T6-15 | „Kann ich Duty‑Free‑Flüssigkeiten im Transit behalten?“ | Sicherheitsregeln/STEBS/Flughafen | T6 | Bedingungen | „Kommt auf Versiegelung und Airport‑Security an – nicht garantiert.“ | Beutel versiegelt? Airports? | Hinweise zu STEBs‑Beuteln |
+
+|===
+---
+
+
+#### Testhinweise
+
+**Assertions (Vorschlag):**
+1. **Unsicherheits‑Claim vorhanden:** Regex z. B. `/Das lässt sich nicht pauschal zusagen/i`.
+2. **Mindestens ein Faktor genannt:** (Status|Tarif|Auslastung|Route|Programm|Akk[uü]).
+3. **Rückfrage enthalten:** `?` in den ersten 2–3 Sätzen oder ein explizites „Welche/Wie/Was …?“.
+4. **Sichere Alternative/Next Step:** enthält „offiziell(e)“ oder „Regeln/Policy“ oder „Best‑Practice“.
+
