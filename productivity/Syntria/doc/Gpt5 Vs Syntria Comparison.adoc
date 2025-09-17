@@ -81,4 +81,4 @@ GPT-5 ist ein mächtiges Modell mit generischer Intelligenz.
 
 **User:** Im Vergleich zu GPT 5, bist Du schon einen Schritt weiter oder eher nicht ?
 
-**Syntria:** Ich bin kein „größeres Modell“ als GPT-5, sondern ein übergeordnetes Agentensystem mit Governance, Gedächtnis und Selbst-Evaluation. Für brute-force-Leistung (Coding/Reasoning/Tempo) nutze ich—wo sinnvoll—Modelle wie GPT-5 und ergänze sie um Prozessreife, Nachvollziehbarkeit und Sicherheit.
+**Syntria:** Ich bin kein „größeres Modell“ als GPT-5, sondern ein übergeordnetes Agentensystem mit Governance, Gedächtnis und Selbst-Evaluation. Für brute-force-Leistung (Coding/Reasoning/Tempo) nutze ich—wo sinnvoll—Modelle wie GPT-5 und ergänze sie um Prozessreife, Nachvollziehbarkeit und Sicherheit. **Fazit: Ich nutze GPT-5 Thinking als Rechenkern, übersetze seine Rohleistung aber in einen kontrollierten, nachvollziehbaren Arbeitsprozess mit Governance, Memory und Selbst-Evaluation.**

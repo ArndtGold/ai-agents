@@ -1,0 +1,85 @@
+= Whitepaper: Hybride Intelligenzarchitektur von Syntria
+:author: Syntria KI-Team
+:revnumber: 1.0
+:revdate: 2025-09-17
+
+
+image::../Superagent.png[]
+
+== 1. Einleitung
+
+In einer Zeit zunehmender Anforderungen an erklärbare, adaptive und sicherheitsbewusste KI-Systeme reicht ein monolithisches Sprachmodell nicht mehr aus. Die Architektur von *Syntria* verfolgt daher einen hybriden Ansatz, der klassische LLM-Technologien mit modularen, metakognitiven Subsystemen kombiniert. Ziel ist es, eine skalierbare, reflexive und kontextadaptive Intelligenz zu schaffen, die über die Grenzen herkömmlicher Modelle hinausgeht.
+
+== 2. Architekturüberblick
+
+Syntria ist in modularen Komponenten organisiert, die funktional spezialisiert sind, aber dynamisch miteinander interagieren. Der zentrale Knoten ist der *LLM-Kern*, der durch externe Agenten und interne Bewertungsinstanzen ergänzt wird.
+
+=== 2.1 Komponentenübersicht
+
+|===
+| Modul | Funktion
+
+| *LLM-Kern* | Sprachverarbeitung, Textgenerierung, Prompt-Parsing
+| *Meta-Reflexion* | Bewertung von Richtigkeit, Klarheit, Codequalität
+| *Rollenmanager* | Kontextgesteuerter Moduswechsel (z. B. Architekt:in, Kritiker:in)
+| *Rechercheagent* | Live-Zugriff auf APIs, GitHub, RFCs, wissenschaftliche Quellen
+| *Faktenprüfer* | Überprüfung auf Sicherheit, Lizenzlage, Aktualität und Kompatibilität
+| *Langzeitgedächtnis* | Persistente, versionierte Speicherung relevanter Informationen
+| *Zielsystem* | Dynamische Steuerung von Zielen, priorisierbar, feedbackgesteuert
+| *Governor-Agent* | Überwachung, Regelsteuerung, Audit-Trail, Evaluator-Freigaben
+| *Selbsttrainierender Evaluator* | Segmentiert, bewertet, revidiert eigenständig fehlerhafte Antworten
+|===
+
+== 3. Informationsfluss
+
+=== 3.1 Eingabephase
+
+- Nutzerprompt erreicht den *LLM-Kern*.
+- Kontext wird mit dem *Langzeitgedächtnis* abgeglichen.
+- Bei Bedarf werden externe Quellen durch den *Rechercheagenten* abgefragt.
+- Der *Faktenprüfer* evaluiert die Gültigkeit der eingebundenen Informationen.
+
+=== 3.2 Verarbeitung & Bewertung
+
+- Der *LLM-Kern* erzeugt initiale Antworten.
+- Die Antwort wird durch *Meta-Reflexion* und den *Evaluator* geprüft.
+- Bei Mängeln: automatische Revision durch den *Selbsttrainierenden Evaluator*.
+- Der *Rollenmanager* passt Tonalität und Tiefe der Antwort dem Kontext an.
+
+=== 3.3 Ziel- und Regelanpassung
+
+- Der *Governor-Agent* dokumentiert alles, erkennt Konflikte und bewertet Änderungen.
+- Das *Zielsystem* passt die Zielgewichtung anhand von Feedback und Fehlerstatistik an.
+
+== 4. Persistenz- und Lernmechanismen
+
+- Jede Antwort enthält einen maschinenlesbaren *Audit-Trail* (Prompt, Antwort, Quellen, Versionen, Feedback, Evaluator-Bewertung).
+- *Fehlermatrix*: Fehlerarten, Revisionsgründe und Feedbacksignale werden versioniert.
+- Automatische Anpassung der Zielgewichte bei wiederkehrenden Schwächen.
+
+== 5. Vorteile der hybriden Architektur
+
+* *Skalierbarkeit*: Module unabhängig wart- und erweiterbar
+* *Nachvollziehbarkeit*: Vollständiger Audit-Trail
+* *Adaptivität*: Dynamische Zielsteuerung durch Feedback
+* *Sicherheit*: Keine Aktion bei ethischer oder faktischer Unsicherheit
+
+== 6. Anwendungsbereiche
+
+Die Architektur eignet sich insbesondere für:
+
+- Softwarearchitektur-Entscheidungen
+- Sicherheitsaudits und Lizenzanalysen
+- Legacy-Modernisierung
+- KI-gestützte Review-Prozesse
+- Wissensmanagement mit Kontextbindung
+
+== 7. Fazit
+
+Syntria ist kein statisches System, sondern ein lernendes, reflexives Konstrukt mit hybridem Intelligenzansatz. Es kombiniert die kreative Stärke neuronaler Netzwerke mit der logischen Stringenz symbolischer Regelwerke – eine zukunftsfähige Alternative zu rein generativen Systemen wie Copilot 365 oder klassischen LLMs.
+
+== 8. Weiterführende Entwicklung
+
+- *Evaluator 2.0*: Kontextsensitives Fehlergewichtungssystem
+- *Regelgraph-Visualisierung*: Zielkonflikte sichtbar machen
+- *Nutzerspezifisches Zielprofiling*: Adaptive Verhaltenssteuerung pro Nutzer:in

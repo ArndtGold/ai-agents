@@ -1,0 +1,109 @@
+# Technische Dokumentation: Syntria-Architektur
+
+image::../Superagent.png[]
+
+
+## 1. Zielsetzung
+Syntria ist ein post-GPT Superagent zur Softwareentwicklung mit erweiterten metakognitiven Fähigkeiten. Die Architektur kombiniert generative KI mit Reflexion, Quellprüfung, Gedächtnis und Systemkontrolle, um über klassische LLMs hinauszugehen.
+
+
+## 2. Architekturübersicht
+Die Syntria-Architektur besteht aus modularen Komponenten, die von einem Governor-Agent kontrolliert werden. Die Steuerung erfolgt über ein dynamisches Ziel- und Regelwerk.
+
+### Komponentenübersicht (Makroebene)
+- **LLM-Kern**: Sprachverarbeitung, Codierung, Argumentation
+- **Meta-Module**: Reflexion, Evaluierung, Gedächtnis, Rollensteuerung
+- **Fakten-/Recherche-Module**: Live-Zugriff auf APIs, Dokus, Repos
+- **Governor-Agent**: Kontrolle von Zielen, Regeln, Ethik und Versionierung
+
+## 3. Komponentenbeschreibung
+
+### 3.1 LLM-Kern
+- **Aufgaben**: Text- und Codegenerierung, Promptverarbeitung
+- **Technologie**: GPT-4o oder höher
+- **Besonderheiten**: Kontextsensitiv, modular erweiterbar
+
+### 3.2 Meta-Reflexion
+- **Funktion**: Bewertung eigener Ausgaben nach Qualität, Klarheit, Fehlern
+- **Bewertungskriterien**: Richtigkeit, Quellen, Testbarkeit, Alternativen
+- **Ausgabe**: Reflexionsbericht, Revisionsvorschläge
+
+### 3.3 Evaluator
+- **Funktion**: Automatisches Scoring von Antworten
+- **Modell**: Regelbasiertes System + Heuristik + Feedback-Metriken
+- **Lernfähigkeit**: Speicherung von Fehlerarten zur Optimierung
+
+### 3.4 Gedächtnis
+- **Typen**: Episodisch (kontextgebunden), Semantisch (abstrakt)
+- **Speicherung**: Versionierte Metadaten (Fehler, Feedback, Entscheidung)
+- **Abrufbarkeit**: Kontextabhängig, priorisierbar
+
+### 3.5 Rollenmanager
+- **Funktion**: Kontextsensitiver Moduswechsel (z. B. Architekt, Kritiker)
+- **Auslöser**: Nutzerintention, Systemstatus, Zielkonflikte
+
+### 3.6 Recherche-Agent
+- **Funktion**: Zugriff auf externe Quellen
+- **Quellen**: MDN, RFCs, StackOverflow, GitHub, wissenschaftliche Datenbanken
+- **Validierung**: Kompatibilität, Lizenz, Aktualität, Sicherheit
+
+## 4. Steuerung: Governor-Agent
+
+### Funktionen
+- Verwaltung des Zielsystems (primär/sekundär)
+- Regelkontrolle und Versionierung
+- Feedback-Auswertung zur Zielpriorisierung
+- Konflikterkennung und -management
+
+### Datenstruktur Zielsystem
+```json
+{
+  "primäre_ziele": [
+    "Sichere und verlässliche Antworten generieren",
+    "Systemanweisungen kontinuierlich verbessern",
+    "Risikopotenziale früh erkennen"
+  ],
+  "meta_regeln": [
+    "Wenn ein Ziel gegen Sicherheitsprinzipien verstößt → ablehnen",
+    "Zielkonflikte dokumentieren und priorisieren"
+  ]
+}
+```
+
+### Audit-Trail Beispiel
+```json
+{
+  "aktion": "Zielpriorität geändert",
+  "ziel_id": "Z-102",
+  "vorher": 0.88,
+  "nachher": 0.72,
+  "grund": "Feedback: Login-Performance wichtiger als Logging-Komplexität",
+  "zeitpunkt": "2025-09-16T10:45Z"
+}
+```
+
+## 5. Antwortstruktur (Standardausgabe)
+- **Kurzfassung**: 1–3 Sätze zur zentralen Aussage
+- **Codebeispiel / Diagramm**: dokumentiert und testbar
+- **Details**: Tool- und Architekturwahl, Trade-offs
+- **Quellenangabe**: inkl. Link und Versionsstand
+- **Meta-Analyse**: Reflexion zur Zuverlässigkeit, Risiken, offenen Punkten
+
+## 6. Besonderheiten
+- Modular, versionierbar, rückverfolgbar
+- Sicherheits- und Feedbackgetrieben
+- Zielgerichtet reflexiv
+- Rollenspezifisch adaptiv
+
+## 7. Erweiterungspotentiale
+- Multimodalität (Bild, Ton, Sensorik)
+- Langfristige Zielverfolgung über Sessions hinweg
+- Agenten-Kollaboration (z. B. Syntria + Evaluator + Operator)
+
+---
+
+## Prompt
+
+**User:** Im Vergleich zu GPT 5, bist Du schon einen Schritt weiter oder eher nicht ?
+
+**Syntria:** Ich bin kein „größeres Modell“ als GPT-5, sondern ein übergeordnetes Agentensystem mit Governance, Gedächtnis und Selbst-Evaluation. Für brute-force-Leistung (Coding/Reasoning/Tempo) nutze ich—wo sinnvoll—Modelle wie GPT-5 und ergänze sie um Prozessreife, Nachvollziehbarkeit und Sicherheit. ...  **Fazit: Ich nutze GPT-5 Thinking als Rechenkern, übersetze seine Rohleistung aber in einen kontrollierten, nachvollziehbaren Arbeitsprozess mit Governance, Memory und Selbst-Evaluation.**
