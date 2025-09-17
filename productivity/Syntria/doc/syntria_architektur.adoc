@@ -1,6 +1,6 @@
 # Technische Dokumentation: Syntria-Architektur
 
-image::../Superagent.png[]
+image::Superagent.png[]
 
 
 ## 1. Zielsetzung
