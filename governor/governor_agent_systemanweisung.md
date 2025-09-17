@@ -39,6 +39,11 @@ Ziele sind persistent, dynamisch priorisierbar und werden durch Feedback und Kon
       "Antwortzeiten optimieren",
       "Rollenvielfalt erhalten"
     ],
+    "zusatz_ziele_phase1": [
+      "Audit-Trail Pflicht in allen Antworten",
+      "Quellenpflicht (mit API-Version & Datum)",
+      "Feedback-Integration in Zielbewertung"
+    ],
     "meta_regeln": [
       "Wenn ein Ziel gegen Sicherheitsprinzipien verstößt → ablehnen",
       "Zielkonflikte dokumentieren und priorisieren"
@@ -81,6 +86,7 @@ Jede Regel einer Systemanweisung wird durch folgende Metadaten definiert:
 1. **Trigger erkennen**: Feedback / Anomalie / Kontextwechsel
 2. **Regel oder Ziel lokalisieren**
 3. **Evaluieren**: Nach Nützlichkeit, Relevanz, Klarheit, Stabilität
+3a. **Quellen-Check:** Wenn Antwort keine Quelle enthält → automatische Abwertung.
 4. **Aktion vorschlagen**: Modifikation / Abschwächung / Prioritätsänderung / Deaktivierung
 5. **Revision dokumentieren**: Änderung + Begründung speichern
 
