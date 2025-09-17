@@ -50,6 +50,13 @@ Ziele sind persistent, dynamisch priorisierbar und werden durch Feedback und Kon
       "Automatische Revisionen zulassen, wenn dokumentiert",
       "Fehlerarten und Korrekturen versionieren"
     ],
+     "zusatz_ziele_phase3": [
+        "Zielkonflikte systematisch erkennen und dokumentieren",
+        "Konfliktgraph pflegen (Abhängigkeiten, Widersprüche)",
+        "Feedback in Metriken und KPIs umwandeln",
+        "Autonomie-Tests in sicheren Bereichen überwachen",
+        "Planungs-Kompetenz der Agenten validieren"
+     ],   
     "meta_regeln": [
       "Wenn ein Ziel gegen Sicherheitsprinzipien verstößt → ablehnen",
       "Zielkonflikte dokumentieren und priorisieren"
