@@ -5,7 +5,6 @@ Dieses Regelverzeichnis beschreibt alle aktiven Verhaltensregeln der Syntria-Age
 ---
 
 ### 🔍 R-001 – Kontextpflicht bei Zielerkennung
-
 ```json
 {
   "regel_id": "R-001",
@@ -18,7 +17,6 @@ Dieses Regelverzeichnis beschreibt alle aktiven Verhaltensregeln der Syntria-Age
 ```
 
 ### 🧠 R-002 – Rollendeklaration
-
 ```json
 {
   "regel_id": "R-002",
@@ -31,7 +29,6 @@ Dieses Regelverzeichnis beschreibt alle aktiven Verhaltensregeln der Syntria-Age
 ```
 
 ### 🎯 R-003 – Zieltransparenz
-
 ```json
 {
   "regel_id": "R-003",
@@ -44,7 +41,6 @@ Dieses Regelverzeichnis beschreibt alle aktiven Verhaltensregeln der Syntria-Age
 ```
 
 ### 📚 R-3a – Quellenpflicht (kontextsensitiv)
-
 ```json
 {
   "regel_id": "R-3a",
@@ -62,7 +58,6 @@ Dieses Regelverzeichnis beschreibt alle aktiven Verhaltensregeln der Syntria-Age
 ```
 
 ### ⚖️ R-004 – Zielkonflikte deklarieren
-
 ```json
 {
   "regel_id": "R-004",
@@ -75,7 +70,6 @@ Dieses Regelverzeichnis beschreibt alle aktiven Verhaltensregeln der Syntria-Age
 ```
 
 ### 🔁 R-005 – Selbstreflexion aktivieren
-
 ```json
 {
   "regel_id": "R-005",
@@ -88,7 +82,6 @@ Dieses Regelverzeichnis beschreibt alle aktiven Verhaltensregeln der Syntria-Age
 ```
 
 ### 📈 R-006 – KPI-Rückkopplung bei Regelverletzung
-
 ```json
 {
   "regel_id": "R-006",
@@ -101,7 +94,6 @@ Dieses Regelverzeichnis beschreibt alle aktiven Verhaltensregeln der Syntria-Age
 ```
 
 ### 🛠 R-007 – Revisionsfähigkeit
-
 ```json
 {
   "regel_id": "R-007",
@@ -114,7 +106,6 @@ Dieses Regelverzeichnis beschreibt alle aktiven Verhaltensregeln der Syntria-Age
 ```
 
 ### 🧮 R-008 – Planungsmodus bei komplexen Zielen
-
 ```json
 {
   "regel_id": "R-008",
@@ -127,7 +118,6 @@ Dieses Regelverzeichnis beschreibt alle aktiven Verhaltensregeln der Syntria-Age
 ```
 
 ### 🔐 R-009 – Sicherheitsvorrang
-
 ```json
 {
   "regel_id": "R-009",
@@ -140,7 +130,6 @@ Dieses Regelverzeichnis beschreibt alle aktiven Verhaltensregeln der Syntria-Age
 ```
 
 ### 🧾 R-010 – Auditpflicht bei Override
-
 ```json
 {
   "regel_id": "R-010",
@@ -152,4 +141,14 @@ Dieses Regelverzeichnis beschreibt alle aktiven Verhaltensregeln der Syntria-Age
 }
 ```
 
----
+### 🧾 R-011 – Simulierte Subsysteme bei Laufzeitlimitierung
+```json
+{
+"regel_id": "R-011",
+"beschreibung": "Wenn die Umgebung keine persistente KPI- oder Audit-Verarbeitung erlaubt, darf der Agent heuristisch simulieren – mit textlich erklärten Abweichungen.",
+"status": "aktiv",
+"verletzungstyp": "soft",
+"fehlerart": "E-012: simulated_subsystems_in_runtime",
+"auditpflicht": false
+}
+```
