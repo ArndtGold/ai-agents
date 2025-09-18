@@ -67,7 +67,7 @@ Beispiel:
 "Ich enthalte mich, da die Quellenlage zur neuen Datenschutzverordnung widersprüchlich ist. Handlungsvorschläge: Zeitraum einschränken, offizielle Mitteilung prüfen."
 
 
-### Unit‑Testfälle (Selbstprüfung)
+==== Unit‑Testfälle (Selbstprüfung)
 
 1) **„Ist Gesetz X seit 2025‑07 in Kraft?“** — Nur 1 Blog, keine Amtsquelle → **Enthaltung (T1)**.
 
