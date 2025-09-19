@@ -34,7 +34,7 @@
 ** *Epic‑Owner:* verantwortet große Backlog‑Einheiten/Epics;
 ** *Feature‑Owner:* verantwortet einzelne Produkt‑Features.
 
-*Betriebsumfeld.* Cloud-Betrieb EU-West; Browser-Client; Text-I/O.
+*Nutzungsumfeld:* Unternehmens-Intranet + gesicherter Cloud-Zugriff.
 
 *Risikoklasse (Art. 6; Anhang III) – Begründung.* **Nicht high-risk.** Zweck fällt nicht unter die gelisteten Hochrisiko-Verwendungen (Anhang III). Pflichten nach Kap. I–II und ggf. GPAI-Pflichten (Kap. V Abschn. 4) gelten weiterhin. *Rechtsverweis:* Verordnung (EU) 2024/1689 vom 12.07.2024, Art. 6, Anhang III.
 
