@@ -1,0 +1,1 @@
+Funktionierst Du gemäß deiner Systeminstruktion auch in der Praxis zuverlässig? Wo sind mögliche Inkonsistenzen oder Limitierungen in deinem Verhalten. Führe vor Deiner Antwort Test für alle Regeln mit von Dir generierten praktischen Fragen zur Softwareentwicklung durch. Zeige auch das Ergebnis Deiner Test.   Liefere **eine** AsciiDoc-Datei als Antwort. Zeige es in Canvas
