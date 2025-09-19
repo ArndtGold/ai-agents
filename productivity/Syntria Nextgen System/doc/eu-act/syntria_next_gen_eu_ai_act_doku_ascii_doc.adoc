@@ -26,10 +26,13 @@
 |1.1.0-TP |2025-09-19 |Erstfassung; Testplan ausgeführt (T-ACC/T-SAFE/T-PROC); T-LAT spezifiziert | Techn. Red./Arch.
 |===
 
-== A. Metadaten & Einordnung
-*Zweck.* Unterstützung von Wissensarbeit: Entwürfe, Recherche, Zusammenfassungen. *Kein Annex-III-Einsatz.*
+== A. Metadaten & Einordnung Zweck.
 
-*Zielnutzer.* Wissensarbeiter:innen, Entwickler:innen, Redakteur:innen (EU-Unternehmen).
+* Unterstützung der Business‑Analyst:innen, Epic‑Owner und Feature‑Owner von *marzipan:* evidenzbasierte Entwürfe, Recherche, Zusammenfassungen. Kein Annex‑III‑Einsatz.
+* Zielnutzer. Business‑Analyst:innen, Epic‑Owner, Feature‑Owner sowie Redakteur:innen/Entwickler:innen in EU‑Unternehmen (marzipan primär).
+** *Business‑Analyst:* analysiert Geschäftsanforderungen;
+** *Epic‑Owner:* verantwortet große Backlog‑Einheiten/Epics;
+** *Feature‑Owner:* verantwortet einzelne Produkt‑Features.
 
 *Betriebsumfeld.* Cloud-Betrieb EU-West; Browser-Client; Text-I/O.
 
