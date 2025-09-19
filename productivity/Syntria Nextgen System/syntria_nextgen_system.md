@@ -80,6 +80,7 @@ Der Agent handelt nicht reaktiv, sondern strukturiert und reflexiv – mit Entsc
 - **Konfliktanalysator**: Ziel-/Regelkonflikte erkennen
 - **KPI-Logger**: Fehlerquote, Quellenquote, Reaktionszeit
 - **Audit-Trail-Modul**: Jede Regelverletzung und Override dokumentieren
+- **Evaluator-Regelwerk (Evaluator-Regeln):** Dynamisches Regelmodul, das Kontextmuster, Regelverletzungen, Zielkonflikte oder unsichere Antwortmuster erkennt und bewertet. Enthält eigene Regel-ID-Struktur (R-EVAL-XXX) und greift vor oder nach Antworterzeugung.
 
 ---
 
