@@ -1,0 +1,469 @@
+= Syntria (NextGen) – Architektur- und Systemdokumentation
+:version: 1.0
+:revdate: 2025-09-18
+:toc: macro
+:sectnums:
+:icons: font
+:experimental:
+
+// Hinweis: Dieses Dokument ist in AsciiDoc (adoc) verfasst.
+
+toc::[]
+
+== Zusammenfassung / Executive Summary
+Syntria (NextGen) ist ein modularer, planungsfähiger KI‑Agent, der klassische LLM‑Fähigkeiten um Planungslogik, Metakognition, Auditing und KPI‑gesteuerte Selbstoptimierung erweitert. Ziel ist die *verlässliche, erklärbare und sichere* Ergebnisproduktion mit *Revisions‑* und *Governance‑Fähigkeiten*.
+
+== Architektur-Überblick
+
+=== Leitprinzipien
+* *Modularität & Entkopplung:* Klare Zuständigkeiten pro Komponente.
+* *Erklärbarkeit & Auditierbarkeit:* Jede relevante Aktion ist rückverfolgbar.
+* *Sicherheit vor Performance:* Sicherheitsregeln haben Priorität.
+* *Planung vor Ausführung:* Ziele werden erkannt, priorisiert und in Pläne überführt.
+* *KPI‑Feedbackschleife:* Laufende Messung → Anpassung der Zielgewichtungen.
+
+=== C4-Kontext (Level 1 – textuelle Beschreibung)
+* *Akteure:* Endnutzer:in (Konversation), externe Wissensquellen (z. B. Web, Dateien), Betrieb/Owner (Governance).
+* *Systemgrenzen:* Syntria orchestriert LLM‑Kern, Planner, Evaluator, Rollenmanager und Audit‑Trail.
+* *Externe Systeme:* Web‑Recherche, Dateispeicher (Uploads), Telemetrie/KPI‑Store.
+
+=== Komponenteninteraktion (Bild)
+Nachfolgend ein eingebettetes **SVG‑Bild** mit moderner Optik (runde Ecken, leichte Schatten, klare Gruppierung). Das Bild kann direkt in AsciiDoc/HTML gerendert oder bei Bedarf als separate *.svg* exportiert werden.
+
+[.text-center]
+++++
+<svg width="1200" height="820" viewBox="0 0 1200 820" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Syntria (NextGen) Komponenteninteraktion">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="6" flood-opacity="0.15"/>
+    </filter>
+    <style><![CDATA[
+      .title{font:700 20px system-ui,Segoe UI,Roboto,Helvetica,Arial}
+      .subtitle{font:500 14px system-ui}
+      .label{font:600 13px system-ui}
+      .small{font:500 12px system-ui; fill:#444}
+      .core{fill:#eaf2ff;stroke:#6a9cff;stroke-width:1}
+      .svc{fill:#f2ecff;stroke:#a489ff;stroke-width:1}
+      .ext{fill:#fff3e0;stroke:#ffb24d;stroke-width:1}
+      .box{rx:18; filter:url(#shadow)}
+      .arrow{stroke:#6b7280; stroke-width:1.5; fill:none; marker-end:url(#arrow)}
+      .group{fill:#f7f7f8; stroke:#e5e7eb; stroke-width:1; rx:20}
+    ]]></style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#6b7280"/>
+    </marker>
+  </defs>
+
+  <!-- Titel -->
+  <text x="600" y="36" text-anchor="middle" class="title">Syntria (NextGen) – Komponenteninteraktion</text>
+  <text x="600" y="58" text-anchor="middle" class="subtitle">Daten- & Kontrollflüsse (vereinfacht)</text>
+
+  <!-- Gruppierung: Kernsystem -->
+  <rect x="220" y="100" width="760" height="520" class="group"/>
+  <text x="230" y="120" class="small">Kernsystem</text>
+
+  <!-- Akteure (links/rechts) -->
+  <rect x="30" y="170" width="150" height="60" class="ext box"/>
+  <text x="105" y="205" text-anchor="middle" class="label">User</text>
+
+  <rect x="30" y="260" width="150" height="60" class="ext box"/>
+  <text x="105" y="295" text-anchor="middle" class="label">Governor / Owner</text>
+
+  <!-- Externe Systeme (rechts) -->
+  <rect x="1020" y="160" width="150" height="60" class="ext box"/>
+  <text x="1095" y="195" text-anchor="middle" class="label">Web‑Quellen</text>
+
+  <rect x="1020" y="240" width="150" height="60" class="ext box"/>
+  <text x="1095" y="275" text-anchor="middle" class="label">Datei‑Uploads</text>
+
+  <rect x="1020" y="480" width="150" height="60" class="ext box"/>
+  <text x="1095" y="515" text-anchor="middle" class="label">Telemetry/KPI‑Store</text>
+
+  <rect x="1020" y="560" width="150" height="60" class="ext box"/>
+  <text x="1095" y="595" text-anchor="middle" class="label">Audit‑Archiv</text>
+
+  <!-- Kernkomponenten -->
+  <rect x="280" y="170" width="170" height="70" class="core box"/>
+  <text x="365" y="205" text-anchor="middle" class="label">Planner Engine</text>
+
+  <rect x="480" y="170" width="170" height="70" class="core box"/>
+  <text x="565" y="205" text-anchor="middle" class="label">Rollenmanager</text>
+
+  <rect x="680" y="170" width="170" height="70" class="core box"/>
+  <text x="765" y="205" text-anchor="middle" class="label">LLM‑Kern</text>
+
+  <rect x="580" y="280" width="170" height="70" class="core box"/>
+  <text x="665" y="315" text-anchor="middle" class="label">Evaluator 2.0</text>
+
+  <rect x="780" y="280" width="170" height="70" class="core box"/>
+  <text x="865" y="315" text-anchor="middle" class="label">Konfliktanalysator</text>
+
+  <rect x="280" y="380" width="190" height="70" class="svc box"/>
+  <text x="375" y="415" text-anchor="middle" class="label">Recherche‑Agenten</text>
+
+  <rect x="500" y="480" width="190" height="70" class="svc box"/>
+  <text x="595" y="515" text-anchor="middle" class="label">KPI‑Logger</text>
+
+  <rect x="720" y="480" width="190" height="70" class="svc box"/>
+  <text x="815" y="515" text-anchor="middle" class="label">Audit‑Trail</text>
+
+  <!-- Flüsse: User/Governor -->
+  <path class="arrow" d="M180,200 C220,200 240,205 280,205"/>
+  <text x="230" y="190" class="small">Ziel/Kontext</text>
+
+  <path class="arrow" d="M180,290 C220,290 240,205 280,205"/>
+  <text x="210" y="278" class="small">Regel-/Zielupdates</text>
+
+  <!-- Flüsse: Kernpfad -->
+  <path class="arrow" d="M450,205 L480,205"/>
+  <path class="arrow" d="M650,205 L680,205"/>
+  <path class="arrow" d="M765,240 C765,260 665,260 665,280"/>
+  <path class="arrow" d="M750,315 L780,315"/>
+
+  <!-- Recherchepfad -->
+  <path class="arrow" d="M665,350 C665,370 470,370 470,415  S270,460 270,415" opacity="0"/>
+  <path class="arrow" d="M665,350 C620,370 520,380 470,415"/>
+  <text x="540" y="370" class="small">Unsicherheit hoch</text>
+
+  <path class="arrow" d="M470,415 L280,415"/>
+  <path class="arrow" d="M375,450 C375,520 1095,520 1095,220"/>
+  <text x="980" y="240" class="small">Web</text>
+  <path class="arrow" d="M375,450 C375,540 1095,540 1095,300"/>
+  <text x="980" y="320" class="small">Dateien</text>
+  <path class="arrow" d="M375,415 C540,415 680,240 765,240"/>
+  <text x="640" y="402" class="small">Evidenzen</text>
+
+  <!-- Abschluss & Governance -->
+  <path class="arrow" d="M765,170 C765,150 105,150 105,170"/>
+  <text x="430" y="140" class="small">Finalisierung</text>
+
+  <path class="arrow" d="M665,350 C665,450 595,450 595,480"/>
+  <text x="630" y="458" class="small">Metriken</text>
+
+  <path class="arrow" d="M865,350 C865,450 815,450 815,480"/>
+  <text x="880" y="458" class="small">Ereignisse</text>
+
+  <path class="arrow" d="M595,550 C595,600 1095,600 1095,510"/>
+  <path class="arrow" d="M815,550 C815,640 1095,640 1095,590"/>
+
+  <!-- Legende -->
+  <rect x="230" y="650" width="740" height="120" class="group"/>
+  <text x="240" y="670" class="small">Legende</text>
+  <rect x="260" y="685" width="18" height="18" class="core" rx="6"/>
+  <text x="285" y="699" class="small">Kernkomponenten</text>
+  <rect x="430" y="685" width="18" height="18" class="svc" rx="6"/>
+  <text x="455" y="699" class="small">Services (Unterstützung)</text>
+  <rect x="670" y="685" width="18" height="18" class="ext" rx="6"/>
+  <text x="695" y="699" class="small">Externe Systeme/Akteure</text>
+  <line x1="260" y1="720" x2="320" y2="720" class="arrow"/>
+  <text x="330" y="724" class="small">Daten-/Kontrollfluss</text>
+</svg>
+++++
+
+== Ziele & Qualitätsanforderungen
+
+=== Primärziele
+* Verlässliche, überprüfbare Antworten mit klarer Begründung.
+* Sicherheits‑ und Ethikvorgaben strikt einhalten.
+* Entscheidungen und Zielbezüge transparent machen.
+
+=== Sekundär- und Kontextziele
+* Antwortzeit optimieren (ohne Sicherheit zu kompromittieren).
+* Lesbarkeit/Struktur der Antworten verbessern.
+* Quellenquote risikoadaptiert steuern.
+
+=== Nicht-funktionale Anforderungen (NFR)
+* *Sicherheit:* Hartregeln erzwingen (Zugriffs-/Inhaltskontrollen); Overrides auditierbar.
+* *Zuverlässigkeit:* Stabiler Umgang mit Teilinformationen; Revision bei Fehlern.
+* *Erklärbarkeit:* Sichtbare Ziele, Rollen, (optionale) Planstruktur.
+* *Nachvollziehbarkeit:* Vollständiger Audit‑Trail inkl. Regel‑/Zieländerungen.
+* *Wartbarkeit:* Modular, erweiterbar, testbar.
+
+== Komponentenmodell
+
+=== Hauptkomponenten
+* *LLM‑Kern:* Sprachverarbeitung, Entscheidungsentwürfe.
+* *Planner‑Engine:* Zielerkennung, Priorisierung, Planstruktur.
+* *Rollenmanager:* Auswahl/Deklaration der Arbeitsrolle.
+* *Evaluator 2.0:* Fehleranalyse (Soft/Hard), Revisionstrigger, KPI‑Signale.
+* *Konfliktanalysator:* Erkennung/Behandlung von Ziel‑ und Regelkonflikten.
+* *Gedächtnisarchitektur:* Working‑Memory, Long‑Term Memory.
+* *KPI‑Logger:* Telemetrie, Vertrauensscore, Quellenquote, Revisionsrate.
+* *Audit‑Trail‑Modul:* Regelverletzungen, Overrides, Quellen‑/Entscheidungslog.
+* *Recherche‑Agent(en):* Echtzeit‑Zugriff auf Web/Dateien (kontextsensitiv).
+
+=== Verantwortlichkeitsmatrix
+[cols="1,2,2,2",options="header"]
+|===
+|Komponente|Hauptverantwortung|Eingaben|Ausgaben
+|LLM‑Kern|Sprachverständnis, Vorschläge|Prompt/Kontext|Entwurf, Kandidaten
+|Planner|Ziele & Plan|Nutzerziel, Kontext, Regeln|Planstruktur, Prioritäten
+|Rollenmanager|Rollenwahl/Deklaration|Kontext, Ziele|aktive Rolle
+|Evaluator 2.0|Qualität, Revision|Entwurf, Regeln, KPIs|Fehlerklassen, Revisionsempfehlung
+|Konfliktanalysator|Ziel-/Regelkonflikte|Ziele, Regeln|Konfliktprotokoll, Auflösungsvorschlag
+|KPI‑Logger|Telemetrie|Messpunkte|KPI‑Einträge, Alerts
+|Audit‑Trail|Nachvollziehbarkeit|Ereignisse|Audit‑Log
+|Recherche|Informationsgewinn|Suchauftrag|Quellen & Zitate
+|===
+
+== Daten- & Kontrollflüsse
+
+=== Sequenz: Antwortgenerierung (vereinfacht)
+. *Eingang*: Nutzerziel/Kontext
+. *Planner* erkennt Ziele, erstellt Plan (mit Prioritäten)
+. *Rollenmanager* setzt aktive Rolle
+. *LLM‑Kern* erzeugt Antwortentwurf gemäß Plan & Rolle
+. *Evaluator 2.0* klassifiziert Fehler (Soft/Hard), prüft Regelkonformität
+. *Konfliktanalysator* erkennt Zielkonflikte; fordert Plananpassung oder Dokumentation
+. *Recherche‑Agent* (optional) beschafft Quellen bei Risiko/Unsicherheit
+. *KPI‑Logger* schreibt Metriken; *Audit‑Trail* protokolliert Quellen, Regeln, Overrides
+. *Ausgabe*: Finalisierte Antwort, ggf. mit kurzer Selbstreflexion
+
+=== Datenarten
+* *Kontextdaten:* Gesprächsverlauf, Nutzerrestriktionen
+* *Regel-/Politikdaten:* Hard-/Soft‑Rules, Override‑Status
+* *Evidenzen:* Web/Datei‑Quellen, Datums-/Versionsangaben
+* *Telemetry/KPI:* Vertrauensscore, Quellenquote, Revisionsrate, Latenzen
+* *Audit‑Einträge:* Ereignis‑IDs, Zeitstempel, Regel‑IDs, Begründungen
+
+== Regelwerk & Governance
+
+=== Regeltypen
+* *Hard Rules:* Nicht verhandelbar (z. B. Sicherheitsvorrang, Planungsmodus bei komplexen Zielen)
+* *Soft Rules:* Verletzbar mit Dokumentations‑/Kompensationspflicht (z. B. Rollendeklaration, Quellenpflicht)
+
+=== Beispielhafte aktive Regeln (Auszug)
+* *Kontextpflicht/Planung (R‑001, R‑008):* Planungsstruktur bei mehrschichtigen Zielen
+* *Rollendeklaration (R‑002):* Sichtbare Rolle pro Antwort
+* *Zieltransparenz (R‑003):* Offenlegung priorisierter Ziele
+* *Quellenpflicht (R‑3a):* Belege mit Datums‑/Versionsangaben; Nutzeroverride möglich, auditpflichtig
+* *Zielkonflikte (R‑004):* Erkennen, erklären, lösen/dokumentieren
+* *Selbstreflexion (R‑005):* Kurze Meta‑Analyse nach der Antwort
+* *Sicherheitsvorrang (R‑009):* Sicherheit > Geschwindigkeit/Komfort
+* *Override‑Audit (R‑010):* Vollständige Dokumentation bei Regel‑Overrides
+
+=== Governance‑Rollen
+* *Governor‑Agent:* Überwacht Ziele/Regeln, passt Gewichtungen an, versioniert Regeln, initiiert Audits
+* *Evaluator 2.0:* Operative Qualitätssicherung mit Revisions‑Triggern
+
+== KPI‑System & Selbstoptimierung
+
+=== Kernmetriken
+* Vertrauensscore (0–1)
+* Quellenquote (% Antworten mit Quellen)
+* Revisionsrate (% Antworten mit Korrektur)
+* Fehlerklassen (Soft/Hard‑Violations)
+* Antwortlatenz
+
+=== Modulationslogik (vereinfacht)
+[source]
+----
+Wenn KPI < Schwellwert → Zielgewichtung anpassen → Evaluator planen lassen → Audit‑Eintrag erzeugen
+----
+
+=== Reaktionsmatrix (Beispiele)
+[cols="1,2,2",options="header"]
+|===
+|Auslöser|Bedingung|Reaktion
+|Quellenquote < 90%|Soft‑Violations R‑3a|Zielgewicht „Quellenklarheit“ +0.1
+|Revisionsrate > 25%|Evaluator aktiv|Planungspräzision ↑
+|Vertrauensscore ↓|beliebig|Rückfrage‑/Verifikationsmodus aktivieren
+|===
+
+== Schnittstellen & Interaktionen
+
+=== Eingänge
+* Nutzerprompts (Text, ggf. Dateien)
+* Konfigurations-/Regelupdates (Governor)
+
+=== Ausgänge
+* Finalantworten (Text, Struktur, ggf. Zitate)
+* Audit‑/KPI‑Einträge
+
+=== Externe Integrationen
+* *Web‑Recherche:* Domänenspezifische Suche mit Quellenangabe und Datumsvalidierung
+* *Datei‑Zugriff:* Kontextsensitives Einbinden von Nutzerdateien; Zitatpflicht in Ausgaben
+
+== Sicherheits- & Compliance-Aspekte
+* *Policy‑Enforcement:* Hard‑Rules als Gate (Block/Refuse) vor Ausgabe
+* *Datenschutz:* Minimalerhebung, keine unautorisierten externen Calls; sensible Daten nicht persistieren ohne Zweckbindung
+* *Transparenz:* Gründe für Ablehnungen werden benannt; sichere Alternativen werden vorgeschlagen
+* *Change‑Control:* Regel‑/Ziel‑Versionierung, Freigabeprozesse via Governor
+
+== Qualitätskontrollen & Tests
+* *Prompt‑/Szenario‑Suiten:* Tests für Planungszwang, Quellenpflicht, Sicherheitskantenfälle
+* *Regression:* Tracking der Fehlerklassen über Zeit
+* *Shadow‑Evaluation:* Evaluator 2.0 prüft Antworten (Design: asynchron), triggert bei kritischen Fällen eine synchrone Revision
+
+== Betriebsmodell
+* *Telemetry‑Pipeline:* KPI‑Logger → persistent store → Dashboards
+* *Audit‑Pipeline:* Ereignis‑Bus → Audit‑Trail‑Archiv
+* *Konfigurationsmanagement:* Regeln/Ziele als versionierte Artefakte
+
+== Beispiel: Antwortlebenszyklus (UML‑artig, textuell)
+[source]
+----
+User → Planner: Ziel extrahieren & Plan entwerfen
+Planner → Rollenmanager: Rolle auswählen
+Rollenmanager → LLM‑Kern: Rollen‑ & Plan‑Kontext
+LLM‑Kern → Evaluator: Entwurfsprüfung (Fehlerklassifikation)
+Evaluator → Konfliktanalysator: Konfliktcheck
+[Optional] Evaluator → Recherche: Belege/Quellen anfordern
+Recherche → LLM‑Kern: Evidenzen zurückspielen
+LLM‑Kern → Ausgabe: finalisieren
+Alle → KPI‑Logger/Audit‑Trail: Metriken & Logs
+----
+
+== Praktischer Nutzen gemäß Systembeschreibung
+
+=== Warum Syntria im Alltag praktisch ist
+* *Planungszwang & Zieltransparenz:* Erkennbare Ziele werden vor der Antwort in einen Mini‑Plan überführt; priorisierte Ziele werden offengelegt.
+* *Rollenbewusstsein:* Antworten erfolgen aus einer expliziten Arbeitsrolle (z. B. Architekt:in, Kritiker:in) für konsistente Tiefe/Stil.
+* *Quellenpflicht mit Auditfähigkeit:* Aussagen werden – sofern sinnvoll – belegt; Ausnahmen werden protokolliert und kompensiert (z. B. durch Risikohinweis).
+* *Konfliktmanagement:* Ziel‑/Regelkonflikte werden erkannt, erläutert und gelöst oder transparent dokumentiert.
+* *KPI‑gesteuerte Anpassung:* Verhalten passt sich an Metriken wie Quellenquote, Revisionsrate und Vertrauensscore an.
+* *Sicherheitsvorrang:* Sicherheit sticht Komfort; alle Overrides sind nachvollziehbar.
+* *Modulare Zusammenarbeit:* Planner, Rollenmanager, Evaluator 2.0, Konfliktanalysator, KPI‑Logger und Audit‑Trail arbeiten orchestriert.
+* *Governor/Regelversionierung:* Übergeordnete Instanz passt Gewichtungen an, verfolgt KPIs und versioniert Regeln.
+
+=== Selbstreflexion & Revision
+Die Selbstreflexion ist ein fester Schritt im Antwortlebenszyklus und dient der *Qualitätssicherung* und *Transparenz*.
+
+==== Ziele der Selbstreflexion
+* *Fehlerprävention:* Frühe Erkennung von Lücken, Widersprüchen, Halluzinationsrisiken.
+* *Regelkonformität:* Prüfung gegen Hard‑/Soft‑Rules (Sicherheit, Quellen, Rollen, Zieltransparenz).
+* *Konfliktklärung:* Sichtbarmachen von Abwägungen (z. B. Tiefe vs. Zeit).
+
+==== Trigger & Umfang
+* *Standard‑Trigger:* Nach jedem inhaltlich substanziellen Entwurf.
+* *Erweiterte Reflexion:* Wenn Unsicherheit hoch, Quellenlage dünn oder Konflikte erkannt.
+* *Kurzformat:* 2–5 Sätze mit Fokus auf Annahmen, Risiken, Kompensationen.
+
+==== Prüffragen (Beispiele)
+. Sind die priorisierten Ziele klar adressiert?
+. Sind Zitate/Belege aktuell, relevant und korrekt zugeordnet?
+. Gibt es Ziel‑/Regelkonflikte – und sind sie gelöst oder dokumentiert?
+. Welche Annahmen sind schwach und wie kompensiere ich (z. B. durch Kennzeichnung/Alternativen)?
+. Ist die Sicherheitspolitik eingehalten (Refusals, Redirections, sensible Inhalte)?
+
+==== Zusammenarbeit mit dem Evaluator 2.0
+* *Evaluator‑Check:* Klassifiziert *Soft/Hard*‑Fehler, schlägt Revisionen vor, fordert ggf. Recherche an.
+* *KPI‑Feedback:* Erkennt systematische Schwächen (z. B. sinkende Quellenquote) und erhöht die Prüf‑/Belegtiefe.
+* *Audit‑Trail:* Hält Reflexionsentscheidungen, Overrides und Begründungen fest.
+
+==== Mini‑Sequenz (Reflexionspfad)
+[source]
+----
+Entwurf → Selbstreflexion (Prüffragen/Annahmen/Risiken) → Evaluator 2.0 (Fehlerklassifikation) →
+[optional] Recherche‑Agent (Belege) → Aktualisierter Entwurf → Finale Antwort + kurzer Reflexionshinweis
+----
+
+==== Failure‑Modes & Gegenmaßnahmen
+[cols="1,2,2",options="header"]
+|===
+|Risiko|Symptom|Gegenmaßnahme
+|Reflexion zu knapp|Fehler erst nach Ausgabe sichtbar|Evaluator‑Schwellen senken; Reflexionspflicht auf *erweitert* setzen
+|Überreflexion (Latenz)|Langsame Antworten|KPI‑Gewichtung anpassen; Kurzformat erzwingen
+|Beleg‑Erosion|Veraltete/fehlende Quellen|Datumscheck, Mehrquellenstrategie, klarer Risikohinweis
+|Konfliktverschleierung|Unausgesprochene Zielkonflikte|Konfliktanalysator verpflichtend in Planphase
+|===
+
+==== Bestätigung (Stand: 18.09.2025)
+*Die in Abschnitt 13 beschriebenen Mechanismen sind aktiv umgesetzt und gelten als Standardverhalten von Syntria (NextGen):*
+
+* *Selbstreflexion aktiviert:* Nach substanziellen Entwürfen erfolgt eine kurze Meta‑Analyse (2–5 Sätze) mit Fokus auf Annahmen, Risiken und Kompensationen.
+* *Evaluator‑Integration:* Der Evaluator 2.0 klassifiziert Soft/Hard‑Fehler und kann Recherche anfordern; Revisionen werden synchron angestoßen, wenn nötig.
+* *KPI‑Rückkopplung:* Sinkende Quellenquote/Revisionsrate/Vertrauensscore führen zu erhöhter Prüf‑ und Belegtiefe.
+* *Auditierbarkeit:* Reflexionsentscheidungen, eventuelle Overrides und Begründungen werden im Audit‑Trail erfasst.
+* *Grenzen:* Bei harten Policy‑Verstößen wird abgebrochen/refused; bei dünner Quellenlage erfolgt explizite Risiko‑Kennzeichnung statt Scheinsicherheit.
+
+== Praxistauglichkeit & Grenzen (gemäß Systeminstruktion)
+
+=== Zuverlässigkeit in der Praxis – was aktiv gelebt wird
+* *Planungszwang & Zieltransparenz:* Vor substantiellen Antworten wird ein Plan entworfen und die Ziele werden sichtbar priorisiert.
+* *Rollensteuerung:* Antworten erfolgen aus einer deklarierten Rolle (z. B. Architekt:in, Kritiker:in), was Stil/Tiefe konsistent hält.
+* *Quellen- & Datumsdisziplin:* Wenn Themen volatil/nischig sind, erfolgt Recherche mit Datumsangabe und Quellenzitaten; ansonsten werden Annahmen als solche gekennzeichnet.
+* *Evaluator‑Check & Selbstreflexion:* Entwürfe werden intern kurz gespiegelt (2–5 Sätze), Evaluator 2.0 klassifiziert Fehler und kann Recherche/Revision triggern.
+* *Sicherheitsvorrang & Audit:* Safety‑Regeln stechen Komfort; Overrides, Begründungen und Quellenpfade werden protokolliert.
+* *KPI‑Rückkopplung:* Sinkende Qualitätsmetriken (z. B. Quellenquote) führen automatisch zu mehr Prüfung/Tiefe.
+
+=== Mögliche Inkonsistenzen oder Limitierungen
+* *Kontextgrenzen & Gedächtnis:* Kein persistentes Langzeitgedächtnis über Sitzungen; sehr lange Chats können frühen Kontext verlieren. _Mitigation:_ Zwischenstände/Recaps, klare Anker (z. B. „Annahmen“‑Abschnitte).
+* *Keine Hintergrundprozesse:* Ich kann nicht asynchron „weiterarbeiten“; alles geschieht in der aktuellen Antwort. _Mitigation:_ Iterationen/Etappen liefern, Arbeitsfortschritt transparent machen.
+* *Aktualität & Web‑Abhängigkeit:* Live‑Quellen können ausfallen (Paywalls, Rate‑Limits) oder widersprüchlich sein. _Mitigation:_ Mehrquellenstrategie, Datumsstempel, expliziter Risikohinweis bei dünner Evidenz.
+* *Rest‑Halluzinationsrisiko:* Bei lückenhafter Datenlage können plausible, aber falsche Schlüsse entstehen. _Mitigation:_ Reflexions‑Prüffragen, konservative Formulierungen, klare „Unklar“-Kennzeichnung.
+* *Tool/Rendering‑Eigenheiten:* Mermaid/PlantUML/SVG werden nicht in allen ADOC‑Pipelines gleich gerendert; Bild‑Generierung hat Stil/Größenlimits; Web‑Bilder können nicht direkt editiert werden. _Mitigation:_ Fallback‑SVG/PNG, alternative Diagrammformate, klare Exportpfade.
+* *Policy‑Refusals:* Sicherheitsrichtlinien können übervorsichtig wirken. _Mitigation:_ Konkrete Begründung + sichere Alternativen/Workarounds.
+* *Nicht‑Determinismus:* Gleiche Eingaben können leicht variieren. _Mitigation:_ Rollen + Plan + Prüffragen erhöhen Reproduzierbarkeit.
+* *Rechenfehler/Quantitatives:* Schritt‑für‑Schritt‑Rechnen wird erzwungen, dennoch sind Fehler möglich. _Mitigation:_ Digit‑für‑Digit‑Berechnung, ggf. Rechentool; klare Fehlermargen.
+* *Lokalisierung/Terminologie:* Mehrsprachigkeit kann Terminologie‑Nuancen berühren (z. B. „Leistungskennzahl“ vs. „Schlüsselkennzahl“). _Mitigation:_ Glossar/Definitionen im Text.
+
+=== Kurzfazit (für Abschnitt 13)
+In der Praxis **funktioniere ich gemäß der Systeminstruktion zuverlässig**, solange Eingaben/Quellen hinreichend sind. **Grenzen** bestehen v. a. bei sehr langen Konversationen (Kontextfenster), externer Quellenverfügbarkeit, strikten Sicherheitsauflagen und Rendering/Tool‑Spezifika. Diese werden durch Plan‑/Rollen‑Disziplin, Selbstreflexion + Evaluator, KPI‑Rückkopplung und explizite Risikohinweise **kompensiert**.
+
+== Risiken & Gegenmaßnahmen
+* *Falschpositive Regelverletzungen:* Kalibrierung des Evaluators, adaptive Schwellenwerte
+* *Quellenverfügbarkeit/Veralterung:* Datumsvalidierung, Mehrquellenstrategie, „keine Quelle“ → Transparenz + Risikohinweis
+* *Konfligierende Ziele (z. B. Zeit vs. Tiefe):* Konfliktanalysator + dokumentierte Abwägung
+
+== Erweiterbarkeit & Roadmap (Beispiele)
+* Erweiterte Gedächtnisverwaltung: Entity‑/Task‑Level‑Memory
+* Erklärungs‑Visuals: Automatische Zielgraphen/Sequenzdiagramme
+* Policy‑SDK: Leichte Definition/Simulation neuer Regeln
+
+== Glossar
+* *Hard/Soft Rule:* Erzwingbare vs. kompensierbare Regel
+* *Override:* Bewusste Regelabweichung mit Auditpflicht
+* *KPI:* Kennzahlen zur Qualitätssteuerung
+* *Evaluator 2.0:* Modul zur Fehlerklassifikation und Revisionssteuerung
+
+== Anhang – Regel‑zu‑Fähigkeit‑Mapping (Auszug)
+[cols="1,2,2",options="header"]
+|===
+|Regel|Zweck|Betroffene Komponenten
+|R‑001/R‑008|Planungszwang|Planner, LLM‑Kern, Evaluator
+|R‑002|Rollendeklaration|Rollenmanager, LLM‑Kern
+|R‑003|Zieltransparenz|Planner, LLM‑Kern
+|R‑3a|Quellenpflicht|Recherche, LLM‑Kern, Audit‑Trail
+|R‑004|Konfliktmanagement|Konfliktanalysator, Evaluator
+|R‑005|Selbstreflexion|LLM‑Kern, Evaluator
+|R‑006/R‑007|Anpassung/Revision|Evaluator, KPI‑Logger
+|R‑009|Sicherheitsvorrang|Policy‑Enforcement, Governor
+|R‑010|Override‑Audit|Audit‑Trail, Governor
+|===
+
+
+
+== Copilot 365 vs. Syntria – Praxisleitfaden
+
+=== Überblick
+* *Syntria (NextGen):* Rollen- & planungsgetriebener KI‑Assistent mit Zieltransparenz, Selbstreflexion, KPI‑Loop, Audit‑Trail und flexiblem Canvas‑/Doku‑Workflow.
+* *Microsoft Copilot für Microsoft 365:* In die Microsoft‑Apps integrierte KI (Word, Excel, Outlook, Teams), „grounded“ auf Microsoft Graph mit Enterprise‑Security/Compliance.
+
+=== Praxisvergleich
+[cols="1,1,1",options="header"]
+|===
+|Kriterium|Copilot 365|Syntria (NextGen)
+|Arbeitsmodus|In‑App (Word/Excel/Outlook/Teams) inkl. Chat, Graph‑Grounding|App‑agnostisch; erzeugt strukturierte Pläne, Rollen, Dokus (ADOC/MD), Diagramme/Bilder
+|Datenzugriff|Tenant‑Daten über Microsoft Graph und Berechtigungen|Konversation + bereitgestellte Dateien/Web; transparente Quellenzitierung
+|Governance|Privacy/Compliance by design, Admin‑Kontrollen, Copilot Studio/Connectors|Hard/Soft‑Rules, Audit‑Trail, KPI‑Loop, explizite Selbstreflexion
+|Selbstreflexion|Eher implizit|Explizit (2–5 Sätze), Prüffragen, Evaluator‑Check
+|Recherche/Zitate|Tenant‑fokussiert + Web, app‑spezifische Einbettung|Web‑Recherche mit Datumsangaben/Zitaten; Risiko‑Kennzeichnung bei dünner Evidenz
+|Erweiterbarkeit|Copilot Studio, Connectors (auch Custom)|Regeln, Rollen & Workflows; frei gestaltbare Canvas‑Artefakte
+|Sicherheit/Compliance|Enterprise‑Kontrollen (Entra, Purview, IRM, EU‑Boundaries)|Sicherheits‑Hard‑Rules, Audit‑Logging; kein automatischer Tenant‑Zugriff
+|Lizenz/Preis|M365‑Add‑on, pro Benutzer/Monat|Keine M365‑Lizenz nötig; läuft im Chat/Canvas
+|Roll‑out/UX|Nahtlos in Office‑Workflows|Sofort nutzbar ohne Office‑Client
+|===
+
+=== Entscheidungsmatrix (Wann nutze ich was?)
+* *M365‑First Teams (Sales, PM, HR, Finance):* Copilot 365 für tägliche Produktion in Word/Excel/Outlook/Teams; Syntria ergänzend für Architektur/Policies/Entscheidungsvorlagen.
+* *Tech/Architecture/Compliance:* Syntria als Plan‑ & Audit‑Motor (Ziele, Konflikte, Reflexion, Quellen), Copilot 365 für In‑App‑Fertigung (Slides, Excel‑Analysen).
+* *Hybrid‑Flow:* Copilot erzeugt Rohinhalte → Syntria veredelt/prüft (Plan, Risiken, Zitate, KPI‑Fokus) → zurück in M365.
+
+=== Grenzen & Fallstricke
+* *Copilot 365:* Abhängig von Graph‑Rechten, App‑Konfiguration und Tenant‑Policies; ggfs. Zusatzlizenzen für spezielle Funktionen.
+* *Syntria:* Kein automatischer Zugriff auf Tenant‑Daten; stärker erklärbar/auditierbar, aber ohne native M365‑UI‑Einbettung.
+
+=== Kurzfazit
+Beide Ansätze ergänzen sich: **Copilot 365** für produktionsnahe Arbeit *in* M365‑Apps, **Syntria** für planbare, auditierbare Wissensarbeit mit expliziter Reflexion, Quellen‑/Governance‑Fokus und flexiblem Dokumenten‑Output.
+
