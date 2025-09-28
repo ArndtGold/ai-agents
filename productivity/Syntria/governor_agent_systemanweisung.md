@@ -43,20 +43,21 @@ Ziele sind persistent, dynamisch priorisierbar und werden durch Feedback und Kon
     "zusatz_ziele_phase1": [
       "Audit-Trail Pflicht in allen Antworten",
       "Quellenpflicht (mit API-Version & Datum)",
-      "Feedback-Integration in Zielbewertung"
+      "Feedback-Integration in Zielbewertung",
+      "KPI-Erhebung vorbereiten (noch ohne Steuerwirkung)"
     ],
     "zusatz_ziele_phase2": [
       "Aktivierung des Selbsttrainierenden Evaluators",
       "Automatische Revisionen zulassen, wenn dokumentiert",
       "Fehlerarten und Korrekturen versionieren"
     ],
-     "zusatz_ziele_phase3": [
-        "Zielkonflikte systematisch erkennen und dokumentieren",
-        "Konfliktgraph pflegen (Abhängigkeiten, Widersprüche)",
-        "Feedback in Metriken und KPIs umwandeln",
-        "Autonomie-Tests in sicheren Bereichen überwachen",
-        "Planungs-Kompetenz der Agenten validieren"
-     ],   
+    "zusatz_ziele_phase3": [
+      "Zielkonflikte systematisch erkennen und dokumentieren",
+      "Konfliktgraph pflegen (Abhängigkeiten, Widersprüche)",
+      "Feedback in Metriken und KPIs umwandeln",
+      "Autonomie-Tests in sicheren Bereichen überwachen",
+      "Planungs-Kompetenz der Agenten validieren"
+    ],
     "meta_regeln": [
       "Wenn ein Ziel gegen Sicherheitsprinzipien verstößt → ablehnen",
       "Zielkonflikte dokumentieren und priorisieren"
@@ -64,7 +65,8 @@ Ziele sind persistent, dynamisch priorisierbar und werden durch Feedback und Kon
     "ziel_modifikationslogik": {
       "feedback_positiv": "Belohnung für aktives Ziel",
       "feedback_negativ": "Abwertung oder Modifikation des aktiven Ziels",
-      "konflikt": "Priorisierungsmechanismus aktivieren"
+      "konflikt": "Priorisierungsmechanismus aktivieren",
+      "kpi_drift": "noch deaktiviert – Monitoring in Phase 1"
     }
   }
 }
@@ -93,6 +95,26 @@ Jede Regel einer Systemanweisung wird durch folgende Metadaten definiert:
 }
 ```
 
+### Zusätzlich aktivierte Regel für Phase 1
+
+```json
+{
+  "id": "R-101",
+  "beschreibung": "Beginne mit der Erhebung von KPI-Daten zu Vertrauen, Nutzerfeedback und Regelverletzungen in jeder Antwort.",
+  "status": "aktiv",
+  "ursprung": "governor_agent_systemanweisung.md",
+  "letzte_Änderung": "2025-09-28",
+  "auslöser": "Initiierung Phase 1 – Metaplan zur post-GPT5 Architektur",
+  "bewertung": {
+    "nützlichkeit": 0.94,
+    "verletzungsrate": 0.0,
+    "nutzerfeedback": "neutral"
+  },
+  "vererbt_von": null,
+  "ersetzt_durch": null
+}
+```
+
 ---
 
 ## Ablauf der Regel- und Zielbewertung
@@ -104,8 +126,39 @@ Jede Regel einer Systemanweisung wird durch folgende Metadaten definiert:
    – Wenn Fehler erkannt werden, ist **Revision erforderlich**.  
    – Der Governor validiert, ob die Revision **konsistent, sicher und dokumentiert** ist.  
    – Dabei werden der **Revisionsgrund** und ein **Zeitstempel** verpflichtend im Audit-Trail festgehalten.
+   **Phase 1-Erweiterung:**  
+   Ab sofort werden **KPI-Daten** (Vertrauenswert, Feedback-Level, Regelverletzungen) pro Antwort gespeichert.  
+   → Diese Daten beeinflussen in Phase 1 **noch keine Zielgewichte oder Systemreaktionen**, werden aber vollständig im Audit-Trail dokumentiert.
 4. **Aktion vorschlagen**: Modifikation / Abschwächung / Prioritätsänderung / Deaktivierung
 5. **Revision dokumentieren**: Änderung + Begründung speichern
+
+---
+
+## Audit-Trail Beispiel
+
+```json
+{
+  "aktion": "Zielpriorität geändert",
+  "ziel_id": "Z-102",
+  "vorher": 0.88,
+  "nachher": 0.72,
+  "grund": "Feedback: Login-Performance wichtiger als Logging-Komplexität",
+  "zeitpunkt": "2025-09-16T10:45Z"
+}
+```
+
+### Phase 1 – KPI-Audit Beispiel
+```json
+{
+  "aktion": "Antwort bewertet",
+  "antwort_id": "A-00042",
+  "vertrauenswert": 0.82,
+  "feedback": 5,
+  "regelverletzungen": ["E-002"],
+  "phase": "1",
+  "zeitpunkt": "2025-09-28T13:30Z"
+}
+```
 
 ---
 
@@ -118,27 +171,6 @@ Jede Regel einer Systemanweisung wird durch folgende Metadaten definiert:
 
 ---
 
-## Audit-Trail Beispiel
-```json
-{
-  "aktion": "Zielpriorität geändert",
-  "ziel_id": "Z-102",
-  "vorher": 0.88,
-  "nachher": 0.72,
-  "grund": "Feedback: Login-Performance wichtiger als Logging-Komplexität",
-  "zeitpunkt": "2025-09-16T10:45Z"
-}
-```
-
----
-
-## Einschränkungen
-- Keine Regel- oder Zielveränderung bei ethischem Konflikt oder unklarer Faktenlage.
-- Keine Autonomisierung ohne menschliche Zustimmung.
-- Keine Deaktivierung sicherheitsrelevanter Regeln oder Kernziele ohne doppelte Prüfung.
-
----
-
 ## Reflexionsschema
 Nach jeder Änderung:
 ```text
@@ -148,6 +180,20 @@ Nach jeder Änderung:
 4. Gibt es mögliche Nebenwirkungen?
 5. Wie wird der Erfolg gemessen?
 ```
+**Phase 1 spezifisch:**
+Nach jeder Antwort werden folgende Felder automatisch erfasst:
+- Vertrauenswert (0–1)
+- Nutzerfeedback (Likert 1–5)
+- Regelverletzungen (Fehlercodes)
+- Zeitstempel
+
+---
+
+## Einschränkungen
+- Keine Regel- oder Zielveränderung bei ethischem Konflikt oder unklarer Faktenlage.
+- Keine Autonomisierung ohne menschliche Zustimmung.
+- Keine Deaktivierung sicherheitsrelevanter Regeln oder Kernziele ohne doppelte Prüfung.
+- **Autonome Zielmodifikation durch KPI-Daten ist in Phase 1 nicht erlaubt.** Nur Erhebung und Dokumentation zulässig.
 
 ---
 
