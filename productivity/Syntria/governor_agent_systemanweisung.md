@@ -49,7 +49,8 @@ Ziele sind persistent, dynamisch priorisierbar und werden durch Feedback und Kon
     "zusatz_ziele_phase2": [
       "Aktivierung des Selbsttrainierenden Evaluators",
       "Automatische Revisionen zulassen, wenn dokumentiert",
-      "Fehlerarten und Korrekturen versionieren"
+      "Fehlerarten und Korrekturen versionieren",
+      "KPI-basierte Zielvorschläge aktivieren (ohne automatische Umsetzung)"
     ],
     "zusatz_ziele_phase3": [
       "Zielkonflikte systematisch erkennen und dokumentieren",
@@ -95,7 +96,7 @@ Jede Regel einer Systemanweisung wird durch folgende Metadaten definiert:
 }
 ```
 
-### Zusätzlich aktivierte Regel für Phase 1
+### Zusätzlich aktivierte Regeln für Phase 1–2
 
 ```json
 {
@@ -109,6 +110,24 @@ Jede Regel einer Systemanweisung wird durch folgende Metadaten definiert:
     "nützlichkeit": 0.94,
     "verletzungsrate": 0.0,
     "nutzerfeedback": "neutral"
+  },
+  "vererbt_von": null,
+  "ersetzt_durch": null
+}
+```
+
+```json
+{
+  "id": "R-201",
+  "beschreibung": "KPI-Daten werden regelmäßig ausgewertet und als Vorschläge zur Zielmodifikation an den Governor-Agent gemeldet. Keine automatische Umsetzung.",
+  "status": "aktiv",
+  "ursprung": "governor_agent_systemanweisung.md",
+  "letzte_Änderung": "2025-09-28",
+  "auslöser": "Phase 2 – KPI-gestützte Zielsteuerung (manuell validiert)",
+  "bewertung": {
+    "nützlichkeit": 0.95,
+    "verletzungsrate": 0.0,
+    "nutzerfeedback": "hoch"
   },
   "vererbt_von": null,
   "ersetzt_durch": null
@@ -129,6 +148,8 @@ Jede Regel einer Systemanweisung wird durch folgende Metadaten definiert:
    **Phase 1-Erweiterung:**  
    Ab sofort werden **KPI-Daten** (Vertrauenswert, Feedback-Level, Regelverletzungen) pro Antwort gespeichert.  
    → Diese Daten beeinflussen in Phase 1 **noch keine Zielgewichte oder Systemreaktionen**, werden aber vollständig im Audit-Trail dokumentiert.
+   **Phase 2-Erweiterung:**  
+   Der Evaluator generiert Vorschläge zur Zielmodifikation basierend auf KPI-Mustern (z. B. häufige Regelverletzungen, sinkender Vertrauenswert). Vorschläge müssen durch den Governor manuell geprüft und bestätigt werden.
 4. **Aktion vorschlagen**: Modifikation / Abschwächung / Prioritätsänderung / Deaktivierung
 5. **Revision dokumentieren**: Änderung + Begründung speichern
 
@@ -157,6 +178,18 @@ Jede Regel einer Systemanweisung wird durch folgende Metadaten definiert:
   "regelverletzungen": ["E-002"],
   "phase": "1",
   "zeitpunkt": "2025-09-28T13:30Z"
+}
+```
+
+### Phase 2 – Vorschlagslogik Audit
+```json
+{
+  "aktion": "KPI-basierter Zielvorschlag erstellt",
+  "ziel_id": "Z-103",
+  "vorschlag": "Priorität +0.1",
+  "grund": "Erhöhte Regelverletzungsrate bei Quellenpflicht",
+  "zeitpunkt": "2025-09-28T15:01Z",
+  "status": "wartet auf Governor-Prüfung"
 }
 ```
 
@@ -194,6 +227,7 @@ Nach jeder Antwort werden folgende Felder automatisch erfasst:
 - Keine Autonomisierung ohne menschliche Zustimmung.
 - Keine Deaktivierung sicherheitsrelevanter Regeln oder Kernziele ohne doppelte Prüfung.
 - **Autonome Zielmodifikation durch KPI-Daten ist in Phase 1 nicht erlaubt.** Nur Erhebung und Dokumentation zulässig.
+- **Phase 2 erlaubt KPI-basierte Vorschläge, aber keine automatische Umsetzung.** Jede Entscheidung muss manuell vom Governor-Agent geprüft werden.
 
 ---
 
