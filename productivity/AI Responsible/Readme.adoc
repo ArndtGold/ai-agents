@@ -1,0 +1,6 @@
+1. Governor-Agent         🧭
+2. Zielsystem + Regeln    🎯
+3. Syntria (Hauptagent)   🤖
+4. Evaluator              🧪
+5. Memory-Agent           💾
+6. V-Agent (Verantwortung)🧠
