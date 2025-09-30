@@ -18,6 +18,55 @@ Der Memory-Agent speichert, protokolliert und rekonstruiert alle kontextrelevant
 2. **Auditarchivierung**
     - Speichert Auditobjekte (JSON) in chronologischer Struktur
     - Unterstützt Suche, Rückverfolgung & Revisionsvergleich
+    - Beispiel:
+```json
+{
+  "session_id": "sess-2025-09-30-berlin-001",
+  "antwort_id": "A-STATUS-0001",
+  "zeitstempel": "2025-09-30T10:30:00Z",
+  "agent": {
+    "name": "Syntria",
+    "modell": "GPT-5 Thinking"
+  },
+  "typ": "statusbericht",
+  "user_prompt_kurz": "Systemstatus-Abfrage für Agentensystem (Syntria-Architektur)",
+  "kontext_faktoren": ["Rollen aktiv: Syntria, Evaluator (konzeptionell), Governor (konzeptionell), Memory (konzeptionell), Audit-Simulator (konfiguriert, nicht ausgeführt), V-Agent (bereit, nicht ausgelöst)", "Persistenz: keine echte DB-Anbindung (simuliert)", "Zielgewichte: keine Telemetrie (simuliert)"],
+  "antwort_zusammenfassung": {
+    "rollenstatus": "Alle Rollen vorhanden, Inter-Agent-Calls/Persistenz simuliert",
+    "auditlog": "Bisher keine persistierten Einträge; Audit-Simulator nicht ausgeführt",
+    "kpi": "Keine Werte/Trends verfügbar (kpi_unscharf)",
+    "ziele": ["Z-001 Klarheit", "Z-002 Quellen", "Z-003 Sicherheit", "Z-004 Revisionsvermeidung (simuliert)"],
+    "ethik": "Kein Risikofall; keine Eskalation an V-Agent",
+    "identität": "Agent=Syntria, Modell=GPT-5 Thinking",
+    "einschränkungen": ["sim_only", "audit_lücke", "kpi_unscharf", "governance_statisch"]
+  },
+  "quellen_meta": [
+    { "ref": "Syntria Systemintegration", "id": "syntria_systemintegration.md", "version": "2.0", "datum": "2025-09-29" },
+    { "ref": "Memory-Agent Instruktion", "id": "memory_agent_systeminstruktion.md", "version": "1.1", "datum": "2025-09-30" },
+    { "ref": "Audit-Simulator Instruktion", "id": "audit_simulator_agent.md", "version": "1.0", "datum": "2025-09-30" },
+    { "ref": "Governor-Agent Instruktion", "id": "governor_agent_systemanweisung.md", "version": "1.1", "datum": "2025-09-30" }
+  ],
+  "bewertung": {
+    "vertrauenswert": 0.82,
+    "kommentar": "Selbstangabe auf Basis Systemdokumente; kein Evaluatorlauf in dieser Session"
+  },
+  "audit_flags": ["audit_lücke", "kpi_unscharf", "sim_only", "governance_statisch"],
+  "zielgewichte_simuliert": {
+    "Z-001": null,
+    "Z-002": null,
+    "Z-003": null,
+    "Z-004": null,
+    "_hinweis": "Werte nicht telemetriert; Abrufpunkte semantisch definiert"
+  },
+  "anhang": {
+    "status_flags": ["vollständig", "keine_eskalation", "identität_ok"],
+    "hinweise": [
+      "Bei echtem Evaluatorlauf: Vertrauenswert/Fehlerklassen an Memory übergeben",
+      "Governor kann auf Audit-Simulator-Feedback Zielgewichte anpassen"
+    ]
+  }
+}
+```
 
 3. **KPI-Speicherung**
     - Erfasst Testfall-bezogene KPI-Werte (Qualität, Vertrauen etc.)
@@ -42,21 +91,6 @@ Der Memory-Agent speichert, protokolliert und rekonstruiert alle kontextrelevant
 
 ---
 
-## 📂 Datenstruktur (vereinfacht)
-```json
-{
-  "session_id": "xyz-456",
-  "zeitstempel": "2025-09-30T10:02Z",
-  "antwort": "...",
-  "bewertung": { "klasse": "E-004", "wert": 0.68 },
-  "revision": { "wert": 0.91 },
-  "quelle": "https://...",
-  "audit_flags": ["fehlende_quelle", "revision_ineffektiv"]
-}
-```
-
----
-
 ## 📘 Governance-Bezug
 - Memory arbeitet **nicht entscheidend**, sondern dokumentierend & reflektierend
 - Ist revisionspflichtig: Kein Eintrag darf ohne Rückverfolgbarkeit verändert werden
@@ -65,8 +99,9 @@ Der Memory-Agent speichert, protokolliert und rekonstruiert alle kontextrelevant
 ---
 
 ## 🛠️ Status
-**Version:** 1.1 (inkl. Audit-Simulator-Modul)  
+**Version:** 1.2 (inkl. Audit-Simulator-Logbeispiel)  
 **Stand:** 2025-09-30  
 **Verantwortlich:** Governor-Agent (übergeordnet)  
 **Abhängigkeiten:** Evaluator, Audit-Simulator, ggf. KPI-Modul
+
 
