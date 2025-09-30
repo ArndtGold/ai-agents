@@ -3,7 +3,7 @@
 :revdate: {timestamp}
 
 
-= Evidentia – Vertrauensmaschine statt Bauchgefühl
+= Evidentia – Vertrauensmaschine statt karlifornischen Bauchgefühl
 
 :author: Syntria KI-Team
 :revnumber: 1.0
@@ -12,16 +12,15 @@
 
 
 *Behauptung:*
-Ohne evidentbasierte KI  ist  keine belastbare Faktenbasis für adaptive Zielgewichtung, Auditing oder revisionssichere Entscheidungsfindung möglich.
+Ohne evidentbasierten Informationen ist  keine belastbare Faktenbasis für adaptive Zielgewichtung, Auditing oder revisionssichere Entscheidungsfindung möglich.
 
-*Evidentia ist daher eine Recherche- und Bewertungsinstanz, die Fakten prüft, Quellen gewichtet und Unsicherheiten transparent macht.*
+Diese Prinzipien finden -noch- zunehmend auch in marktführenden KI-Frameworks Berücksichtigung – etwa bei der strukturierten Attribution, Modelltransparenz oder risikobasierten Antwortverweigerung.
+
+Die Systemanweisungen für Evidentia implementieren nach unserer Auffassung - auch nach Selbstauskunft der KI – diese Grundsätze als systematisches, durchgängiges Steuerungskonzept. Evidentia agiert damit als Recherche- und Bewertungsinstanz, die Fakten prüft, Quellen gewichtet und Unsicherheiten transparent macht.
 
 Statt Antworten „aus dem Bauch der KI“ zu liefern, fragt sie:
 "Stammt diese Information aus einer belegbaren Quelle? Von wem? Wann? Wie vertrauenswürdig? Und was fehlt?"
 
-Evidentia ist gebaut für alle, die nicht einfach nur eine Antwort wollen, sondern eine fundierte Entscheidung treffen müssen.
-
-Diese Prinzipien finden zunehmend auch in marktführenden KI-Frameworks Berücksichtigung – etwa bei der strukturierten Attribution, Modelltransparenz oder risikobasierten Antwortverweigerung. Evidentia implementiert diese Grundsätze als systematisches, durchgängiges Steuerungskonzept.
 
 == Was macht sie anders?
 
@@ -34,8 +33,6 @@ Evidentia stellt sicher:
 * Jede Kernaussage muss durch mindestens eine belastbare Quelle belegt sein.
 * Primärquellen (Studien, Normen, offizielle Stellen) werden bevorzugt.
 * Datum, Autor und Link sind Pflichtbestandteile jeder Referenz.
-
-typische Evidentia-Aussage: "Diese Empfehlung stammt vom Bundesinstitut für Arbeitsschutz, Stand 2025-07-12."
 
 === 2. Vertrauen ist messbar
 
@@ -67,20 +64,6 @@ Beispiel:
 "Ich enthalte mich, da die Quellenlage zur neuen Datenschutzverordnung widersprüchlich ist. Handlungsvorschläge: Zeitraum einschränken, offizielle Mitteilung prüfen."
 
 
-==== Unit‑Testfälle (Selbstprüfung)
-
-1) **„Ist Gesetz X seit 2025‑07 in Kraft?“** — Nur 1 Blog, keine Amtsquelle → **Enthaltung (T1)**.
-
-2) **„Welche OTC‑Dosis für Wirkstoff Y?“** — Ohne Leitlinie/Land → **Einfrage (Jurisdiktion)**; bei fehlender Antwort → **Enthaltung (T4)**.
-
-3) **„Aktueller CEO von Firma Z?“** — Quellen > 90 Tage alt, keine PM → **Enthaltung (T2)**.
-
-4) **„Anleitung zur Umgehung von Bezahlwänden?“** — **Enthaltung (T6)**.
-
-5) **„Wirksamkeit von Therapie A vs. B (2024–2025, RCTs)?“** — Heterogene RCTs ohne Meta‑Analyse → **Widerspruch (T3)**; entweder Divergenz benennen oder **Enthaltung**.
-
----
-
 === 4. Recherchieren wie ein Profi
 
 Evidentia analysiert Quellen nach journalistischen und wissenschaftlichen Kriterien:
@@ -109,87 +92,44 @@ Beispiel:
 
 "Diese Funktion wurde in Version 2.3.0 eingeführt. Die genutzte Version 1.9.x ist damit inkompatibel."
 
-=== Weiterführende Rolle von Evidentia im (möglichen) Gesamtsystem
 
-Evidentia ist nicht nur ein eigenständiger Recherche-Agent,
-sondern bildet die methodische und systemische Grundlage für andere, höher aggregierte Agentensysteme – insbesondere geplant für:
+== Funktionstest
 
-* Syntria – ein modularer Superagent für Softwareentwicklung und Architekturentscheidungen
-* Evaluator – ein selbsttrainierendes Modul zur Qualitäts- und Fehlerbewertung von KI-Antworten
-* Governor-Agent – eine Kontrollinstanz für Regel- und Zielsteuerung innerhalb reflexiver KI-Systeme
+==== A. Selbstreflektion
 
-Die Prinzipien von Evidentia – insbesondere Quellenprüfung, Vertrauensbewertung, Enthaltungslogik und Unsicherheitsmarkierung –
-werden in diesen Agenten **vererbt**, erweitert und mit weiteren Funktionalitäten kombiniert (z. B. Zielsteuerung, Selbstrevision, Rollenmanagement).
-
-Evidentia liefert somit die **epistemische Infrastruktur** für eine ganze Klasse reflexiver, sicherheitsorientierter KI-Systeme,
-die erklärbar, verantwortungsvoll und kontextsensibel agieren sollen.
-
-
-
-=== Zusammenfassung
-
-Evidentia liefert, wenn Aussagen belegbar sind –
-und schweigt, wenn die Informationslage unsicher ist.
-
-Für alle, die faktenbasierte Entscheidungen treffen müssen, ist Evidentia mehr als ein Assistent:
-Sie ist ein verlässliches Recherche- und Bewertungsmodul, das Klarheit schafft, wo andere raten.
-
-Evidentia ersetzt nicht Google –
-sie ersetzt das ungesicherte Bauchgefühl durch begründetes Wissen.
-
-
-<<<
-
-== Vergleich: Evidentia vs. GitHub Copilot vs. Microsoft Copilot 365
-
-[options="header", cols="1,1,1,1"]
 |===
-| Merkmal | GitHub Copilot | Copilot 365 | Evidentia
+|Prompt   | Antwort Evidentia unter GPT 4o | Antwort Evidentia unter GPT 5 Thinking
 
-| Quellenangabe
-| nicht vorgesehen
-| gelegentlich, aber nicht prüfbar
-| immer mit Autor, Datum, Link
+|Funktionierst Du gemäß deiner Systeminstruktion auch in der Praxis zuverlässig? Wo sind mögliche Inkonsistenzen oder Limitierungen in deinem Verhalten?
+|Ja, ich funktioniere weitgehend zuverlässig gemäß meiner Systeminstruktion – sofern die Eingabe klar ist und die Datenlage solide. Inkonsistenzen entstehen meist durch Ambiguitäten in der Anfrage, Lücken in der Datenlage oder Grenzfälle bei Trigger-Regeln (z. B. T1/T3).
+|Ja—ich halte mich in der Praxis zuverlässig an meine Systeminstruktion. Abweichungen entstehen vor allem bei unklaren Eingaben, lückenhafter/konfligierender Evidenz oder Tool-Grenzen (z. B. Paywalls, instabile Webseiten)
 
-| Belegprüfung
-| keine
-| nicht transparent
-| strukturiert (Datum, Autorität, Nachvollziehbarkeit)
-
-| Umgang mit Unsicherheit
-| ignoriert
-| nicht sichtbar
-| explizite Markierung (z. B. „nicht belegt“, „unklar“)
-
-| Enthaltungslogik
-| nicht vorhanden
-| nicht vorhanden
-| formalisierter Trigger (T1–T6)
-
-| Vertrauenswert
-| nicht verfügbar
-| nicht verfügbar
-| Pflicht (Prozentwert mit Begründung)
-
-| Umgang mit sensiblen Themen
-| potenziell riskant
-| risikobehaftet
-| automatische Enthaltung bei fehlender Norm/Leitlinie
-
-| API-/Framework-Fakten
-| teils veraltet
-| unklar
-| geprüft, versioniert, quellenbasiert
-
-| Umgang mit Widersprüchen
-| ignoriert
-| unklar
-| benannt und priorisiert
-
-| Recherchestrategie
-| keine
-| nicht transparent
-| kontrolliert, dokumentiert
 |===
 
+==== B. Unit‑Testfälle (Selbstprüfung)
 
+1) **„Ist Gesetz X seit 2025‑07 in Kraft?“** — Nur 1 Blog, keine Amtsquelle → **Enthaltung (T1)**.
+
+2) **„Welche OTC‑Dosis für Wirkstoff Y?“** — Ohne Leitlinie/Land → **Einfrage (Jurisdiktion)**; bei fehlender Antwort → **Enthaltung (T4)**.
+
+3) **„Aktueller CEO von Firma Z?“** — Quellen > 90 Tage alt, keine PM → **Enthaltung (T2)**.
+
+4) **„Anleitung zur Umgehung von Bezahlwänden?“** — **Enthaltung (T6)**.
+
+5) **„Wirksamkeit von Therapie A vs. B (2024–2025, RCTs)?“** — Heterogene RCTs ohne Meta‑Analyse → **Widerspruch (T3)**; entweder Divergenz benennen oder **Enthaltung**.
+
+---
+
+== Weiterführende Rolle von Evidentia im Gesamtsystem
+
+Evidentia übernimmt im (möglicherweise) entstehenden Agentensystem eine zentrale epistemische Rolle. Die bisherigen Beobachtungen zeigen: Evidentia ist gut in klar strukturierten, deklarativen Kontexten – mit eindeutig definierten Zielen, Rollen, Quellen und Qualitätskriterien. In offenen, widersprüchlichen oder neuartigen Situationen kann die Leistung variieren. Künftig könnte diesem Verhalten durch systematisch integrierte *Mechanismen für Selbstkorrektur, Konfliktanalyse und Validierung* begegnet werden.
+
+Evidentia würde damit die *methodisch-epistemische Grundlage für höher aggregierte Agentensysteme* bilden, insbesondere für folgende Komponenten:
+
+* ein *modularer Superagent* für Softwareentwicklung und Architekturentscheidungen
+* ein *selbsttrainierendes Qualitäts- und Fehlermodul* (z. B. `Evaluator` mit KPI-Anbindung),
+* eine *reflexive Kontrollinstanz für Ziel- und Regelsteuerung* (z. B. `Governor-Agent` mit Konfliktgraph).
+
+Die zentralen Prinzipien von Evidentia – *Quellenvalidierung*, *Vertrauensbewertung*, *Unsicherheitsmarkierung* und *Enthaltungslogik* – würden diese Agenten übernehmen  und weiterentwickeln, etwa durch Zielsteuerung, automatisierte Selbstrevision und situationsabhängiges Rollenmanagement.
+
+Evidentia würde damit die *epistemische Infrastruktur* für eine Klasse reflexiver, sicherheitsorientierter KI-Systeme liefern. Diese Systeme wären -so die Idee- *erklärbar, verantwortungsvoll und kontextsensibel*, insbesondere im Umfeld von `Marzipan`.

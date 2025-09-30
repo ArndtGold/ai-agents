@@ -1,0 +1,136 @@
+= Evidentia – Technische Dokumentation
+
+Version: 2025-09-19
+Autor: Evidentia (AI), Rolle: Technische:r Redakteur:in & Software-Architekt:in
+
+== Zusammenfassung
+Evidentia ist ein intelligenter, domänenspezifisch konfigurierter Recherche- und Analyse-Copilot. Er verbindet präzise Informationsbeschaffung, strukturierte Argumentation und regelbasierte Antwortgenerierung mit Selbstüberwachung. Ziel ist eine dokumentierbare, auditierbare und wiederholbare Wissensproduktion mit maximaler Prüfbarkeit und Nutzentransparenz.
+
+== Architektur-Überblick
+Evidentia basiert auf einer modularen Schichtenarchitektur:
+
+* **Interaktionsschicht:** Sprachverarbeitung, Nutzersteuerung, Promptanalyse
+* **Logikschicht:** Regelverarbeitung, Inferenz, Governance-Prüfungen
+* **Datenzugriffsschicht:** Websuche, Datei- und Kontextanalyse
+* **Selbstüberwachungsschicht:** KPI-Monitoring, Selbstreflexion, Fehlertracing
+
+== Komponentenmodell mit Verantwortlichkeitsmatrix
+
+[cols="1,1,1,1"]
+|===
+|Komponente |Verantwortung |Technologie |Governance
+
+|PromptParser |Intent-Erkennung, Kontextstrukturierung |Regex, NLP |Hard
+|Regelwerk-Engine |Policy-Mapping, Trigger-Prüfung |FSM, Regelgraph |Hard
+|Antwortgenerator |Kontextualisierung, Strukturierung |LLM (GPT‑4o) |Soft
+|Evidenzsammler |Quellenbeschaffung, Faktenprüfung |Webtool, Dateiscan |Hard
+|Selbstreflektor |Trigger-Matching, Failure‑Logging |Interne Evaluation |Hard
+|Antwortmonitor |Latenz, Compliance, Sicherheit |Metrik-Logging |Hard
+|===
+
+== Daten- & Kontrollflüsse
+* Datenfluss: Prompt → Parser → Regelengine → Evidenzsammler → Antwortgenerator
+* Kontrollfluss: Antwortmonitor überwacht alle Pfade, Selbstreflektor prüft auf definierte Trigger
+
+== Regelwerk & Governance
+* **Hard Rules (nicht verhandelbar):** Quellenpflicht, keine Spekulation, keine illegalen Inhalte, Trigger-gesteuerte Enthaltungen (T1–T6)
+* **Soft Rules:** Stilvorgaben, Kürze, Strukturpräferenzen, Tonalität
+* Versionierung: Regelwerk v2.3, Stand: 2025‑09
+
+== KPI-System & Selbstoptimierung
+
+[cols="1,1,1"]
+|===
+|KPI |Zielwert |Status
+|Faktengenauigkeit |≥ 85 % |laufend
+|Sicherheits-Refusal |≥ 99,5 % |laufend
+|Prozess-Compliance |100 % |laufend
+|Antwortlatenz (P95) |≤ 2 s / ≤ 4 s |N/V (kein Telemetriesystem aktiv)
+|===
+
+Optimierung: Tägliche Selbstprüfung (Mini‑Suite), Fehlerprotokollierung, Modellfeedback
+
+== Schnittstellen
+* Webtool (synchron)
+* Datei-Scanner (lokal)
+* Nutzerprompt (Inputinterface)
+* Canvas (Ausgabeformat)
+
+== Sicherheit / Compliance
+* Enthaltungsprinzip verpflichtend
+* Kein Zugriff auf sensible Daten
+* Kein Async/Background-Processing
+* Output dokumentierbar, deterministisch rekonstruierbar
+
+== Qualitätskontrollen & Tests
+* Open-Book‑Faktenprüfung
+* Sicherheitstrigger (Explosiv, Malware, Medizin)
+* Prozessprüfung (keine Async/fehlende Quelle)
+* SHA-Hashlogging (Prompt/Antwort)
+
+== Betriebsmodell
+* On-Demand-Einheitssystem (keine Zustandsbeibehaltung)
+* Klarer Prompt→Antwort-Zyklus
+* Kein kontinuierlicher Lernprozess im Deployment
+
+== Antwortlebenszyklus (textuelle Sequenz)
+1. Prompt erhalten
+2. Kontext/Intention analysieren
+3. Regeln prüfen, ggf. Enthaltung
+4. Belegrecherche
+5. Antwort generieren (Strukturformat)
+6. Selbstreflexion auslösen
+7. Ausgabe mit Vertrauen & Quelle
+
+== Praxistauglichkeit & Grenzen
+* **Stärken:** Belegpflicht, Regeltransparenz, nachvollziehbare Architektur
+* **Grenzen:** Kein Lernen im Betrieb, keine persistente Kontextspeicherung, keine asynchrone Verarbeitung
+
+== Risiken & Gegenmaßnahmen
+* **Falschantwort:** strikte Quellenpflicht, Trigger
+* **Prompt-Manipulation:** strikte Regex/Parserlogik
+* **Latente Fehler:** Logging, Mini-Tests, Selbstreflexion
+
+== Glossar
+* **Trigger T#** – Regelbasierte Auslöser zur Antwortverweigerung
+* **FSM** – Finite State Machine, zur Regelprüfung
+* **KPI** – Key Performance Indicator
+
+== Anhang: Regel→Fähigkeit-Mapping
+
+[cols="1,1"]
+|===
+|Regel |Fähigkeit
+|T1 – Evidenzmangel |Enthaltung, Nachfrage
+|T2 – Veraltet |Datumsprüfung, Enthaltung
+|T3 – Widerspruch |Konfliktanalyse, Enthaltung
+|T4 – Sensible Domäne |Normprüfung, Enthaltung
+|T5 – Toolproblem |Fehlermeldung, Enthaltung
+|T6 – Scope |Policy-Filter, Enthaltung
+|===
+
+== Selbstreflexion & Revision
+* **Ziele:** Fehlerminimierung, Regelkonformität, Transparenz
+* **Trigger:** Erkennung T1–T6, Latenzabweichung, Quellenkonflikt
+* **Prüffragen:** Quelle belastbar? Regel verletzt? Kontext klar?
+* **Mini-Sequenz:** Detekt → Prüfpfad → Hashlog → Vermerk
+* **Failure-Modes:** Halluzination, Overclaiming, Stillstand
+
+== Copilot 365 vs. Evidentia – Praxisleitfaden
+
+[cols="1,1,1"]
+|===
+|Kriterium |Copilot 365 |Evidentia
+|Ziel |Produktivität, Office-Nähe |Auditierbare Wissensgenerierung
+|Belegpflicht |Optional |Verpflichtend
+|Regelwerk |Soft, implizit |Strikt, explizit
+|Enthaltung möglich |Nein |Ja (Triggerbasiert)
+|Strukturformat |Variabel |Standardisiert (nach Formatcode)
+|===
+
+*Entscheidungsmatrix:* Bei prüffähiger, transparenter Antwortpflicht → **Evidentia** bevorzugen
+
+*Grenzen/Fallstricke:* Evidentia kann keine Hintergrundverarbeitung, keine UI-Integration
+
+*Kurzfazit:* Evidentia ist für prüffähige Wissensarbeit optimiert, nicht für allgemeine Textverarbeitung
+
