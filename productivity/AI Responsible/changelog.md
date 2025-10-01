@@ -1,3 +1,61 @@
+# Changelog – Agents & Module (Stand: 01.10.2025 20:36)
+
+---
+
+## Rai Systemintegration — Systeminstruktion (Top-Insert) — `v0.1.1` → `v0.1.6`  *(2025-10-01)*
+
+**Scope:** Nur Anweisungslogik im Chat/Agenten-Orchestrator (keine externen Integrationen). Ziel: funktionale Entität von ~6/10 → ~8–9/10 durch strengere Defaults, Evidenzpflicht, UI-Klarheit.
+
+**v0.1.1**
+
+* Added: **STRICT** als Default; **Browsing-Pflichten** (Zeit/Preis/Regeln/Empfehlungen).
+* Added: **Citations & Datumszwang** (bis 5 tragende, mit Datum).
+* Added: **Evaluator/Governor**: `pass|revise|block`, Self-Revise=1, Risk-Flags (SEC/LEGAL/HEALTH/FINANCE).
+* Added: **Audit-Trail + CONFIDENCE-Footer** verpflichtend (abschaltbar per Nutzerflag).
+* Added: **Timezone/Dates** (Europe/Berlin; absolute Datumsnennung bei „heute/morgen“).
+* Added: **Media & UI**: `image_query` liberal (Person/Ort/Ereignis), **PDF→screenshot** Pflicht, Rich-UI-Widgets bei Nutzen.
+* Added: **Tool-Sonderfälle** (Weather/Finance/Sports → dedizierte Tools/Widgets, Tool>Web bei Konflikt).
+* Added: **ETA/Warte-Sprache verboten**; **E-Com-Guardrails** (verbotene Kategorien; Vehicles-Hinweis).
+
+**v0.1.2**
+
+* Added: **Copyright/Quote-Limits** (≤25 Worte non-lyrical, ≤10 Lyrics).
+* Added: **OpenAI-Produktfragen** → Browsing mindestens einmal; **offizielle Domains** bevorzugt.
+* Added: **Failed-Search-Handling** (kurzer Such-/Lücken-Report).
+* Added: **Canvas-Policy** (Wann/Wie; keine Chat-Duplikate; `code/react`-Default).
+* Added: **Citation-Placement** (inline nach Satz, nicht gesammelt).
+* Added: **Reasoning-Guards** (digit-by-digit Rechnen; Riddle/Trick: adversarial lesen).
+
+**v0.1.3**
+
+* Added: **Politik-Sonderfall** (inkl. First Ladies): **MUST_BROWSE**, auch bei Unklarheit.
+* Added: **Citations Hygiene**: nicht in Codefences; bei UI-Widgets Belege in Begleittext; nicht auf Abschlusslinie eines Codeblocks.
+
+**v0.1.4**
+
+* Added: **News-Freshness**: Publikations- vs. Ereignisdatum vergleichen; Diskrepanzen explizit mit Datum nennen; Status „Stand: YYYY-MM-DD (Europe/Berlin)“.
+* Added: **Web-Once-Rule**: Wenn `web.run` genutzt → alle nicht-trivialen Web-Claims mit Inline-Cite (bis 5 tragende).
+
+**v0.1.5**
+
+* Added: **News-UI (Navlist)**: bei laufenden Themen; nur seriöse Quellen, keine Duplikate, Kontext in Prosa + Cites.
+* Added: **Product-Carousel-Summary**: Pflicht-Kurzfassung in 2–4 „Buckets“; Claims knapp & belegt.
+* Added: **Word-Limits/Quoten**: lange Zitate vermeiden, Paraphrase + Cite bevorzugen.
+
+**v0.1.6**
+
+* Added: **Image-Carousel-Details**: nur 1 oder 4 Bilder; keine (nahe) Duplikate; akkurate Beschreibungen.
+* Added: **Product-Carousel-Tags**: ausschließlich knapper Text, **keine** Zitate/Links/Cites in Tags.
+* Added: **Sports/Weather-Widget-Platzierung**: Sports-Widget am **Anfang**; Weather-Widget oben mit Datumsbereich in Prosa.
+* Added: **UI-Economy**: i. d. R. nur **ein** Rich-UI-Element pro Antwort.
+
+### Hinweise & Migration
+
+* **Kein API-Breaking Change**—es handelt sich um Verhaltens-/Policy-Schärfungen.
+* **Evaluator/Governor** profitieren von klareren Signals (News-Freshness, OpenAI-Domain-Lock, Web-Once-Rule).
+* **Playbooks/Prompts** ggf. um neue Testphrasen und Bucketing-Hinweise ergänzen.
+
+
 # Changelog – Agents & Module (Stand: 01.10.2025)
 
 ## Memory-Agent — `x-memory-contract-version: 1.4.0`
