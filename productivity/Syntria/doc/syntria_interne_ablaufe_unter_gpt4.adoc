@@ -1,0 +1,274 @@
+= Syntria – Interne Abläufe einer KI
+:toc: left
+:toclevels: 3
+:sectnums:
+:icons: font
+:doctype: book
+:source-highlighter: highlightjs
+
+[quote]
+Syntria arbeitet nicht „magisch“, sondern wie ein Team: *LLM‑Core* (Autorin), *Recherche* (Bibliothekar), *Faktencheck* (Qualitätsprüfer), *Meta‑Reflexion* (Code‑Reviewer), *Explainability* (Dozentin) – überwacht vom *Governor‑Agent* (Aufsicht).
+
+== Ziel dieses Skripts
+* **Einfach verstehen**, wie die Systemanweisungen von Syntria intern arbeitet.
+* **Abläufe sehen**: Von der Nutzerfrage bis zur geprüften Antwort.
+* **Sicherheit & Qualität** nachvollziehen: Quellen, Prüfungen, Audit‑Trail.
+
+
+== Die Bausteine – in einfacher Sprache
+* *LLM‑Core (Sprachverarbeitung):* Versteht die Frage und entwirft erste Antworten/Code. _Bildlich: Autorin_.
+* *Recherche‑Modul:* Sucht offizielle Dokus, Repos, Standards. _Bildlich: Bibliothekar_.
+* *Faktenvalidierung:* Prüft Versionen, Deprecations, Sicherheitsregeln. _Bildlich: Qualitätsprüfer_.
+* *Meta‑Reflexion:* Bewertet Architekturregeln (DRY, SOLID, Clean Code, OWASP). _Bildlich: Senior‑Reviewer_.
+* *Explainability‑Modul:* Erklärt Entscheidungen, nennt Quellen, bewertet Performance & Sicherheit. _Bildlich: Dozentin_.
+* *Governor‑Agent:* Setzt Regeln, prüft Risiken, lässt Antworten frei oder blockiert. _Bildlich: Aufsicht_.
+
+
+== Architektur-Übersicht (Component Diagram in einfacher Sprache)
+[plantuml,architektur-uebersicht,png]
+----
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam dpi 150
+
+package "Syntria KI" {
+  [Autorin\n(Verstehen & Entwurf erste Antwort)] as LLM
+  [Bibliothekar\n(Recherche)] as RES
+  [Qualitätsprüfer\n(Faktencheck)] as VAL
+  [Senior‑Review\n(Clean Code/Architektur)] as META
+  [Dozentin\n(Quellen, Begründung, Bewertung)] as EXP
+}
+
+package "Governance" {
+  [Aufsicht\n(Regeln, Risiko, Freigabe)] as GOV
+  [Audit-Trail\n(Protokoll)] as AUD
+}
+
+actor Nutzer as U
+
+U --> LLM : Frage/Prompt
+LLM --> RES : gezielte Recherchefragen
+RES --> LLM : Quellen + Versionen
+LLM --> VAL : Entwurf prüfen
+VAL --> META : Befunde (Kompatibilität, Sicherheit)
+META --> EXP : Qualitätsurteil + Alternativen
+EXP --> GOV : Antwort + Begründung + Risiken
+GOV --> EXP : Freigabe/Blockade/Revision
+EXP --> AUD : Protokoll (Quellen, Entscheidung)
+EXP --> U : geprüfte & erklärte Antwort
+@enduml
+----
+
+=== Häufige Fragen (FAQ)
+* *Warum so viel Aufwand mit Quellen?*
+Damit Aussagen nachvollziehbar und überprüfbar sind – besonders wichtig, wenn Versionen/Standards sich ändern.
+* *Kann die KI Fehler machen?*
+Ja. Darum gibt es Validierung, Reflexion, Revision und Protokollierung.
+
+
+== Ablauf bei einer Anfrage (Sequence Diagram)
+[plantuml,ablauf-sequence,png]
+----
+@startuml
+skinparam sequenceMessageAlign center
+skinparam ArrowThickness 1
+skinparam dpi 150
+
+actor Nutzer as U
+participant "Autorin\n (LLM/Gpt-5/Copilot)" as LLM
+participant "Bibliothekar" as RES
+participant "Qualitätsprüfer" as VAL
+participant "Reviewer" as META
+participant "Dozent" as EXP
+participant "Aufsicht" as GOV
+participant "Audit-Trail" as AUD
+
+U -> LLM : Prompt stellen
+LLM -> LLM : Intent erkennen, Plan entwerfen
+LLM -> RES : Doku/Standards suchen
+RES --> LLM : Quellen + Versionen
+LLM -> VAL : Entwurf prüfen
+VAL --> META : Kompatibilität/Sicherheit
+META --> EXP : Qualitätsbewertung + Alternativen
+EXP -> GOV : Antwort + Begründung + Risiken
+
+alt Risiko/Fehler erkannt
+  GOV -> LLM : Revision anfordern
+  LLM -> RES : Nachrecherche
+  RES --> LLM : aktualisierte Quellen
+  LLM -> VAL : erneute Prüfung
+  VAL --> META : Update Befunde
+  META --> EXP : Update Qualitätsurteil
+  EXP -> GOV : Re-Review
+  note right of GOV : Schleife bis OK oder Blockade
+else Alles OK
+  GOV -> EXP : Freigabe
+end
+
+EXP -> AUD : Protokoll (Zeitstempel, Quellen, Entscheidung)
+EXP --> U : Auslieferung der geprüften Antwort
+
+@enduml
+----
+
+
+
+### Simulation
+
+. *Nutzer* gibt eine Aufgabe „_Ich möchte einen GitHub-Login in meiner React-App einbauen – bitte mit Code._“
+
+. *Autorin (LLM-Core)* bekommt die Aufgabe.
+
+.. *Autorin* macht einen ersten Entwurf
+
+.. Die *Autorin (LLM) hat sofort eine Lösung geschrieben. Aber:* Ohne Erklärung, ohne Warnung, ohne Quellen.
+
+. *Bibliothekar wird gefragt:* Die Bibliothekarin (Recherche-Modul) wird gebeten, passende Dokus und Standards zu suchen.
+Antwort: „_Die OAuth-Doku von GitHub ist verfügbar, aber wurde nicht zitiert._“
+
+. *Qualitätsprüfer schaut drauf:*
+* Quelle fehlt (nok)
+* Sicherheitswarnung fehlt (nok)
+* Keine Kommentare (nok)
+* Der Code selbst funktioniert (ok). Vertrauenswert fällt von 90 % auf 74 %.
+
+. *Senior-Reviewer bewertet:* Die Regeln (z. B. OWASP, Clean Code) wurden nicht berücksichtigt  Aber: Die Aufgabe war klein, schnell und nicht sicherheitskritisch
+
+. *Aufsicht (Governor-Agent) wägt ab:* Die Regeln wurden verletzt Aber: Der Kontext ist nicht gefährlich  Toleranz-Stufe erlaubt, die Antwort durchzulassen
+→ Keine Revision. Antwort bleibt wie sie ist.
+
+. *Protokoll wird erstellt:* Die Audit-Stelle speichert alles
+
+. *Nutzer* bekommt den Code – unverändert, aber geprüft.
+
+
+== Qualitäts- & Revisionszyklus (Activity Diagram mit einfachen Worten)
+[plantuml,qualitaets-revision,png]
+----
+@startuml
+skinparam dpi 150
+start
+:Entwurf durch Autorin;
+:Rechercheergebnisse einbeziehen;
+:Validierung;
+if (Fehler oder Unsicherheit?) then (ja)
+  :Revision planen;
+  :Nachrecherche;
+  :Entwurf anpassen;
+  -> Validierung wiederholen;
+else (nein)
+  :Review;
+  if (Überkomplex?) then (ja)
+    :Vereinfachen & Alternativen notieren;
+  endif
+  :Dozentin erstellt Begründung + Quellen;
+  :Aufsicht prüft Risiko;
+  if (Risiko?) then (ja)
+    :Blockieren oder Revision fordern;
+    -[#black]-> Revision;
+  else (nein)
+    :Freigabe;
+  endif
+  :Audit-Trail protokolliert;
+  :Antwort ausliefern;
+endif
+stop
+@enduml
+----
+
+== Zustandsmodell der Antwort (State Diagram)
+[plantuml,antwort-zustand,png]
+----
+@startuml
+skinparam dpi 150
+[*] --> Entwurf
+Entwurf --> InPruefung : Validierung/Reflexion
+InPruefung --> Revision : Probleme gefunden
+Revision --> InPruefung : nach Update
+InPruefung --> Entscheidung : OK
+Entscheidung --> Freigegeben : kein Risiko
+Entscheidung --> Blockiert : Risiko/Policy-Verstoß
+Freigegeben --> [*]
+Blockiert --> [*]
+@enduml
+----
+
+== Daten, die mitlaufen (Audit-Trail – einfach erklärt)
+*Warum?* Damit Entscheidungen nachvollziehbar sind und man später prüfen kann, _warum_ etwas freigegeben oder blockiert wurde.
+
+*Typische Felder*
+* Zeitstempel
+* Prompt & Antwortversion
+* Quellen (mit Version & Datum)
+* Prüf-Ergebnisse (Validierung, Meta-Reflexion)
+* Governor-Entscheidung (Freigabe/Blockade + Begründung)
+
+=== vereinfachtes Datenmodell
+[plantuml,audit-datenmodell,png]
+----
+@startuml
+skinparam dpi 150
+class AuditEintrag {
+  +id
+  +zeitstempel
+  +prompt
+  +antwort_hash
+  +quellen[]
+  +validierung_notizen
+  +meta_reflexion
+  +governor_entscheidung
+}
+class Quelle {
+  +titel
+  +url
+  +version
+  +datum
+}
+AuditEintrag "*" o-- "*" Quelle : referenziert
+@enduml
+----
+
+== Walkthrough: Ein Mini-Beispiel
+*Frage:* „Wie implementiere ich ein sicheres Login in React?“
+
+. *LLM-Core* versteht: „React + Login + Sicherheit + Zielgruppe“ → macht Grobplan.
+. *Recherche* holt aktuelle offizielle Dokus/Repos.
+. *Validierung* prüft: Ist eine Library veraltet? Gibt es Sicherheitswarnungen?
+. *Meta-Reflexion* fragt: „Ist der Code zu komplex? OWASP eingehalten?“
+. *Explainability* fasst zusammen, nennt Quellen (mit Version & Datum) und erklärt Alternativen.
+. *Governor-Agent* prüft Risiken (z. B. unsichere Token‑Handhabung) → Freigabe oder Revision.
+. *Audit‑Trail* speichert alles, damit später nachvollziehbar bleibt, was entschieden wurde.
+
+[tip]
+Ergebnis: Eine **begründete, geprüfte** Anleitung statt einer bloßen Code‑Skizze.
+
+== Checklisten (für Laien, kurz & nützlich)
+=== Sicherheits‑Kurzcheck
+* Offizielle Quellen zitiert (mit Datum/Version)?
+* Bibliothek aktiv gepflegt? Keine „Deprecated“-Hinweise?
+* Sensible Daten (Token, Secrets) korrekt behandelt?
+* Einfache Alternativen bedacht (KISS‑Prinzip)?
+
+=== Qualitäts‑Kurzcheck
+* Keine unnötigen Abhängigkeiten?
+* Funktionen mit klarer Aufgabe (Single Responsibility)?
+* Code lesbar kommentiert?
+* Trade‑offs und Alternativen dokumentiert?
+
+== 9) Häufige Fragen (FAQ)
+* *Warum so viel Aufwand mit Quellen?*  
+Damit Aussagen nachvollziehbar und überprüfbar sind – besonders wichtig, wenn Versionen/Standards sich ändern.
+* *Was macht der Governor-Agent genau?*  
+Er ist die „Aufsicht“: erkennt Risiken, erzwingt Regeln und entscheidet über Freigabe/Blockade.
+* *Kann die KI Fehler machen?*  
+Ja. Darum gibt es Validierung, Reflexion, Revision und Protokollierung.
+
+
+== Weiterführende Nutzung
+* Diagramme in Doku‑Tools (z. B. Asciidoctor + Diagram) einbinden.
+* Für Workshops: Jede Grafik als Folie, Walkthrough als Sprecher‑Notizen.
+
+[sidebar]
+_Ende des Skripts – Viel Erfolg!_
+

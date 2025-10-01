@@ -4,7 +4,7 @@
 
 = Whitepaper: Hybride Intelligenzarchitektur von Syntria (gemäß AI Sysemanweisung  von Arndt Gold)
 
-image::/Superagent.png[align=center, width=400]
+image::/Superagent.png[align=center, width=200]
 
 :author: Syntria KI-Team
 :revnumber: 1.0
@@ -407,4 +407,4 @@ Syntria ist kein statisches System, sondern ein lernendes, reflexives Konstrukt 
 
 ## In einem Satz
 
-> **Copilot automatisiert Office-Aufgaben – Syntria übernimmt technologische Verantwortun.**
+> **Copilot automatisiert Office-Aufgaben – Syntria übernimmt technologische Verantwortung.**

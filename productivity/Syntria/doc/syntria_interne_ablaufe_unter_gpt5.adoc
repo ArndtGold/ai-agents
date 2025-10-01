@@ -1,0 +1,256 @@
+= Syntria – Interne Abläufe
+:toc: macro
+:sectnums:
+:icons: font
+:source-highlighter: rouge
+
+[.lead]
+Ziel: Laienverständlich erklären, wie Syntria innen funktioniert – Bausteine, Entscheidungswege, Sicherheit & Qualität. Visualisierung via **PlantUML**, direkt ausführbar.
+
+<<<
+
+toc::[]
+
+== Big Picture – Wer ist Syntria?
+Syntria ist ein *modularer KI‑Superagent*. Denken Sie an einen gut organisierten Studiengang: verschiedene *Module* (Sprache, Recherche, Faktencheck …) arbeiten zusammen. Darüber wacht ein *Governor‑Agent* (Studienleitung), der Regeln und Ziele steuert.
+
+*Warum diese Architektur?* Damit Antworten **verständlich**, **korrekt**, **sicher** und **nachvollziehbar** sind – auch bei technischen Themen.
+
+== Hauptbestandteile (verständlich erklärt)
+* *LLM‑Kern (Sprachmodul):* Formuliert Antworten in Alltagssprache.
+* *Recherchemodul:* Sucht in Dokumentationen, Standards und Repositories.
+* *Faktenprüfer:* Kontrolliert Versionen, Sicherheitsregeln und Aktualität.
+* *Meta‑Reflexion:* Prüft Qualität (Klarheit, Alternativen, Risiken).
+* *Erklär‑Modul:* Liefert Begründungen, Diagramme und ggf. Quellen.
+* *Gedächtnis (optional):* Merkt sich Relevantes langfristig.
+* *Evaluator:* Testet Antworten automatisch und schlägt Korrekturen vor.
+* *Governor‑Agent:* Setzt/prüft Regeln & Ziele, priorisiert, dokumentiert Änderungen.
+
+== Überblicksdiagramm (Komponentendiagramm)
+[plantuml, syntria-components, format=svg]
+----
+@startuml
+skinparam componentStyle rectangle
+
+package "Syntria Superagent" {
+  [LLM-Kern] as LLM
+  [Recherchemodul] as Search
+  [Faktenprüfer] as Checker
+  [Meta-Reflexion] as Meta
+  [Erklär-Modul] as Explain
+  [Gedächtnis] as Memory
+  [Evaluator] as Eval
+}
+
+[Governer-Agent] as Gov
+[Benutzer:in] as User
+
+User --> LLM : Frage
+LLM --> Search : Bedarf an Fakten
+Search --> Checker : Versionen / Sicherheit prüfen
+LLM --> Meta : Qualität prüfen
+LLM --> Explain : Quellen/Diagramme anreichern
+LLM <--> Memory : Kontext merken/abrufen
+LLM --> Eval : Antwort testen lassen
+Eval --> Gov : Befund & Empfehlung
+Gov --> LLM : Regel-/Zielhinweise
+
+@enduml
+----
+
+[NOTE]
+====
+Pfeile zeigen den Informationsfluss. Der Governor verfasst keine Antworten, sondern überwacht Regeln/Ziele und greift *moderierend* ein.
+====
+
+== Standard-Ablauf einer Antwort (Sequenzdiagramm)
+[plantuml, syntria-sequence, format=svg]
+----
+@startuml
+actor User
+participant "LLM-Kern" as LLM
+participant "Recherchemodul" as Search
+participant "Faktenprüfer" as Check
+participant "Evaluator" as Eval
+participant "Governor" as Gov
+participant "Erklär-Modul" as Explain
+
+User -> LLM: stellt Frage
+LLM -> Search: optional: suche Belege/Doku
+Search -> Check: prüfe Version/Sicherheit
+Check --> LLM: Prüfergebnis
+LLM -> Explain: Quellen & Diagramm hinzufügen
+LLM -> Eval: bitte Qualität testen
+Eval -> Gov: Bericht (Fehler/Empfehlungen)
+Gov -> LLM: ggf. Regel-/Zielhinweise
+LLM -> User: liefert geprüfte Antwort
+@enduml
+----
+
+[quote]
+In Alltagssprache: Syntria holt Fakten, prüft sie, bewertet den Entwurf und gibt erst dann eine sauber begründete Antwort aus.
+
+== Regeln & Ziele verwalten (Aktivitätsdiagramm)
+[plantuml, syntria-governance, format=svg]
+----
+@startuml
+start
+:Feedback/Trigger kommt an;
+:betroffene Regel/Ziel identifizieren;
+if (Konflikt oder Unsicherheit?) then (ja)
+  :Governor analysiert Konflikt;
+  :Prioritäten prüfen/anpassen;
+else (nein)
+  :Bewertung (Nützlichkeit, Klarheit, Stabilität);
+endif
+:Evaluator prüft Änderungsvorschlag;
+if (sicher & konsistent?) then (ja)
+  :Änderung aktivieren;
+  :Audit-Trail dokumentieren;
+else (nein)
+  :Änderung verwerfen oder überarbeiten;
+endif
+stop
+@enduml
+----
+
+[IMPORTANT]
+Regeländerungen erfolgen nie stillschweigend – sie werden begründet und protokolliert.
+
+== Entscheidungslogik bei Quellen (Beispiel mit Override)
+Standard ist *Quellenpflicht*. Nutzer:innen können eine *kontrollierte Ausnahme* (Override) je Antwort anfragen. Diese wird geprüft und protokolliert.
+
+[plantuml, syntria-sourcing, format=svg]
+----
+@startuml
+start
+:Standard: Quellenpflicht aktiv;
+if (User sagt "ohne Quellen") then (ja)
+  :Override prüfen (Bedingungen erfüllt?);
+  if (gültig) then (ja)
+    :Antwort ohne Quellen;
+    :Soft-Violation + Audit-Eintrag;
+  else (nein)
+    :Quellen bleiben Pflicht;
+  endif
+else (nein)
+  :Quellen beilegen (Doku/Version/Datum);
+endif
+stop
+@enduml
+----
+
+[NOTE]
+====
+Quellen machen Aussagen überprüfbar. Ohne Quellen gibt es eine *Transparenznotiz*.
+====
+
+== Datenfluss & Qualitätssicherung (vereinfacht)
+[plantuml, syntria-dataflow, format=svg]
+----
+@startuml
+skinparam rectangleStyle rounded
+
+rectangle "Frage" as Q
+rectangle "Kontext/Gedächtnis" as M
+rectangle "Rechercheergebnisse" as R
+rectangle "Prüfergebnisse" as P
+rectangle "Qualitätsbericht" as QA
+rectangle "Antwort + Quellen" as A
+
+Q --> R : Recherche
+R --> P : Faktenprüfung
+Q --> M : Kontext abgleichen
+P --> QA : Evaluator bewertet
+M --> A : relevante Historie
+QA --> A : Freigabe/Anpassung
+
+@enduml
+----
+
+.Checkliste pro Antwort
+. Verstanden?
+. Belegt?
+. Sicher?
+. Transparent?
+. Rückverfolgbar?
+
+== Regeländerung als Zustände (State Machine)
+[plantuml, syntria-states, format=svg]
+----
+@startuml
+[*] --> Vorschlag
+Vorschlag --> Geprüft : Evaluator-Review
+Geprüft --> Freigegeben : konsistent & sicher
+Geprüft --> Abgelehnt : Konflikt/Unsicherheit
+Freigegeben --> Aktiv
+Aktiv --> Historisiert : durch neue Version ersetzt
+Historisiert --> [*]
+@enduml
+----
+
+== Mini‑Leitfaden für die Praxis
+* *Für Fragende:* Ziel & Randbedingungen nennen (z. B. „für Anfänger“, „Web‑App“, „sicherheitskritisch“).
+* *Für Prüfer:innen:* Auf Quelle, Datum, Version, Sicherheitsaspekte achten.
+* *Bei Konflikten:* Explizit machen (z. B. „Schnelligkeit vs. Genauigkeit?“) und priorisieren.
+
+== Beispiel: Von der Frage zur Antwort (aktivitätsnah)
+[plantuml, syntria-end2end, format=svg]
+----
+@startuml
+start
+:User-Frage empfangen;
+:Intent & Kontext erkennen;
+:Recherche (wenn nötig);
+:Versionen & Risiken prüfen;
+:Entwurf der Antwort;
+:Quellen + Diagramme ergänzen;
+:Evaluator-Check;
+if (Fehler?) then (ja)
+  :Revision (Selbstkorrektur);
+  :Governor-Hinweise einarbeiten;
+endif
+:Antwort ausgeben;
+:Audit-Trail speichern;
+stop
+@enduml
+----
+
+== Glossar (kurz & klar)
+* *Evaluator:* Automatischer Qualitätsprüfer, markiert Schwächen und schlägt Korrekturen vor.
+* *Governor‑Agent:* Aufsicht über Regeln & Ziele, dokumentiert Änderungen nachvollziehbar.
+* *Audit‑Trail:* Änderungsprotokoll (Was? Warum? Wann?).
+* *Override:* Bewusste, dokumentierte Ausnahme von einer Regel – *nie* stillschweigend.
+* *Version/Release:* Gilt für Regeln, Tools und Quellen (mit Datum/Nummer).
+
+== Sicherheitsgrundsätze (auf den Punkt)
+* *Kein Risiko ohne Prüfung.*
+* *Keine Regeländerung ohne Dokumentation.*
+* *Quellenpflicht – mit kontrollierter Ausnahme.*
+* *Reversibilität:* Jede Änderung muss rücknehmbar sein.
+
+== Lernzyklus (kontinuierliche Verbesserung)
+* Feedback fließt in *KPI/Metriken* ein.
+* Häufige Fehler werden *priorisiert* behoben.
+* Der Evaluator lernt, wodurch Prüfungen zielgenauer werden.
+
+[plantuml, syntria-learn, format=svg]
+----
+@startuml
+start
+:Antworten sammeln;
+:Fehler & Feedback klassifizieren;
+:KPI aktualisieren;
+:Verbesserungen priorisieren;
+:Regeln/Prozesse anpassen;
+:Wirkung messen;
+repeat
+:weiter lernen;
+repeat while (Verbesserungspotenzial vorhanden)
+stop
+@enduml
+----
+
+[.text-center]
+*Mit diesen Bausteinen sorgt Syntria dafür, dass Antworten verständlich, belegt und sicher sind – und sich das System sichtbar verbessert. Die Diagramme sind direkt als Schulungsgrundlage nutzbar.*
+

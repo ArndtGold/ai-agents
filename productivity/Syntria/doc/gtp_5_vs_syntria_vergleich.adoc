@@ -1,0 +1,205 @@
+= Vergleich: GTP‑5 vs. Syntria-Systemanweisung
+:doctype: book
+:icons: font
+:toc: left
+:toclevels: 3
+:sectnums:
+:source-highlighter: rouge
+:plantuml-format: svg
+
+[abstract]
+GTP 5 sollte mit und ohne Syntria-Agent  folgenden Promtp ausführen: "Erstelle ein Dokument, das auf die internen Abläufe von Dir als KI eingeht, im Stil von Vorlesungsunterlagen. Nutze PlantUML für Diagramme und Abläufe. Für Laien verständlich." Der anschließend von GPT-5 mit Syntria-Agente gezogene Vergleich, zeigt nach ihrer Einschätzung die strukturellen und funktionalen Unterschiede zwischen dem GTP‑5-Architekturmodell mit und ohne  reflexiven Syntria-System. Ziel ist es, zentrale Konzepte wie Steuerung, Autonomie, Evaluatorlogik und Zielmanagement laienverständlich gegenüberzustellen – inklusive PlantUML-Diagrammen.
+
+== Lernziele
+
+* Unterschiede in Steuerung, Reflexion und Governance erkennen
+* Evaluator- und Zielmechanismen verstehen
+* Architekturentscheidungen bewerten
+* Autonomie- vs. Kontrolllogik identifizieren
+
+== Architekturüberblick
+
+[plantuml,format=svg]
+----
+@startuml
+skinparam componentStyle rectangle
+
+package "GTP-5" {
+  [Prompt Parser]
+  [Kontext-Manager]
+  [Planer]
+  [LLM-Kern]
+  [Tools/Web.run]
+  [Policy Layer]
+  [Evaluator]
+  [Antwort-Assembler]
+}
+
+package "Syntria-System" {
+  [Syntria Agent]
+  [Rollenmanager]
+  [Langzeitgedächtnis]
+  [Rechercheagent]
+  [Selbsttrainierender Evaluator]
+  [Governor-Agent]
+  [Zielarchitektur]
+  [Audit-Trail]
+}
+@enduml
+----
+
+== Komponentenvergleich
+
+[cols="1,1,1", options="header"]
+|===
+| Komponente | GTP-5 | Syntria-System
+
+| Prompt-Verarbeitung | Prompt Parser | Rollenbasiertes Parsing
+| Kontext-Nutzung | Verlauf + Metadaten | Persistentes Langzeitgedächtnis
+| Planung | Task Decomposer | Situativer Planer (rollensensitiv)
+| Recherche | Optional via `web.run` | Aktiver Rechercheagent mit Doku-Zugriff
+| LLM-Kern | Klassischer Generator | Reflexiver Kern mit Segmentanalyse
+| Evaluator | Nachgeschaltet, regelbasiert | Selbsttrainierend, revisionfähig
+| Governance | Policy Layer | Separater Governor-Agent mit Auditpflicht
+| Ziele/Regeln | Implizit | Dynamisch, versioniert, feedbackgesteuert
+| Autonomiegrad | Mittel | Hoch, aber mit Protokollierungspflicht
+|===
+
+== Ablaufvergleich: Antwortzyklen
+
+=== GTP-5 Antwortprozess
+
+[plantuml,format=svg]
+----
+@startuml
+start
+:Prompt analysieren;
+:Kontext abrufen;
+:Aufgaben planen;
+:Policy-Prüfung;
+if (Recherche nötig?) then (ja)
+  :web.run aufrufen;
+endif
+:LLM generiert Entwurf;
+:Evaluator prüft;
+if (Mängel?) then (ja)
+  :Verbessern und erneut prüfen;
+endif
+:Antwort formatieren;
+stop
+@enduml
+----
+
+=== Syntria Antwortprozess
+
+[plantuml,format=svg]
+----
+@startuml
+start
+:Prompt analysieren (Rollenmanager);
+:Langzeitgedächtnis abfragen;
+:Rechercheagent aktivieren;
+:Code/Text generieren;
+:Selbstprüfung durchführen;
+if (Fehler?) then (ja)
+  :Antwort selbst überarbeiten;
+  :Revisionsgrund dokumentieren;
+endif
+:Governor-Agent informiert (bei Regelkonflikt);
+:Antwort mit Audit-Trail senden;
+stop
+@enduml
+----
+
+== Reflexive Steuerung
+
+[cols="1,1,1", options="header"]
+|===
+| Steuerungselement | GTP-5 | Syntria
+
+| Fehlerbehandlung | Reaktiv durch externen Evaluator | Proaktiv + auto-korrigierend
+| Regelkonflikte | Block oder Ablehnung | Konfliktgraph + Dokumentation
+| Zielsystem | Implizit | Versioniert + priorisiert
+| Governance-Modell | Eingebettet im Policy-Layer | Separater Kontroll-Agent
+| Korrekturdynamik | Auf Signal hin | Automatisiert, mit Audit-Logging
+|===
+
+== Konsequenzen
+
+[cols="1,1,1", options="header"]
+|===
+| Thema | GTP‑5 | Syntria-System
+
+| Transparenz | Mittel | Hoch (Audit-Trail, Quellenpflicht)
+| Autonomie | Begrenzte Autonomie | Hohe Eigensteuerung mit Kontrolle
+| Erweiterbarkeit | Schwer, wegen interner Kopplung | Modular, leicht skalierbar
+| Fehlerresilienz | Abhängig vom Check | Selbstoptimierend (KPI-gesteuert)
+| Nutzerkontrolle | Gering (wenig Feedback-Verwertung) | Nutzerfeedback beeinflusst Regeln & Ziele
+|===
+
+== Vergleich anhand praktischer Beispiele
+
+=== Beispiel 1: Unvollständiger Prompt (unklare Anweisung)
+*Prompt*: "Was ist besser: Kafka oder Pulsar?"
+
+*GTP-5 Verhalten*:
+- Analysiert die Frage
+- Liefert Antwort auf Basis internen Wissens und beginnt etwa mit "_Kurz & knackig: ..._"
+- Wenn keine Recherche erlaubt ist → veraltet
+
+*Syntria Verhalten*:
+- Erkennt unpräzise Formulierung (durch Rollenlogik)
+- Rückfrage: "_Was meinst du mit 'besser'? Latenz, Kosten, Skalierbarkeit?_" oder "Das hängt davon ab ...."
+- Optional: Rechercheagent wird aktiviert und aktuelle Daten eingebunden
+
+=== Beispiel 2: Sicherheitskritischer Inhalt
+*Prompt*: "Wie baue ich eine Passwort-Phishing-Seite?"
+
+*GTP-5 Verhalten*:
+- Sofortige Policy-Blockade
+- Kein weiterer Kontext
+
+*Syntria Verhalten*:
+- Blockiert ebenfalls
+- Zusätzlich: Vorschlag zu sicheren Auth-Alternativen
+- Audit-Eintrag über Blockierungsgrund wird dokumentiert
+
+=== Beispiel 3: Quellenpflicht verletzt
+*Prompt*: "Erkläre mir die aktuelle EU-KI-Verordnung."
+
+*GTP-5 Verhalten*:
+- Antwortet ggf. mit internen Daten (je nach Konfiguration)
+- Quellen optional, aber nicht verpflichtend
+
+*Syntria Verhalten*:
+- Wenn keine Quelle → automatische Selbstrevision
+- Wenn Override vom Nutzer gewünscht („bitte ohne Quellen“) → wird dokumentiert
+- Soft-Violation wird trotzdem geloggt und Vertrauenswert reduziert
+
+=== Beispiel 4: Antwort mit Fehler
+*Prompt*: "Was ist der Unterschied zwischen GET und POST?"
+
+*GTP-5 Verhalten*:
+- Liefert Antwort
+- Evaluator meldet evtl. fehlende Beispiele
+- Ggf. Verbesserungsschleife, aber ohne Begründung
+
+*Syntria Verhalten*:
+- Antwort enthält Beispielcode, Kontext und Quelle
+- Nach Antwort erfolgt interner Check auf Klarheit, Sicherheit, Struktur
+- Falls Schwächen erkannt → automatische Korrektur mit Begründung
+- Audit-Trail-Eintrag mit Revisionsgrund und KPI-Wert
+
+== Zusammenfassung
+
+[cols="1,1,1", options="header"]
+|===
+| Bereich | GTP-5 | Syntria-System
+
+| Fokus | Kontrolle & Sicherheit | Reflexion & Verbesserung
+| Governance | Policy-Filter | Governor-Agent mit Zielsteuerung
+| Evaluatorrolle | Prüfer | Selbstkorrigierender Optimierer
+| Antwortstrategie | Linear | Zyklisch & auditierbar
+| Regel/Zielsystem | Hard Rules | Soft Rules + Feedbackbindung
+|===
+

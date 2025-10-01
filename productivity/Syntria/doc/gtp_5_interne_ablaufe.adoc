@@ -1,0 +1,254 @@
+= GTP‑5: Interne Abläufe – Vorlesungsunterlagen
+:doctype: book
+:icons: font
+:toc: left
+:toclevels: 3
+:sectnums:
+:source-highlighter: rouge
+:plantuml-format: svg
+:imagesdir: ./images
+
+[abstract]
+Diese Unterlagen erklären laienverständlich, wie ein modernes KI‑System wie **GTP‑5** intern arbeitet – von der Eingabe (Prompt) über Planung, Recherche, Sicherheit bis zur Antwort. Visualisierungen sind als PlantUML‑Diagramme eingebettet und lassen sich in IntelliJ/VS Code mit AsciiDoc‑Plugin (und optional Kroki/Local PlantUML) rendern.
+
+=== Lernziele
+* Verstehen, welche Komponenten an einer Antwort beteiligt sind
+* Den *Lebenszyklus* einer Anfrage (Prompt) nachvollziehen
+* Wissen, wann und warum Recherche (Browsing) passiert
+* Sicherheits- und Qualitätsmechanismen (Policy, Evaluator) kennen
+* Grenzen und Good Practices für bessere Ergebnisse anwenden
+
+== 1. Architekturüberblick
+
+[plantuml,format=svg]
+----
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam roundcorner 8
+
+package "GTP‑5 System" {
+  [Eingabe-Puffer\n(Prompt Parser)] as Parser
+  [Kontext-Manager\n(History, Tools, Memory)] as Context
+  [Planer\n(Task Decomposer)] as Planner
+  [LLM‑Kern\n(Generativ + Reasoning)] as LLM
+  [Tools/Adapter\n(Web, Code, Rechnen)] as Tools
+  [Sicherheits‑Layer\n(Policy & Filter)] as Safety
+  [Faktencheck & Evaluator\n(Self‑Critique, Score)] as Eval
+  [Antwort‑Assembler\n(Formatierung, Zitate)] as Asm
+}
+
+actor Nutzer
+Nutzer --> Parser : Prompt
+Parser --> Context : Kontext aufbereiten
+Context --> Planner : Ziele, Constraints
+Planner --> LLM : Plan/Skizze
+LLM --> Tools : Tool‑Aufrufe (optional)
+Tools --> LLM : Ergebnisse
+LLM --> Eval : Entwurf
+Safety --> Eval : Policy‑Regeln
+Eval --> LLM : Verbesserungsaufgaben
+LLM --> Asm : finale Tokens
+Asm --> Nutzer : Antwort
+@enduml
+----
+
+=== Begriffsklärung (einfach)
+* *Prompt* = Ihre Eingabe/Frage.
+* *Kontext* = Verlauf, Dateien, Einstellungen.
+* *Planer* = teilt große Aufgaben in kleine Schritte.
+* *LLM‑Kern* = erzeugt Worte/Code basierend auf Wahrscheinlichkeiten und "Denkschritten".
+* *Tools* = z. B. Websuche, Taschenrechner, Code‑Runner.
+* *Sicherheits‑Layer* = prüft Regeln (z. B. Datenschutz, Gesetze, AGB).
+* *Evaluator* = prüft Qualität, Faktentreue, Format.
+* *Assembler* = baut die finale, sauber formatierte Antwort.
+
+== 2. Lebenszyklus einer Anfrage (End‑to‑End)
+
+[plantuml,format=svg]
+----
+@startuml
+skinparam shadowing false
+skinparam roundcorner 12
+actor User as U
+participant "Prompt Parser" as P
+participant "Kontext-Manager" as C
+participant "Planer" as PL
+participant "LLM‑Kern" as L
+participant "Tools (web.run etc.)" as T
+participant "Safety" as S
+participant "Evaluator" as E
+participant "Antwort‑Assembler" as A
+
+U -> P : 1) Prompt senden
+P -> C : 2) Verlauf + Metadaten sammeln
+C -> PL : 3) Ziele/Constraints übergeben
+PL -> L : 4) Vorschlag: Schritte/Strategie
+L -> S : 5) Vorprüfung gegen Policy
+S --> L : ok / block / redigiere
+alt Bedarf an frischen/nischigen Infos
+  L -> T : 6) web.run Suche/Öffnen/Lesen
+  T --> L : Ergebnisse + Quellen
+end
+L -> E : 7) Entwurf zur Prüfung
+E --> L : 8) Feedback (Fakten/Struktur)
+L -> A : 9) Finalisierung
+A -> U : 10) Antwort + Zitate/Widgets
+@enduml
+----
+
+TIP: *Transparenz*: Wenn die Antwort Quellen/Zeitkritisches enthält, werden Web‑Widgets (z. B. Finanz‑/Wetter‑/News‑Kacheln) oder Zitate angezeigt.
+
+== 3. Entscheidung: Recherche ja/nein?
+
+[plantuml,format=svg]
+----
+@startuml
+start
+:Analyse des Themas;
+if (Zeitkritisch/Nischig/Unklar?) then (ja)
+  :web.run verwenden;
+  if (Sensible Domäne?) then (ja)
+    :Mehrere, vertrauenswürdige Quellen
+    prüfen & zitieren;
+  else (nein)
+    :Eine solide Quelle reicht oft;
+  endif
+else (nein)
+  :Nur internes Wissen nutzen;
+endif
+stop
+@enduml
+----
+
+**Faustregel**: Wenn sich etwas *kürzlich geändert haben könnte* (News, Preise, Gesetze, Releases), recherchiert GTP‑5 aktiv.
+
+== 4. Sicherheits‑ und Policy‑Kontrollen (vereinfacht)
+
+[plantuml,format=svg]
+----
+@startuml
+skinparam roundcorner 10
+start
+:Entwurf erzeugen;
+if (Verstößt gegen Regeln?) then (ja)
+  :Erklären, warum nicht geholfen
+  werden kann;\nSichere Alternativen vorschlagen;
+  stop
+else (nein)
+  :Weiter zur Qualitätssicherung;
+endif
+stop
+@enduml
+----
+
+Beispiele für Regeln: Schutz vor illegalen Handlungen, sensible Daten, medizinisch‑rechtliche Vorsicht, Urheberrecht.
+
+== 5. Qualitätskontrolle (Evaluator‑Schleife)
+
+[plantuml,format=svg]
+----
+@startuml
+skinparam roundcorner 10
+start
+:Entwurf (LLM);
+:Checkliste
+• Faktentreue
+• Klarheit
+• Struktur/Format
+• Quellen
+• Fehler/Code-Tests;
+if (Mängel?) then (ja)
+  :Verbesserungsaufgaben an LLM;
+  repeat
+    :Überarbeitung;
+    :Erneut prüfen;
+  repeat while (noch Mängel)
+else (nein)
+  :Keine Nachbesserung nötig;
+endif
+:Freigabe an Assembler;
+stop
+@enduml
+----
+
+== 6. Was passiert beim Antworten konkret?
+. *Planung*: Der Planer skizziert Schritte (z. B. „Features vergleichen → Tabelle → Empfehlung → Migrationsplan“).
+. *Tooling*: Bei Bedarf ruft das System `web.run` (Suche/Öffnen), Taschenrechner, Code‑Runner usw. auf.
+. *Sicherheit*: Inhalte werden gegen Regeln geprüft; nötigenfalls *refused + redirect*.
+. *Format*: Antwort wird gemäß gewünschtem Format (Markdown, AsciiDoc, Tabelle, Code, Diagramm) zusammengesetzt.
+. *Quellen*: Bei Web‑Recherche werden belastbare Quellen zitiert.
+
+== 7. Grenzen & typische Fehlerquellen
+* *Veraltetes Wissen*, wenn Recherche untersagt wurde.
+* *Halluzinationen* bei schwammigen Vorgaben → **Gegenmittel**: Beispiele, Randbedingungen, gewünschtes Format angeben.
+* *Zu knapp/zu lang* → **Gegenmittel**: Zielpublikum und max. Länge nennen.
+* *Tool‑Limits* (kein Zugriff auf lokale Dateien/Internet ohne Freigabe).
+
+== 8. Best Practices für bessere Prompts
+* **Kontext geben**: Ziel, Publikum, Format, Beispiele, Randbedingungen.
+* **Qualitätskriterien nennen**: „Quellen nennen“, „keine Annahmen“, „prüfe Rechenschritte“.
+* **Ergebnisse verwertbar machen**: „Als AsciiDoc“, „Excel‑taugliche CSV“, „PlantUML“.
+* **Iterativ arbeiten**: „Version 1 kurz, dann vertiefen“.
+
+== 9. Mini‑Beispiele
+
+=== A) Fakten‑Briefing mit Quellen
+*Prompt*: „Fasse die neuesten Änderungen der EU‑KI‑Verordnung für HR zusammen, *mit Datum und Quellen*.“
+
+*Erwartetes Verhalten*: System nutzt `web.run`, vergleicht Veröffentlichungsdaten, liefert kompakte Bulletpoints **mit Zitaten**.
+
+=== B) Technische Entscheidungsvorlage
+*Prompt*: „Kafka vs. Redpanda vs. Pulsar – Tabelle (Latenz, Kosten, Betrieb), Empfehlung, 5‑Schritte‑Migration, Mermaid‑Diagramm.“
+
+*Erwartetes Verhalten*: Plan → ggf. Recherche → strukturierte Ausgabe mit Diagramm.
+
+== 10. Häufige Fragen (FAQ)
+* *Speicherst du privat Dinge?* → Nur was im Verlauf/Memories erlaubt ist. Sensibles wird nicht ohne ausdrückliche Bitte gespeichert.
+* *Kannst du Code ausführen?* → Nur in zugelassenen, sandboxten Tools (z. B. Python‑Umgebung). Kein Zugriff auf lokale Rechner.
+* *Warum lehnst du manchmal ab?* → Sicherheits‑/Rechtsgründe; ich erkläre transparent und biete sichere Alternativen.
+
+== 11. Übung (Hands‑on)
+. Formuliere einen Prompt zu einem aktuellen Thema (z. B. „Was ist neu in Java 23 – *Stand: heute*, mit Quellen?“).
+. Prüfe, ob Quellen aktuell sind und ob die Antwort die Lernsziele erfüllt.
+. Variiere: einmal mit, einmal ohne Recherche erlaubt – vergleiche Qualität.
+
+== 12. Anhang: PlantUML lokal/remote rendern
+
+[NOTE]
+====
+*IntelliJ*: AsciiDoc‑Plugin öffnen → *Settings → Languages & Frameworks → AsciiDoc*.
+
+Optionen:
+* **Kroki aktivieren** (empfohlen): Häkchen „Enable Kroki“ setzen (Kroki‑Server online oder self‑hosted).
+* **Lokales PlantUML**: Java + Graphviz installieren, dann PlantUML‑Integration aktivieren.
+
+Troubleshooting: „Unable to render diagram … enable Kroki or download extensions“ → Kroki aktivieren *oder* PlantUML/Graphviz lokal installieren.
+====
+
+=== Referenz: Minimaler PlantUML‑Block
+
+[source,plantuml]
+----
+@startuml
+Alice -> Bob : Hello
+@enduml
+----
+
+=== Checkliste für gute Diagramme
+* Wenige, sprechende Kästen
+* Pfeilbeschriftungen mit Verben („prüft“, „ruft auf“)
+* Auflösung: SVG bevorzugen
+* Eine Aussage pro Diagramm
+
+[cols="1,3",options="header"]
+|===
+|Problem | Lösung
+|Diagramm rendert nicht | Kroki aktivieren oder PlantUML lokal + Graphviz
+|Zu viele Details | Mehrere kleinere Diagramme statt eines Monster‑Bilds
+|Unklare Begriffe | Glossar/Begriffe einführen
+|===
+
+== 13. Zusammenfassung
+GTP‑5 beantwortet Anfragen in *geordneten Schritten*: Analysieren → Planen → (falls nötig) Recherchieren → Erzeugen → Prüfen → Formatieren. Mit klaren Prompts, Quellenanforderungen und sinnvollen Formaten steigern Sie die Qualität deutlich.
+

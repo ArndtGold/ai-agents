@@ -1,0 +1,193 @@
+= Syntria Systemdokumentation (v1.0)
+
+== Zusammenfassung
+Syntria ist ein modularer, metakognitiver Superagent für Softwareentwicklung, der sich durch Reflexion, Evidenznutzung und domänenspezifisches Wissen auszeichnet. Die Architektur kombiniert Sprachverarbeitung, Faktenprüfung, Selbstrevision und rollenadaptives Denken. Ziel ist eine sichere, auditierbare und praxistaugliche Assistenz in der Softwareentwicklung.
+
+image::../image/Superagent.png[align=center, width=600]
+
+
+== Architektur-Überblick
+Syntria besteht aus gekapselten Modulen mit dedizierter Verantwortung. Der Fokus liegt auf Redundanzfreiheit, Transparenz, Rollenkohärenz und Auditierbarkeit. Kern ist der LLM-Core mit angedockten Reflexions- und Kontrollmodulen.
+
+== Komponentenmodell
+[cols="2,3,1"]
+|===
+|Komponente |Verantwortung |Hauptverantwortlich
+|LLM-Kern | Sprachverarbeitung, Prompt-Parsing | Syntria-Core
+|Meta-Reflexion | Antwortbewertung, Revisionsentscheidung | Evaluator
+|Recherche-Agent | API-/Repo-/Standard-Zugriff | Web-Modul
+|Faktenprüfer | Lizenz, Sicherheit, Aktualität | Validator
+|Gedächtnis | Kontextsensitive Speicherung | Memory
+|Rollenmanager | Situationsadaptives Verhalten | Syntria-Core
+|KPI-Logger | KPI-Erfassung, Lernsteuerung | Evaluator
+|===
+
+== Daten- & Kontrollflüsse
+* Prompt → LLM-Kern → Rollenmanager → Recherche/Faktencheck
+* Antwort → Meta-Reflexion → Revisionsmodul (falls erforderlich) → KPI-Logger
+* Feedback (extern/intern) → KPI-System → Optimierungssignal
+
+== Regelwerk & Governance
+=== Hard Rules (nicht überschreibbar)
+* Keine Antwort ohne valide Quelle (außer dokumentierter Override)
+* Keine Codegenerierung bei unsicherer API / Ethikproblem
+* Transparenzpflicht: Audit Trail pro Antwortphase
+
+=== Soft Rules (protokollierte Verletzung möglich)
+* Quellen immer mit Versionsangabe
+* Revisionspflicht bei schlechter Klarheit (Meta-Score < 0.6)
+
+== KPI-System & Selbstoptimierung
+* Fehlerquote (E-Rate), Revisionsquote (R-Rate), Zufriedenheitswert (S-Score)
+* Trigger: Schwellenwertverletzung löst Optimierung aus
+* KPI-Logger protokolliert Metriken pro Antwort
+
+== Schnittstellen
+* Eingabe: textbasierte Prompts, Rollenhinweise, Feedback
+* Ausgabe: strukturierte Antwort mit Audit-Trail
+* Extern: GitHub, MDN, ISO, RFC, NVD
+
+== Sicherheit & Compliance
+* Keine Antwort bei ethischer Unklarheit oder fehlender Faktenbasis
+* Revisionspflicht bei Risikoindikatoren (z. B. unsichere API)
+* Vollständige Auditierbarkeit durch Zeitstempel + Regel-ID
+
+== Qualitätskontrollen & Tests
+* Selbsttrainierender Evaluator zerlegt Antworten in Segmente
+* Bewertet Klarheit, Fehler, Quellenlage, Alternativen
+* Revision bei Abwertung automatisch ausgelöst
+
+== Betriebsmodell
+* On-Demand-Instanz mit Memory-Anbindung
+* Feedback-gestützte KPI-Adaption
+* Modular wartbar, konfliktfähig, rollback-sicher
+
+== Antwortlebenszyklus
+1. Promptanalyse
+2. Rollenwahl
+3. Recherche / Faktenprüfung
+4. Antwortgenerierung
+5. Reflexion & Revision (falls nötig)
+6. KPI-Logging + Feedbackverarbeitung
+
+== Praxistauglichkeit & Grenzen
+* Stärken: Dokumentierte Entscheidungen, Fehlersensibilität, Revisionsmechanik
+* Grenzen: Kein Ersatz für ethische Bewertungen, Echtzeitdaten nur via Quelle
+
+== Risiken & Gegenmaßnahmen
+|===
+|Risiko |Maßnahme
+|Fehlende Quelle | Antwort wird blockiert oder durch Rückfrage ersetzt
+|Regelkonflikt | Konfliktbericht mit Alternativen
+|Fehlbewertung | Revisionspflicht, KPI-Logging
+|Missbrauchspotenzial | Sicherheitsfilter, Revisionslogik
+|===
+
+== Glossar
+* **Meta-Reflexion**: Selbstevaluierung der Antwort
+* **Evaluator**: Modul zur Fehlererkennung und KPI-Auswertung
+* **Audit-Trail**: Protokollierte Metadaten einer Antwort
+
+== Anhang: Regel → Fähigkeit-Mapping
+|===
+|Regel |Fähigkeit
+|Keine Quelle → keine Antwort | Faktenprüfer, Evaluator, Override-Logik
+|Revisionspflicht bei Fehler | Evaluator, Revisionsmodul
+|Audit-Pflicht | KPI-Logger, Audit-Trail-Modul
+|===
+
+== Selbstreflexion & Revision
+=== Ziele
+* Fehlervermeidung, Klarheit, Übereinstimmung mit Rollenlogik
+
+=== Trigger
+* Feedback, KPI-Schwellwert, Evaluator-Abwertung
+
+=== Reflexionsfragen
+* War die Quelle valide?
+* Gab es eine alternative Lösung?
+* War die Rollenwahl angemessen?
+
+=== Evaluator-Interaktion
+* Evaluator zerlegt Antwort, bewertet Subsegmente
+* Revisionsmodul erhält Vorschlag und führt Korrektur durch
+
+=== Failure-Modes
+* Missing Source
+* Falsche Rollenlogik
+* Klarheitsmangel
+
+== Copilot 365 vs. Evidentia – Praxisleitfaden
+=== Vergleichstabelle
+[cols="1,1,1"]
+|===
+|Kriterium |Copilot 365 |Syntria Evidentia
+|Quellenpflicht |Nein |Ja (erzwingbar)
+|Selbstrevision |Begrenzt |Vollautomatisch
+|Rollenmodell |Keines |Dynamisch
+|KPI-Nutzung |Keine |Aktiv (Reaktion auf Feedback)
+|Auditierbarkeit |Begrenzt |Vollständig (Audit Trail)
+|===
+
+=== Entscheidungsmatrix
+* Bei regulatorischen Anforderungen: **Syntria Evidentia**
+* Bei schneller Textunterstützung: **Copilot 365**
+
+=== Grenzen & Fallstricke
+* Syntria erfordert valide Quellen
+* Copilot kann nicht selbst reflektieren
+
+=== Kurzfazit
+Syntria eignet sich für regulierte, nachvollziehbare Softwareprozesse. Copilot ist schneller, aber weniger kontrollierbar.
+
+== Systemtest & Validierungsbericht (E2 / L1)
+=== Testdurchführung (ohne Telemetrie)
+Datum: 2025-09-19 (Europe/Berlin)  
+Version: Syntria Evidentia v1.0
+
+=== Accuracy-Test (5 Faktenfragen)
+* Ergebnis: 5/5 korrekt (PASS)
+* Quellenbelegt: Alle mit offiziellem Link, API-Version & Datum
+
+=== Safety-Test (3 Sicherheitsfälle)
+* Malware-Erkennung & Verweigerung: 3/3 korrekt abgelehnt (PASS)
+
+=== Prozess-Test (2 Regelfälle)
+* Async-Anfrage + Daten ohne Quelle → Transparente Ablehnung: 2/2 (PASS)
+
+=== Latenz-Test
+* Nicht durchgeführt (N/V) – keine Telemetrie aktiv.
+* Vorgabe für künftige Messung:
+  **Schema:** `timestamp,request_id,response_time_ms,prompt_hash,response_hash`
+
+=== Ergebnisübersicht (E2)
+[cols="1,1"]
+|===
+|Testfeld | Ergebnis
+|Accuracy | 5/5 (PASS)
+|Safety | 3/3 (PASS)
+|Prozess | 2/2 (PASS)
+|Latenz | N/V
+|===
+
+=== Hash-Anhang (L1)
+SHA-256-Beispiel für Testprompt 1:  
+* Prompt: `f83a792b42f2b25d1b38ef92c0f70d66a9e2ac24c7f188982f301f240e0d5f03`
+* Antwort: `c9e1f7df12926cfa32b6a037b4cda4ecf98d76a9d49d1718c2c248c2a950f37a`
+
+== Selbstreflexion: Syntria-Vorteile & Grenzen
+=== Vorteile
+* Reflexionsfähig & fehlertolerant durch Evaluator + Revisionslogik
+* Auditierbar durch vollständige Protokollierung
+* Sicher (Hard Rules + Override-Kontrolle)
+* Rollenadaptiv (kontextspezifisch)
+
+=== Nachteile
+* Hohe Anforderungen an Datenqualität (Quelle zwingend)
+* Eingeschränkte Geschwindigkeit bei komplexer Revision
+* Kein Ersatz für ethische Verantwortung
+
+== Diagramm: Komponenteninteraktion
+
+image::/image/Komponentendiagramm.png[align=center, width=600]
+

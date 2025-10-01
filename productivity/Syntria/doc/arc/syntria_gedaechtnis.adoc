@@ -1,0 +1,96 @@
+= Syntria Modul-Dokumentation: Gedächtnis (v1.0)
+
+== Zusammenfassung
+Das Gedächtnis-Modul von Syntria ist ein kontextsensitiver Speichermechanismus, der relevante Informationen persistiert, versioniert und kontextualisiert abrufbar macht. Es bildet die Grundlage für langfristige Kohärenz, lernbasierte Verbesserung und verhaltensgesteuerte Reaktion auf System- oder Nutzerfeedback.
+
+== Hauptfunktionen
+* **Persistenz:** Speicherung von Entscheidungsverlauf, Quellen, Architekturen, Argumentationslinien.
+* **Kontextualisierung:** Assoziation von Speicherinhalten mit Rollen, Prompts, Fehlerarten.
+* **Versionierung:** Jede gespeicherte Information ist versioniert und auditierbar.
+* **Abfrageintegration:** Kontextuelle Wiederverwendung von Gedächtnisinhalten bei neuen Prompts.
+
+== Architekturposition
+Das Modul ist direkt mit dem LLM-Kern, dem Rollenmanager, dem KPI-Logger und dem Revisionssystem verbunden.
+
+== Datenmodell (vereinfacht)
+[source,json]
+----
+{
+  "speicher_id": "M-2025-09-19-001",
+  "inhalt": "Beispielantwort zur OAuth2-Architektur",
+  "rolle": "Architekt:in",
+  "kontext_tags": ["OAuth2", "Security", "React"],
+  "zeitstempel": "2025-09-19T10:42:00Z",
+  "quelle": "https://datatracker.ietf.org/doc/html/rfc6749",
+  "version": "1.0",
+  "revisionslog": [
+    {
+      "datum": "2025-09-19T11:00:00Z",
+      "grund": "veraltete Bibliothek",
+      "aktion": "Quellenhinweis aktualisiert"
+    }
+  ]
+}
+----
+
+== Interaktionen
+[cols="1,3"]
+|===
+|Partner |Zweck
+|LLM-Kern | Zugriff & Befüllung auf Basis semantischer Ähnlichkeit
+|Rollenmanager | Kontextspezifische Selektion relevanter Einträge
+|Meta-Reflexion | Abgleich zwischen aktuellem Output und historischen Lösungen
+|Evaluator | Prüft Gedächtniseinträge auf Fehlerpersistenz
+|KPI-Logger | Verknüpft Feedback mit Speicheraktualisierung
+|===
+
+== Zugriffstypen
+* **Implizit:** durch semantische Kontextanalyse (LLM)
+* **Explizit:** bei direkter Frage nach vergangener Antwort/Quelle
+* **Kollaborativ:** durch Evaluator oder Revisionsmodul initiiert
+
+== Sicherheits- & Governance-Regeln
+* Kein Zugriff auf Gedächtnis bei ethischem Widerspruch oder Datenkonflikt
+* Alle Gedächtniszugriffe sind auditpflichtig (Log-Level: Info)
+* Speicherinhalte dürfen nicht zur Entscheidung ohne Validierung genutzt werden (Soft-Rule)
+
+== KPI-Verknüpfung
+* Speicherqualität wird bewertet anhand:
+  ** Revisionshäufigkeit
+  ** Fehlervererbung
+  ** Wiederverwendbarkeit
+* KPI-Auslöser führen zu Markierung veralteter Inhalte
+
+== Qualitätsmechanismen
+* Evaluator taggt schwache Einträge (E-Score < 0.7)
+* Memory Cleaner prüft periodisch auf Redundanz & Aktualität
+
+== Beispiel: Gedächtnisnutzung im Antwortprozess
+. Nutzer fordert Architekturberatung zu OAuth2.
+. LLM identifiziert Kontext + Rolle = Architekt:in
+. Rollenmanager ruft passende Gedächtniseinträge auf.
+. Faktenprüfer validiert Quelle + Versionsstand
+. LLM verwendet validierten Gedächtnisinhalt zur Antwortgenerierung
+
+== Risiken & Gegenmaßnahmen
+[cols="1,2"]
+|===
+|Risiko |Maßnahme
+|Veralteter Kontext | Automatische Markierung + Evaluator-Warnung
+|Fehlerpersistenz | Revisionslogik + KPI-Degradation
+|Unpassender Rollenbezug | Rollenabgleich + Kontextfilterung
+|===
+
+== Anhang: Beispiel-Audit-Trail für Gedächtniszugriff
+[source,json]
+----
+{
+  "zugriffs_id": "A-20491",
+  "antwort_id": "R-7781",
+  "grund": "Rollenbasierte Kontextanfrage (OAuth2)",
+  "modul": "Memory",
+  "rolle": "Architekt:in",
+  "zeitpunkt": "2025-09-19T10:45:23Z"
+}
+----
+

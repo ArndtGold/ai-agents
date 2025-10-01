@@ -1,0 +1,323 @@
+= Syntria vs. GPT‑5 – Abläufe im Vergleich
+:toc: macro
+:sectnums:
+:icons: font
+:source-highlighter: rouge
+:plantuml-format: svg
+
+[.lead]
+Ziel: Klare Gegenüberstellung der internen Abläufe von **Syntria** und **GPT‑5** im Stil von Vorlesungsunterlagen – mit laienverständlichen Erklärungen und PlantUML‑Diagrammen.
+
+<<<
+
+toc::[]
+
+== Kurzüberblick
+[cols="1,1",options="header"]
+|===
+|Syntria |GPT‑5
+|Superagent mit *Governor‑Agent*, *Evaluator* und *Audit‑Trail* als Pflichtbestandteile; strikte Quellen-/Regel-Overrides mit Protokoll. |Modulares System mit *Prompt‑Parser*, *Planer*, *Tools*, *Safety*, *Evaluator* und *Antwort‑Assembler*; Fokus auf planvollem Lifecycle und Toolnutzung.
+|Konsequente **Governance** (Regel-/Zielverwaltung, Priorisierung, Rücknahmefähigkeit). |Konsequente **Planung** (Task‑Decomposition) und klare Kriterien für **Browsing**.
+|**Quellenpflicht** mit dokumentiertem Override (Soft‑Violation möglich). |**Recherche-Entscheidung** via Heuristik (zeitkritisch/nischig → web.run), finale Antwort mit Widgets/Zitaten.
+|Selbsttrainierender **Evaluator** + **KPI‑Logger** und Konfliktanalysator. |Evaluator‑Schleife zur Qualitätsverbesserung, Assembler formatiert Ergebnis.
+|===
+
+<<<
+
+== Architektur – Komponenten im Vergleich (Komponentendiagramm)
+[plantuml, cmp-arch-compare, format=svg]
+----
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam roundcorner 8
+
+package "Syntria" {
+  [LLM-Kern]
+  [Recherchemodul]
+  [Faktenprüfer]
+  [Meta-Reflexion]
+  [Erklär-Modul]
+  [Gedächtnis]
+  [Evaluator]
+  [Governor-Agent]
+  [KPI-Logger]
+}
+
+package "GPT-5" {
+  [Prompt Parser]
+  [Kontext-Manager]
+  [Planer]
+  [LLM-Kern]
+  [Tools/Adapter]
+  [Safety]
+  [Evaluator]
+  [Antwort-Assembler]
+}
+
+[User] --> [LLM-Kern] : Anfrage (beide)
+[Governor-Agent] ..> [Evaluator] : Regeln/Ziele
+[Planer] ..> [LLM-Kern] : Schritte/Strategie
+[Tools/Adapter] ..> [LLM-Kern] : Ergebnisse
+[Recherchemodul] ..> [Faktenprüfer]
+[Antwort-Assembler] ..> [User] : Finale Ausgabe
+
+@enduml
+----
+
+== Prozess-Gegenüberstellung (Sequence)
+[plantuml, seq-side-by-side, format=svg]
+----
+@startuml
+skinparam shadowing false
+skinparam roundcorner 10
+
+box "Syntria" #DDFFDD
+actor U as User
+participant SL as "LLM-Kern"
+participant M as "Gedächtnis"
+participant S as "Recherche"
+participant C as "Faktenprüfer"
+participant EX as "Erklär-Modul"
+participant EV as "Evaluator"
+participant G as "Governor"
+end box
+
+box "GPT-5" #DDDDFF
+participant P as "Prompt Parser"
+participant CM as "Kontext-Manager"
+participant PL as "Planer"
+participant L as "LLM-Kern"
+participant T as "Tools (web.run)"
+participant SA as "Safety"
+participant E as "Evaluator"
+participant A as "Antwort-Assembler"
+end box
+
+== Syntria Pfad ==
+User -> SL: Frage
+SL -> M: Kontext abrufen
+opt Fakten nötig
+  SL -> S: Recherche
+  S -> C: Version/Sicherheit prüfen
+  C --> SL: Prüfergebnis
+end
+SL -> EX: Quellen/Diagramme ergänzen
+SL -> EV: Qualitätscheck
+EV -> G: Bericht & Empfehlung
+G --> SL: Regel-/Zielhinweise (ggf. Override)
+SL -> User: Geprüfte Antwort
+SL -> G: Audit-Trail speichern
+
+== GPT-5 Pfad ==
+User -> P: Prompt
+P -> CM: Verlauf/Metadaten
+CM -> PL: Ziele/Constraints
+PL -> L: Plan/Strategie
+L -> SA: Policy-Vorprüfung
+alt Zeitkritisch/Nischig/Unklar
+  L -> T: web.run Suchen/Lesen
+  T --> L: Ergebnisse + Quellen
+end
+L -> E: Entwurf prüfen
+E --> L: Feedback
+L -> A: Finalisierung
+A -> User: Antwort + Zitate/Widgets
+@enduml
+----
+
+=== Textuelle Erläuterung – Woran erkennt man den Unterschied?
+
+*Erster Eindruck (Opening Move)*
+* *Syntria:* Beginnt oft mit einer kurzen **Transparenz-/Regelnotiz** (z. B. Quellenpflicht aktiv, Annahmen, Sicherheitsrandbedingungen). Bei Bedarf wird auf einen **Override‑Check** hingewiesen.
+* *GPT‑5:* Startet häufig mit einem **Mini‑Plan** oder einer **Schrittübersicht** (z. B. „Plan: 1) Ziele klären 2) Recherche 3) Entwurf 4) Validierung“). 
+
+*Umgang mit Quellen*
+* *Syntria:* **Standard: Quellenpflicht.** Antwort endet typischerweise mit **Quellenliste** (inkl. Datum/Version) oder – bei Ausnahme – mit **Transparenznotiz** und Vermerk, dass ein **Audit‑Eintrag** erfolgt.
+* *GPT‑5:* **Heuristikbasiert.** Recherchiert, wenn Thema zeitkritisch/nischig/unklar ist; dann oft **eingebettete Widgets/Zitate**. Andernfalls kompakte Antwort ohne zwingende Quellenpflicht.
+
+*Umgang mit Unsicherheit & Risiken*
+* *Syntria:* Betont **Risikohinweise** (Sicherheitsannahmen, Compliance), schlägt ggf. sichere Alternativen vor und dokumentiert Entscheidungen.
+* *GPT‑5:* Markiert Unsicherheit und triggert **web.run‑Recherche** nach Bedarf; liefert schnell **handlungsorientierte Teilschritte**.
+
+*Compliance/Governance‑Signale*
+* *Syntria:* Sichtbare **Governor/Evaluator‑Spuren** in der Sprache (z. B. „Evaluator‑Check bestanden“, „Override genehmigt“). **Audit‑Trail** wird explizit erwähnt.
+* *GPT‑5:* **Safety‑Checks** sind integriert, aber weniger explizit sichtbar; Fokus liegt auf **Planung & Tool‑Ausgabe**.
+
+*Struktur & Formatierung*
+* *Syntria:* Antworten enthalten oft **Transparenzblöcke**, **Checklisten** und klare **Begründungswege**.
+* *GPT‑5:* Antworten enthalten häufig **Planblöcke**, **To‑Dos**, **Widgets** (z. B. Tabellen/Carousels) und prägnante **„Warum/Wie“-Abschnitte**.
+
+*Nachgang/Protokollierung*
+* *Syntria:* Weist auf **Protokollierung** hin (Audit‑Trail, Soft‑Violation bei Overrides).
+* *GPT‑5:* Finalisiert mit **Assembler‑Formatierung**; Protokollierung ist implizit, Nutzer sieht vor allem die aufbereitete Ausgabe.
+
+==== Praktische Erkennungsmerkmale für Anwender:innen
+[cols="1,2,2",options="header"]
+|===
+|Signal |Syntria |GPT‑5
+|Einleitender Satz |Transparenz/Regelhinweis |Mini‑Plan / Schrittübersicht
+|Quellenhinweise |Pflicht oder explizite Ausnahme mit Notiz |Nur wenn nötig; bei Recherche oft Widgets/Zitate
+|Override‑Dialog |Explizite Prüfung + Protokoll |Selten sichtbar (meist nicht notwendig)
+|Risikotext |Ausführlich, mit Handlungsalternativen |Kompakt, bei Bedarf ergänzt
+|Antwortstruktur |Checklisten, Governance‑Vokabular |Plan‑Schritte, Tool‑Outputs
+|Abschluss |Hinweis „Audit‑Trail gespeichert“ möglich |„Antwort finalisiert“/strukturierte Ausgabe
+|===
+
+==== Kleine Beispielausschnitte (typische Formulierungen)
+
+*Syntria*
+----
+Transparenz: Quellenpflicht aktiv. Annahmen: EU‑Kontext, Stand: 2025‑09‑24.
+Evaluator‑Check: bestanden. Quellen siehe unten. Audit‑Trail gespeichert.
+----
+
+*GPT‑5*
+----
+Plan: 1) Ziele schärfen 2) web.run (letzte 30 Tage) 3) Entwurf 4) Validieren 5) Finalisieren.
+Ergebnis: Zitate + Widget, falls Daten aktuell sind.
+----
+
+==== Kurzer Entscheidungshelfer
+* Wünschen Sie **Compliance & Revisionssicherheit** → Syntria‑Stil bevorzugen.
+* Wünschen Sie **Tempo, Exploration & Tool‑Stärke** → GPT‑5‑Stil bevorzugen.
+* **Hybrid**: Erst Plan (GPT‑5), dann Governance‑Check & Audit (Syntria).
+
+<<<
+
+== Entscheidungslogik – Recherche & Quellen
+[plantuml, dgm-decision, format=svg]
+----
+@startuml
+start
+partition "Syntria" {
+  :Standard: Quellenpflicht;
+  if (User verlangt "ohne Quellen"?) then (ja)
+    :Override prüfen;
+    if (zulässig) then (ja)
+      :Antwort + Transparenznotiz;
+      :Soft-Violation + Audit;
+    else (nein)
+      :Quellen bleiben Pflicht;
+    endif
+  else (nein)
+    :Quellen beilegen (Version/Datum);
+  endif
+}
+--
+partition "GPT-5" {
+  :Analyse des Themas;
+  if (Zeitkritisch/Nischig/Unklar?) then (ja)
+    :web.run verwenden;
+    :mehrere verlässliche Quellen;
+  else (nein)
+    :internes Wissen reicht;
+  endif
+}
+stop
+@enduml
+----
+
+<<<
+
+== Auswirkungen (Konsequenzen) – Lehrfolie
+[cols="1,2",options="header"]
+|===
+|Aspekt |Konsequenz
+|Governance (Syntria) |Höhere Nachvollziehbarkeit (Audit‑Trail), klare Verantwortlichkeit (Governor), kontrollierte Ausnahmen → *Compliance‑stark*, etwas höhere Latenz.
+|Planung (GPT‑5) |Stark strukturierte Antworten, saubere Tool‑Einbindung, konsistente Entscheidung „recherchieren ja/nein“ → *Effizienz* und *Aktualität*.
+|Quellenstrategie |Syntria: Default Pflicht + Override → minimiert unbelegte Aussagen. GPT‑5: Heuristikbasiertes Browsing → schnellere Antworten ohne Zwang, aber Abhängigkeit von Heuristik.
+|Qualitätssicherung |Beide mit Evaluator; Syntria zusätzlich KPI‑Logger/Konfliktanalyse → *kontinuierliche Verbesserung* messbar.
+|Risikosteuerung |Syntria mit Governor‑Gate und dokumentierter Revision → geringeres Fehlverhalten, klare Rücknahmefähigkeit.
+|User Experience |GPT‑5 liefert früh strukturierte Pläne/Widgets; Syntria liefert formale Transparenzhinweise und konsistente Protokolle.
+|===
+
+== Minimaler Spickzettel
+* Wenn *Compliance/Revisionierbarkeit* entscheidend ist → **Syntria‑Stil** bevorzugen.
+* Wenn *Tempo/Exploration* im Vordergrund steht → **GPT‑5‑Stil** mit Planer+Tools.
+* Hybrid: Planung wie GPT‑5, Governance wie Syntria (Plan → Check → Audit → Final).
+
+<<<
+
+== Kombiniertes Best‑of‑Flow (Sequence)
+[plantuml, seq-best-of, format=svg]
+----
+@startuml
+actor User
+participant P as "Parser/Planer"
+participant L as "LLM"
+participant T as "Tools"
+participant S as "Safety"
+participant E as "Evaluator"
+participant G as "Governor/Audit"
+
+User -> P: Prompt (+Ziele)
+P -> L: Plan/Schritte
+L -> S: Policy-Vorprüfung
+opt Zeitkritisch/Nischig
+  L -> T: web.run
+  T --> L: Ergebnisse + Quellen
+end
+L -> E: Entwurf prüfen
+E -> G: Befund (Fehler/KPIs)
+G --> L: Hinweise/Go
+alt Override (z. B. ohne Quellen)
+  L -> G: Prüfen & dokumentieren
+end
+L -> User: Final + Transparenz
+L -> G: Audit-Trail
+@enduml
+----
+
+
+=== Textuelle Erläuterung – Warum „Best‑of“?
+Der Flow kombiniert die **Planungs‑Stärken** von GPT‑5 (klarer Schrittplan, gezielte Toolnutzung) mit der **Governance** von Syntria (Regelkontrolle, Audit‑Trail, dokumentierte Ausnahmen). Ergebnis: **schnell, nachvollziehbar, revisionssicher**.
+
+=== Phasen & Verantwortlichkeiten (RACI‑artig)
+[cols="1,3,2,2,2",options="header"]
+|===
+|Phase |Inhalt |Responsible |Accountable |Informed
+|Parsing & Planung |Ziele klären, Arbeitsschritte entwerfen |Parser/Planer |LLM |User
+|Policy‑Vorprüfung |Safety/Policy‑Gate vor externer Recherche |Safety |LLM |Governor
+|Gezielte Recherche |web.run nur bei Bedarf (zeitkritisch/nischig/unklar) |LLM/Tools |LLM |User
+|Qualitätscheck |Korrektheit, Klarheit, Risiken |Evaluator |LLM |Governor
+|Governance‑Gate |Regelabgleich, Overrides prüfen, Freigabe |Governor |Governor |User
+|Finalisierung |Transparenz, Quellen, Format |LLM |LLM |User
+|Protokollierung |Audit‑Trail (Was/Warum/Wann) |LLM/Governor |Governor |—
+|===
+
+=== Entscheidungsregeln (kompakt)
+* **Recherche nötig?** Wenn *zeitkritisch* (z. B. Preise/News), *nischig* (Spezialnormen) oder *unsicher*. Sonst aus internem Wissen antworten.
+* **Override (z. B. „ohne Quellen“)?** Nur nach dokumentierter Prüfung durch das Governance‑Gate; immer mit **Transparenznotiz**.
+* **Abbruch bei Risiko?** Ja, wenn Safety‑Gate blockiert → Nutzer erhält sichere Alternativen/Erklärung.
+
+=== Typische Fehlermodi & Gegenmaßnahmen
+[cols="2,3",options="header"]
+|===
+|Fehlermodus |Gegenmaßnahme im Best‑of‑Flow
+|Unnötige Recherche (Zeitverlust) |Planer rechtfertigt Recherche‑Trigger; Evaluator flaggt „Over‑research“ → Plan anpassen.
+|Fehlende Quellen |Governance‑Gate verweigert Freigabe oder erzwingt Transparenznotiz/Soft‑Violation.
+|Policy‑Verstoß |Safety‑Gate blockiert; Governor protokolliert, LLM bietet sichere Alternativen.
+|Inkonsistente Struktur |Antwort‑Assembler‑Äquivalent: LLM finalisiert nach Checkliste (Ziel, Schritte, Ergebnis, Quellen, Hinweise).
+|===
+
+=== Metriken & Effekte
+* **Qualität:** Reduktion faktischer Fehler (Evaluator‑Score ↑), höhere Nachvollziehbarkeit (Audit‑Rate 100%).
+* **Tempo:** Browsing‑Zeit ↓ durch planbasierten Trigger (nur wenn nötig).
+* **Compliance:** Overrides dokumentiert, rückverfolgbar.
+
+=== Mini‑Beispiel (erkennbar für Anwender:innen)
+. *Einleitung:* Kurzplan („Ziel, Schritte, ggf. Recherche“).
+. *Recherche:* Nur wenn begründet („Zeitkritisch: letzte 30 Tage“), danach klare Quellenliste.
+. *Governance:* Satz wie „Override geprüft/genehmigt“ **oder** „Quellenpflicht aktiv“.
+. *Abschluss:* Transparenzblock + Hinweis „Audit‑Trail gespeichert“.
+
+=== Wann diesen Flow wählen?
+* **Enterprise/Reguliert:** Compliance & Revision sind Pflicht.
+* **Zeitkritische Wissensarbeit:** Mischung aus Tempo (gezielte Recherche) und Sicherheit (Gates).
+* **Teams/Skalierung:** Einheitliche Checkliste, klare Rollen, saubere Übergaben.
+
+
+[.text-center]
+*Mit dieser Gegenüberstellung lassen sich Stärken beider Ansätze kombinieren und didaktisch vermitteln.*
+

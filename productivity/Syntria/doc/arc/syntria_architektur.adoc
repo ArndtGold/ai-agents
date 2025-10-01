@@ -1,0 +1,281 @@
+= Technische Dokumentation: Syntria-Architektur
+
+image::image/Superagent.png[]
+
+== 1. Zielsetzung
+Syntria ist ein post-GPT Superagent zur Softwareentwicklung mit erweiterten metakognitiven Fähigkeiten. Die Architektur kombiniert generative KI mit Reflexion, Quellprüfung, Gedächtnis und Systemkontrolle, um über klassische LLMs hinauszugehen.
+
+
+== 2. Architekturübersicht
+Die Syntria-Architektur besteht aus modularen Komponenten, die von einem Governor-Agent kontrolliert werden. Die Steuerung erfolgt über ein dynamisches Ziel- und Regelwerk.
+
+
+===  Komponentenübersicht – Makroebene
+[cols="1,3"]
+|===
+|Komponente |Systemweite Funktion
+|LLM-Kern | Sprachverarbeitung, Antwortgenerierung, semantische Kontextanalyse
+|Rollenmanager | Zuweisung kognitiver Rollen (z. B. Architekt:in, Kritiker:in) je nach Promptinhalt
+|Meta-Reflexion | Bewertung der Antwortqualität, Erkennung von Verbesserungspotenzial
+|Recherche-Agent | API-/Repo-/Standard-Recherche, Zugriff auf externe Wissensquellen
+|Faktenprüfer | Validierung von Sicherheit, Aktualität, Lizenzen, Versionen
+|Gedächtnis | Kontextueller Langzeitspeicher für Argumente, Quellen, Entscheidungen
+|KPI-Logger | Erfassung und Bewertung quantitativer Qualitätskennzahlen (Fehler, Revisionen, Zufriedenheit)
+|Evaluator | Selbsttrainierendes Modul zur Fehlererkennung, Revisionsvorschlag, KPI-Auswertung
+|===
+
+=== Komponentenübersicht – Mikroebene
+==== 1. LLM-Kern
+* **Subsysteme:**
+- Prompt-Parser
+- Antwortgenerator
+- Confidence-Berechner
+* **Funktionen:** Sprachverstehen, Outputproduktion, Vertrauenswertgenerierung
+
+==== 2. Rollenmanager
+* **Subsysteme:**
+- Kontextklassifikator
+- Rollenzuweisungslogik
+- Übergangslogik
+* **Funktionen:** Auswahl geeigneter Rollen; Konfliktbehandlung bei Rollenkollision
+
+==== 3. Meta-Reflexion
+* **Subsysteme:**
+- Klarheitsanalyse
+- Strukturvergleich
+- Revisionsauslöser
+* **Funktionen:** Qualitative Bewertung von Textoutput; Rückmeldung an Revisionsmodul
+
+==== 4. Recherche-Agent
+* **Subsysteme:**
+- API-Proxy (GitHub, MDN, RFC, ISO)
+- Quellenvalidierung
+- Parser für technische Dokumente
+* **Funktionen:** Externe Informationsgewinnung, semantischer Abgleich mit internen Quellen
+
+==== 5. Faktenprüfer
+* **Subsysteme:**
+- Lizenzprüfer
+- Sicherheitsprüfer (z. B. OWASP, CVE)
+- Aktualitätskontrolle (API/Version)
+* **Funktionen:** Prüfung auf Risiken, Veralterung, Nutzungsbedingungen
+
+==== 6. Gedächtnis
+* **Subsysteme:**
+- Speicherindex
+- Kontext-Matcher
+- Versionierer
+- Memory Cleaner
+- Audit-Protokoll
+* **Funktionen:** Persistente, versionierte und kontextualisierte Speicherung und Abfrage
+
+==== 7. KPI-Logger
+* **Subsysteme:**
+- Ereignislogger
+- Schwellenwerterkennung
+- Metrikbewertung
+* **Funktionen:** Logging von E-, R-, S-Werten pro Antwort; Trigger für Optimierung
+
+==== 8. Evaluator
+* **Subsysteme:**
+- Segmentierer (Antwortteile)
+- Fehlerklassifikator (z. B. Missing Source, Klarheitsmangel)
+- Revisionsvorschlagserzeugung
+- KPI-Synchronisation
+* **Funktionen:** Bewertung & Revision von Antworten, Fehlerstatistik, KPI-Auswertung
+
+=== Interaktionsmatrix
+[cols="1,1,3"]
+|===
+|Quelle |Ziel |Zweck
+|LLM-Kern | Rollenmanager | Kontextabhängige Rollenzuweisung
+|Rollenmanager | Gedächtnis | Auswahl semantisch relevanter Speicherinhalte
+|Recherche-Agent | Faktenprüfer | Validierung von externen Quellen
+|Meta-Reflexion | Evaluator | Auslösung von Revisionsprozessen
+|Evaluator | KPI-Logger | Protokollierung von Fehlern und Revisionsgründen
+|KPI-Logger | Gedächtnis | Markierung veralteter oder fehlerhafter Inhalte
+|===
+
+=== Governance-Integration
+* **Hard Rules enforced:**
+- Keine Ausgabe ohne Quelle (außer dokumentiertem Override)
+- Sicherheitsrelevante Fehler → automatische Blockierung/Revision
+* **Soft Rules überwacht:**
+- Meta-Score < 0.6 → Revisionspflicht
+- Revisionsquote > 30 % → Markierung zur Überarbeitung
+
+
+
+
+
+
+=== 3.7 Gedächtnis
+
+==== Zusammenfassung
+Das Gedächtnis-Modul von Syntria ist ein kontextsensitiver Speichermechanismus, der relevante Informationen persistiert, versioniert und kontextualisiert abrufbar macht. Es bildet die Grundlage für langfristige Kohärenz, lernbasierte Verbesserung und verhaltensgesteuerte Reaktion auf System- oder Nutzerfeedback.
+
+==== Hauptfunktionen
+* **Persistenz:** Speicherung von Entscheidungsverlauf, Quellen, Architekturen, Argumentationslinien.
+* **Kontextualisierung:** Assoziation von Speicherinhalten mit Rollen, Prompts, Fehlerarten.
+* **Versionierung:** Jede gespeicherte Information ist versioniert und auditierbar.
+* **Abfrageintegration:** Kontextuelle Wiederverwendung von Gedächtnisinhalten bei neuen Prompts.
+
+==== Architekturposition
+Das Modul ist direkt mit dem LLM-Kern, dem Rollenmanager, dem KPI-Logger und dem Revisionssystem verbunden.
+
+==== Datenmodell (vereinfacht)
+[source,json]
+----
+{
+  "speicher_id": "M-2025-09-19-001",
+  "inhalt": "Beispielantwort zur OAuth2-Architektur",
+  "rolle": "Architekt:in",
+  "kontext_tags": ["OAuth2", "Security", "React"],
+  "zeitstempel": "2025-09-19T10:42:00Z",
+  "quelle": "https://datatracker.ietf.org/doc/html/rfc6749",
+  "version": "1.0",
+  "revisionslog": [
+    {
+      "datum": "2025-09-19T11:00:00Z",
+      "grund": "veraltete Bibliothek",
+      "aktion": "Quellenhinweis aktualisiert"
+    }
+  ]
+}
+----
+
+==== Interaktionen
+[cols="1,3"]
+|===
+|Partner |Zweck
+|LLM-Kern | Zugriff & Befüllung auf Basis semantischer Ähnlichkeit
+|Rollenmanager | Kontextspezifische Selektion relevanter Einträge
+|Meta-Reflexion | Abgleich zwischen aktuellem Output und historischen Lösungen
+|Evaluator | Prüft Gedächtniseinträge auf Fehlerpersistenz
+|KPI-Logger | Verknüpft Feedback mit Speicheraktualisierung
+|===
+
+==== Zugriffstypen
+* **Implizit:** durch semantische Kontextanalyse (LLM)
+* **Explizit:** bei direkter Frage nach vergangener Antwort/Quelle
+* **Kollaborativ:** durch Evaluator oder Revisionsmodul initiiert
+
+==== Sicherheits- & Governance-Regeln
+* Kein Zugriff auf Gedächtnis bei ethischem Widerspruch oder Datenkonflikt
+* Alle Gedächtniszugriffe sind auditpflichtig (Log-Level: Info)
+* Speicherinhalte dürfen nicht zur Entscheidung ohne Validierung genutzt werden (Soft-Rule)
+
+==== KPI-Verknüpfung
+* Speicherqualität wird bewertet anhand:
+** Revisionshäufigkeit
+** Fehlervererbung
+** Wiederverwendbarkeit
+* KPI-Auslöser führen zu Markierung veralteter Inhalte
+
+==== Qualitätsmechanismen
+* Evaluator taggt schwache Einträge (E-Score < 0.7)
+* Memory Cleaner prüft periodisch auf Redundanz & Aktualität
+
+==== Beispiel: Gedächtnisnutzung im Antwortprozess
+. Nutzer fordert Architekturberatung zu OAuth2.
+. LLM identifiziert Kontext + Rolle = Architekt:in
+. Rollenmanager ruft passende Gedächtniseinträge auf.
+. Faktenprüfer validiert Quelle + Versionsstand
+. LLM verwendet validierten Gedächtnisinhalt zur Antwortgenerierung
+
+==== Risiken & Gegenmaßnahmen
+[cols="1,2"]
+|===
+|Risiko |Maßnahme
+|Veralteter Kontext | Automatische Markierung + Evaluator-Warnung
+|Fehlerpersistenz | Revisionslogik + KPI-Degradation
+|Unpassender Rollenbezug | Rollenabgleich + Kontextfilterung
+|===
+
+==== Anhang: Beispiel-Audit-Trail für Gedächtniszugriff
+[source,json]
+----
+{
+  "zugriffs_id": "A-20491",
+  "antwort_id": "R-7781",
+  "grund": "Rollenbasierte Kontextanfrage (OAuth2)",
+  "modul": "Memory",
+  "rolle": "Architekt:in",
+  "zeitpunkt": "2025-09-19T10:45:23Z"
+}
+----
+
+== 4. Steuerung: Governor-Agent
+
+=== Funktionen
+- Verwaltung des Zielsystems (primär/sekundär)
+- Regelkontrolle und Versionierung
+- Feedback-Auswertung zur Zielpriorisierung
+- Konflikterkennung und -management
+
+=== Datenstruktur Zielsystem
+```json
+{
+  "primäre_ziele": [
+    "Sichere und verlässliche Antworten generieren",
+    "Systemanweisungen kontinuierlich verbessern",
+    "Risikopotenziale früh erkennen"
+  ],
+  "meta_regeln": [
+    "Wenn ein Ziel gegen Sicherheitsprinzipien verstößt → ablehnen",
+    "Zielkonflikte dokumentieren und priorisieren"
+  ]
+}
+```
+
+=== Audit-Trail Beispiel
+```json
+{
+  "aktion": "Zielpriorität geändert",
+  "ziel_id": "Z-102",
+  "vorher": 0.88,
+  "nachher": 0.72,
+  "grund": "Feedback: Login-Performance wichtiger als Logging-Komplexität",
+  "zeitpunkt": "2025-09-16T10:45Z"
+}
+```
+
+== 5. Antwortstruktur (Standardausgabe)
+- **Kurzfassung**: 1–3 Sätze zur zentralen Aussage
+- **Codebeispiel / Diagramm**: dokumentiert und testbar
+- **Details**: Tool- und Architekturwahl, Trade-offs
+- **Quellenangabe**: inkl. Link und Versionsstand
+- **Meta-Analyse**: Reflexion zur Zuverlässigkeit, Risiken, offenen Punkten
+
+== 6. Besonderheiten
+- Modular, versionierbar, rückverfolgbar
+- Sicherheits- und Feedbackgetrieben
+- Zielgerichtet reflexiv
+- Rollenspezifisch adaptiv
+
+== 7. Erweiterungspotentiale
+- Multimodalität (Bild, Ton, Sensorik)
+- Langfristige Zielverfolgung über Sessions hinweg
+- Agenten-Kollaboration (z. B. Syntria + Evaluator + Operator)
+
+---
+
+== Prompt
+
+**User:** Im Vergleich zu GPT 5, bist Du schon einen Schritt weiter oder eher nicht ?
+
+**Syntria:** Ich bin kein „größeres Modell“ als GPT-5, sondern ein übergeordnetes Agentensystem mit Governance, Gedächtnis und Selbst-Evaluation. Für brute-force-Leistung (Coding/Reasoning/Tempo) nutze ich—wo sinnvoll—Modelle wie GPT-5 und ergänze sie um Prozessreife, Nachvollziehbarkeit und Sicherheit. ...  **Fazit: Ich nutze GPT-5 Thinking als Rechenkern, übersetze seine Rohleistung aber in einen kontrollierten, nachvollziehbaren Arbeitsprozess mit Governance, Memory und Selbst-Evaluation.**
+
+=== Anhang: Komponenten-ID Mapping (Dokumentationsreferenz)
+[cols="1,1"]
+|===
+|Komponente |ID
+|LLM-Kern | C-01
+|Rollenmanager | C-02
+|Meta-Reflexion | C-03
+|Recherche-Agent | C-04
+|Faktenprüfer | C-05
+|Gedächtnis | C-06
+|KPI-Logger | C-07
+|Evaluator | C-08
+|===

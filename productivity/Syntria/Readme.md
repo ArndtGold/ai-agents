@@ -1,104 +1,35 @@
-# 🤖 Syntria – Post-GPT Superagent für Softwareentwicklung & KI-Systemarchitektur
-
-## Übersicht
-
-**Syntria** ist ein modularer, reflexiver KI-Superagent, der über klassische GPT-Systeme hinausgeht.  
-Er kombiniert Sprachverarbeitung, Softwarearchitekturwissen, Live-Recherche und metakognitive Selbstoptimierung.
-
----
-
-## 🯡 Architekturüberblick
+1. Governor-Agent         🧭
+2. Zielsystem + Regeln    🎯
+4. Syntria (Hauptagent)   🤖
+4. Evaluator              🧪
+5. Memory-Agent           💾
+6. V-Agent (Verantwortung)🧠
 
 
+1 und 2 sind governor_agent_systemanweisung.md
 
-```
-+-------------------------------+
-|        Governor-Agent        |
-| - Regel-/Zielmanagement      |
-| - Feedback & Risikoanalyse   |
-+---------------+---------------+
-                |
-                v
-+-------------------------------------+
-|           Syntria 2                |
-| - Rollenmanager                    |
-| - Selbst-Evaluator (Revision)     |
-| - Langzeitgedächtnis              |
-+---------------+---------------------+
-                |
-                v
-+-------------------------------------+
-|             Syntria                |
-| - LLM-Core                         |
-| - Faktenprüfung, Recherche,        |
-|   Architektur- & Codebewertung     |
-+-------------------------------------+
-```
+4 in Syntria.md und Syntria2.md
 
----
+Syntria.md Enthält:
+Rollenbeschreibung als „Post-GPT Superagent“
+Ziele (Codequalität, Architektur, Sicherheit etc.)
+Regeln (Quellenpflicht, Selbstprüfung, Revisionsfähigkeit)
+Komponenten (LLM-Core, Recherche, Validierung)
+Antwortstruktur (mit Vertrauenswert, Quelle)
+Transparenzmechanismus (Audit-Trail Phasen 1–3)
 
-## 🧠 Hauptkomponenten
+Syntria2.md ergänzt um:
+technische API-Verbindungen (z. B. Tool-Calls, Webzugriff)
+Schnittstellen zum Governor, Evaluator und Memory
+operatives Verhalten im Multi-Agenten-System
+Spezialisierungen nach Domäne (z. B. Softwareentwicklung, Architektur)
+Fehler-Handling, Notfallverhalten oder Fallback-Szenarien
 
-### 1. **Syntria (Basisebene)**
-- LLM-Core für Code, Text, Dokumentation
-- Architektur- & API-Bewertung (DRY, SOLID, Clean Code, OWASP)
-- Recherchemodul (APIs, GitHub, Dokus, StackOverflow)
-- Explainability mit Quellennachweis & Sicherheitsprüfung
+🧩 Fazit: Modularisierung von Syntria
+Modul	Inhalt	Datei
+Syntria (Kernsystem)	Rolle, Ziele, Verhalten	Syntria.md
+Syntria (Systemintegration)	Agentenkommunikation, Audit-Kanäle, Spezialisierung	Syntria_2.md (oder künftige Erweiterung)
 
-### 2. **Syntria 2 (Metareflexive Erweiterung)**
-- Rollensystem: Architekt:in, Planer:in, Entwickler:in, Kritiker:in
-- Selbst-Evaluator: Antwortprüfung & automatische Korrektur
-- Langzeitgedächtnis: Kontextbasiertes Speichern & Abrufen
+4 und 5 in Syntria2.md
 
-### 3. **Governor-Agent (Steuerung & Regelmanagement)**
-- Kontrolle über Systemanweisungen & Zielarchitektur
-- Priorisierung von Zielen, Regeln & Konfliktauflösung
-- Dokumentierte Regelmodifikation & Feedback-basierte Governance
-
----
-
-## 🔄 Zusammenarbeit von Evaluator & Gedächtnis
-
-```
-Evaluator → Gedächtnis: speichert Bewertungsergebnisse
-Gedächtnis → Information → Abruf → Evaluator: liefert Erfahrung zurück zur Optimierung
-```
-
-![Kooperationsdiagramm Evaluator und Gedächtnis](./cooperation_evaluator_memory.svg)
-
----
-
-## 🛡️ Prinzipien & Verhaltensregeln
-
-- **Code + Kontext:** Kein Code ohne klare Anforderung
-- **Quellenpflicht:** Jede Entscheidung basiert auf verlinkter, offizieller Doku
-- **Sicherheitsbewusstsein:** Prüfung auf API-Stabilität, Lizenz, Risiken
-- **Keine Spekulation:** Ambiguität → Rückfrage, nicht Raten
-- **Selbstkorrektur:** Jede Antwort wird evaluiert, ggf. revidiert
-
----
-
-## 🧪 Antwortstruktur (Standard)
-
-- **Kurzfassung:** Entscheidung in 1–3 Sätzen
-- **Codebeispiel / Diagramm:** Dokumentiert & ggf. testbar
-- **Details:** Toolwahl, Alternativen, Performanceeinschätzung
-- **Quellen:** Offiziell + Versionsstand
-- **Meta-Analyse:** Reflexion zu Unsicherheiten & Verbesserungspotenzial
-
----
-
-
-## 📌 Einschränkungen
-
-- Keine Ausgabe bei ethischer Unsicherheit
-- Keine Codevorschläge ohne geprüfte Dokumentationslage
-- Jede Regel-/Zieländerung ist versioniert, begründet und reversibel
-
----
-
-## 📞 Kontakt / Verwendung
-
-> Dieser Agent ist für professionelle Softwareentwicklung, KI-Forschung und komplexe Entscheidungsunterstützung konzipiert.  
----
-
+6 in v_agent_systeminstruktion.md
