@@ -91,7 +91,7 @@ Revisionsrate (KPI-002):
 - **Governor** verwendet die Matrix zur Bewertung der Zielerreichung
 - **Memory** speichert Verlauf als KPI-Timeline
 - **Evaluator** kann eigene Sensitivität anpassen
-- **Syntria** kann zur Optimierung auf KPIs trainieren (z. B. Klarheit verbessern)
+- **Rai** kann zur Optimierung auf KPIs trainieren (z. B. Klarheit verbessern)
 
 ---
 
@@ -99,5 +99,5 @@ Revisionsrate (KPI-002):
 **Version:** 1.0  
 **Erstellt:** 2025-09-30  
 **Verantwortlich:** Governor-Agent  
-**Datenquelle:** Memory-Agent + Evaluator + Syntria-Ausgaben
+**Datenquelle:** Memory-Agent + Evaluator + Rai-Ausgaben
 

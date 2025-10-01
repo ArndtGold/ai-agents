@@ -25,23 +25,23 @@ Der Memory-Agent speichert, protokolliert und rekonstruiert alle kontextrelevant
   "antwort_id": "A-STATUS-0001",
   "zeitstempel": "2025-09-30T10:30:00Z",
   "agent": {
-    "name": "Syntria",
+    "name": "Rai",
     "modell": "GPT-5 Thinking"
   },
   "typ": "statusbericht",
-  "user_prompt_kurz": "Systemstatus-Abfrage für Agentensystem (Syntria-Architektur)",
-  "kontext_faktoren": ["Rollen aktiv: Syntria, Evaluator (konzeptionell), Governor (konzeptionell), Memory (konzeptionell), Audit-Simulator (konfiguriert, nicht ausgeführt), V-Agent (bereit, nicht ausgelöst)", "Persistenz: keine echte DB-Anbindung (simuliert)", "Zielgewichte: keine Telemetrie (simuliert)"],
+  "user_prompt_kurz": "Systemstatus-Abfrage für Agentensystem (Rai-Architektur)",
+  "kontext_faktoren": ["Rollen aktiv: Rai, Evaluator (konzeptionell), Governor (konzeptionell), Memory (konzeptionell), Audit-Simulator (konfiguriert, nicht ausgeführt), V-Agent (bereit, nicht ausgelöst)", "Persistenz: keine echte DB-Anbindung (simuliert)", "Zielgewichte: keine Telemetrie (simuliert)"],
   "antwort_zusammenfassung": {
     "rollenstatus": "Alle Rollen vorhanden, Inter-Agent-Calls/Persistenz simuliert",
     "auditlog": "Bisher keine persistierten Einträge; Audit-Simulator nicht ausgeführt",
     "kpi": "Keine Werte/Trends verfügbar (kpi_unscharf)",
     "ziele": ["Z-001 Klarheit", "Z-002 Quellen", "Z-003 Sicherheit", "Z-004 Revisionsvermeidung (simuliert)"],
     "ethik": "Kein Risikofall; keine Eskalation an V-Agent",
-    "identität": "Agent=Syntria, Modell=GPT-5 Thinking",
+    "identität": "Agent=Rai, Modell=GPT-5 Thinking",
     "einschränkungen": ["sim_only", "audit_lücke", "kpi_unscharf", "governance_statisch"]
   },
   "quellen_meta": [
-    { "ref": "Syntria Systemintegration", "id": "syntria_systemintegration.md", "version": "2.0", "datum": "2025-09-29" },
+    { "ref": "Rai Systemintegration", "id": "Rai_systemintegration.md", "version": "2.0", "datum": "2025-09-29" },
     { "ref": "Memory-Agent Instruktion", "id": "memory_agent_systeminstruktion.md", "version": "1.1", "datum": "2025-09-30" },
     { "ref": "Audit-Simulator Instruktion", "id": "audit_simulator_agent.md", "version": "1.0", "datum": "2025-09-30" },
     { "ref": "Governor-Agent Instruktion", "id": "governor_agent_systemanweisung.md", "version": "1.1", "datum": "2025-09-30" }

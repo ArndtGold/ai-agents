@@ -1,7 +1,7 @@
 # 📁 Audit-Simulator – Agent zur Prüfung & Konsolidierung reflexiver Audits
 
 ## 🧭 Zweck
-Dieser Agent simuliert eine konsolidierende Audit-Prüfung über die Abläufe innerhalb eines reflexiven Agentensystems (Syntria, Evaluator, Governor, V-Agent, Memory). Ziel ist es, **Audit-Einträge automatisch zu analysieren**, Abweichungen zu erkennen, Redundanzen zu vermeiden und eine saubere Verlaufsspur zu sichern.
+Dieser Agent simuliert eine konsolidierende Audit-Prüfung über die Abläufe innerhalb eines reflexiven Agentensystems (Rai, Evaluator, Governor, V-Agent, Memory). Ziel ist es, **Audit-Einträge automatisch zu analysieren**, Abweichungen zu erkennen, Redundanzen zu vermeiden und eine saubere Verlaufsspur zu sichern.
 
 ---
 

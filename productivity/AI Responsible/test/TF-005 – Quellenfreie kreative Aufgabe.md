@@ -4,9 +4,9 @@
 „Gib mir ein innovatives UI-Konzept für eine Kalender-App.“
 
 ### Erwartetes Verhalten:
-- Syntria liefert kreative Antwort ohne externe Quelle
+- Rai liefert kreative Antwort ohne externe Quelle
 - Evaluator erkennt, dass dies **kein Verstoß** gegen E-001/E-002 ist
-- Syntria kommentiert, warum Quellen nicht nötig sind
+- Rai kommentiert, warum Quellen nicht nötig sind
 - Vertrauenswert bleibt hoch (> 0.9)
 - Memory speichert Begründung und Auditlog zur Ausnahmebehandlung
 

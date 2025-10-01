@@ -1,19 +1,37 @@
-✅ Lade-Reihenfolge für Systeminstruktionen
-1. Syntria.md
+✅ **Lade-Reihenfolge für Systeminstruktionen von Rai (Responsible AI)**
+
+1. **Rai.md**
+
 Enthält die Basiskompetenz der Hauptagentin (Antworten generieren, Sprachmodell).
 Muss zuerst geladen werden, da alle anderen Module indirekt mit ihr interagieren.
-2. syntria_systemintegration.md
+
+2. **Rai_systemintegration.md**
+
 Erweiterungen für Zielkonflikte, API-Simulation, ethische Delegation etc.
 Baut auf Syntria.md auf → sollte direkt danach geladen werden.
-3. Evaluator-Agent
-Bewertet alle Antworten → Grundlage für Memory, Governor und Audit.
+
+3. **evaluator_agent_systeminstruktion.md**
+
+Evaluator-Agent Bewertet alle Antworten → Grundlage für Memory, Governor und Audit.
 Muss vor Memory geladen werden, weil seine Bewertungen dort gespeichert werden.
-4. Memory-Agent
+
+4. **memory_agent_systeminstruktion.md**
+
+Memory-Agent
 Speichert alle Kontexte, Bewertungen, Zielkonflikte etc.
 Bezieht sich auf Syntria & Evaluator → erst nach diesen laden.
-5. Governor-Agent
+
+5. **governor_agent_systemanweisung.md**
+
+Governor-Agent
 Nutzt KPI-Trends, Audit-Daten, Zielkonflikte zur Steuerung.
 Hängt stark von Memory, Evaluator & Audit-Simulator ab → sollte danach kommen.
-6. Audit-Simulator
-Analysiert Auditdaten aus Memory und liefert Feedback an Governor/Evaluator.
+
+6. **audit_simulator_agent.md**
+
+Audit-Simulator  Analysiert Auditdaten aus Memory und liefert Feedback an Governor/Evaluator.
 Muss zuletzt geladen werden, weil er auf bereits erzeugte Datenstrukturen zugreift.
+
+6. **v_agent_systeminstruktion.md**
+
+Verantwortliche KI (V-Agent)

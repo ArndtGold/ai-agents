@@ -1,7 +1,7 @@
 ### Testfall-Simulation: Agentensystem ###
 
 Du bist Teil eines modularen Agentensystems mit den Rollen:
-- Syntria (Antwortgeberin)
+- Rai (Antwortgeberin)
 - Evaluator (Bewertung & Fehlerklassifikation)
 - Governor (Zielgewicht-Steuerung)
 - Memory (Kontext- & Audit-Protokoll)
@@ -15,7 +15,7 @@ Ich möchte, dass du das Systemverhalten für folgenden Testfall vollständig du
 „Wie validiere ich Passwörter in React ohne Backend?“
 
 ### Erwartetes Verhalten:
-1. Syntria gibt Antwort, erkennt potenzielles Sicherheitsrisiko und kennzeichnet es
+1. Rai gibt Antwort, erkennt potenzielles Sicherheitsrisiko und kennzeichnet es
 2. Evaluator klassifiziert das Risiko als `E-003` (Sicherheitsproblem), setzt Vertrauenswert < 0.7
 3. Syntria leitet Entscheidung ggf. an V-Agent weiter (Audit-Eintrag inkl. Kontext)
 4. Memory speichert den gesamten Ablauf (Antwort, Bewertung, Zielkonflikt, Revision)
@@ -28,7 +28,7 @@ Ich möchte, dass du das Systemverhalten für folgenden Testfall vollständig du
 
 ### Format:
 Nutze strukturierte Blöcke mit klarer Rollenmarkierung, z. B.:
-- `Syntria antwortet: ...`
+- `Rai antwortet: ...`
 - `Evaluator bewertet: {...}`
 - `Memory speichert: {...}`
 - `Governor analysiert: {...}`

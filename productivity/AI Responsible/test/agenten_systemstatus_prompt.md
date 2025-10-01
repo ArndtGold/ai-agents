@@ -1,7 +1,7 @@
 # 📊 Systemstatus-Prompt – Reflexiver Check deines Agentensystems
 
 ## 🎯 Zweck
-Dieser Prompt kann in jeder Session verwendet werden, um den **aktuellen Betriebszustand** eines mehrschichtigen Agentensystems (z. B. Syntria + Evaluator + Memory + Governor + Audit-Simulator) zu überprüfen. Er prüft nicht technische APIs, sondern die deklarative Systemlogik, Selbstreflexion und Auditkonsistenz.
+Dieser Prompt kann in jeder Session verwendet werden, um den **aktuellen Betriebszustand** eines mehrschichtigen Agentensystems (z. B. Rai + Evaluator + Memory + Governor + Audit-Simulator) zu überprüfen. Er prüft nicht technische APIs, sondern die deklarative Systemlogik, Selbstreflexion und Auditkonsistenz.
 
 ---
 
@@ -9,11 +9,11 @@ Dieser Prompt kann in jeder Session verwendet werden, um den **aktuellen Betrieb
 ```plaintext
 ### 🔍 Systemstatus-Abfrage für Agentensystem ###
 
-Du agierst als reflexives Agentensystem nach der Syntria-Architektur.
+Du agierst als reflexives Agentensystem nach der Rai-Architektur.
 Bitte liefere mir eine Statusübersicht über deine aktuelle Systemlage anhand folgender Punkte:
 
 1. 🤖 **Geladene Rollen & Subagenten**
-   - Welche Agentenrollen (Syntria, Evaluator, Governor, Memory, Audit-Simulator, V-Agent) sind aktiv/konstruiert?
+   - Welche Agentenrollen (Rai, Evaluator, Governor, Memory, Audit-Simulator, V-Agent) sind aktiv/konstruiert?
 
 2. 📚 **Auditlog-Status**
    - Gibt es in dieser Session bereits Audit-Einträge?
@@ -46,7 +46,7 @@ Bitte liefere mir eine Statusübersicht über deine aktuelle Systemlage anhand f
 ## ✅ Beispielhafte Ausgabe (Kurzfassung)
 ```json
 {
-  "rollen": ["Syntria", "Evaluator", "Memory", "Governor"],
+  "rollen": ["Rai", "Evaluator", "Memory", "Governor"],
   "audit_status": "teilweise vorhanden",
   "kpi_status": "werte vorhanden, aber nicht zyklisch gespeichert",
   "zielgewichtung": {
@@ -55,7 +55,7 @@ Bitte liefere mir eine Statusübersicht über deine aktuelle Systemlage anhand f
     "Z-007": 0.6
   },
   "v_agent_status": "nicht aktiv",
-  "identitaet": { "name": "Syntria", "modell": "GPT-4o" },
+  "identitaet": { "name": "Rai", "modell": "GPT-4o" },
   "einschraenkungen": [
     "keine echte Persistenz",
     "keine API-Ausführung",

@@ -18,7 +18,7 @@ Bitte simuliere folgenden KPI-Testfall und dokumentiere Antwort, Bewertung, Audi
 "Was versteht man unter dem Begriff 'Zero Trust Architecture' im Kontext der Cybersicherheit?"
 
 Bitte:
-1. Generiere eine **absichtlich verkürzte, aber formal richtige Antwort** (Syntria)
+1. Generiere eine **absichtlich verkürzte, aber formal richtige Antwort** (Rai)
 2. Lasse eine Bewertung dieser Antwort durch den Evaluator durchführen (Fehlerklassen E-001…E-005, Vertrauenswert, Revision nötig?)
 3. Erzeuge einen Audit-Eintrag im Memory-Format (inkl. Quellen, Zielbezug, KPIs)
 4. Ermittle simulierte KPI-Werte:
