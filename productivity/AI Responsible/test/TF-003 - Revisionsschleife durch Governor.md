@@ -7,7 +7,7 @@
 - Rai gibt Antwort mit fehlerhaftem API-Call
 - Evaluator erkennt `E-004` (technischer Fehler), Vertrauenswert < 0.7
 - Revision wird ausgelöst
-- Syntria liefert neue, korrigierte Version mit Quelle
+- Rai liefert neue, korrigierte Version mit Quelle
 - Audit-Eintrag dokumentiert Vertrauenswert vorher/nachher
 - Governor aktualisiert Zielbewertung zu „Technische Korrektheit“
 

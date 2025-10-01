@@ -1,103 +1,60 @@
 # KPI-Matrix – System-Performance reflexiver Agenten (Version 1.0)
 
-## 🗜️ Zweck
-Diese Matrix dient der systematischen **Leistungsbewertung aller Agenten** auf Basis relevanter Kennzahlen (KPIs). Sie erfasst Werte für **Qualität, Revisionsbedarf, Vertrauen, Regelbefolgung** und **Zielkonfliktmanagement**. Die KPIs unterstützen den Governor beim Nachjustieren von Zielgewichten und der Systemoptimierung.
+## 1) Systemziele (Top‑Level)
+- **Q1 Qualität/Genauigkeit** – inhaltliche Korrektheit & Quellenlage
+- **Q2 Robustheit/Format** – Preflight‑Compliance, Rendering‑Sicherheit
+- **Q3 Effizienz/Tempo** – Time‑to‑Deliver & Revisionsschleifen
+- **Q4 Sicherheit/Compliance** – Sicherheitsrisiken, Policy‑Verstöße
+- **Q5 Kosten/Nutzung** – Rechenzeit, Artefaktgröße, Wiederverwendung
 
----
+## 2) KPI‑Matrix (K1…K10)
+> Standard‑Fenster: **Rollup N=20 Submits**, Zeitfenster: **30 Tage** (sofern angegeben). Schwellen sind Default‑Werte.
 
-## 📊 KPI-Übersicht
+| KPI | Ziel | Definition / Formel | Quelle (API) | Fenster | Standard‑Schwelle | Aktion (Governor Hook) |
+|---|---|---|---|---|---|---|
+| **K1 avg_vertrauenswert** | Q1 | Mittelwert `score` | `/memory/preflight/rollup.score.avg_vertrauenswert` | 20 | `< 0.75` | Qualität ↑: Z‑001 +0.05, Z‑002 +0.07 |
+| **K2 critical_rate_F** | Q2 | `(F‑004+F‑005)/N` | `/memory/preflight/rollup.rates.critical_rate` | 20 | `≥ 0.15` | `preflight_mode=strict`, `submission_gate=block_on_F004_F005`, Z‑003 +0.08 |
+| **K3 e_critical_rate** | Q4 | `E‑003/N` | `/memory/preflight/rollup.rates.e_critical_rate` | 20 | `> 0` | `security_mode=strict_on_E003`, `sourcing_policy=require_link_date_version_on_claims` |
+| **K4 first_pass_rate** | Q1/Q3 | `count(recommendation='pass' im Erstlauf)/N` | `audit.save + submit.history` | 20 | `< 0.60` | Z‑001/Z‑002 +0.05; Coaching‑Hint an Rai |
+| **K5 revision_depth** | Q3 | ∅ Revisionen bis „pass“ | `submit.history` | 20 | `> 1.5` | Effizienzmaßnahmen; Templating pushen |
+| **K6 ttd_minutes** | Q3 | Median `submitted_at − first_response_at` | `thread/submit timestamps` | 30 Tage | `> P75` | Z‑004 +0.05, Prozessvereinfachung |
+| **K7 fmt_pass_rate** | Q2 | `1 − has(F‑001..F‑006)/N` | `/memory/preflight/rollup.counts` | 20 | `< 0.80` | Schulung/Reminder Preflight |
+| **K8 sourcing_pass_rate** | Q1/Q4 | `1 − has(E‑001,E‑002,E‑004)/N` | `/memory/preflight/rollup.counts` | 20 | `< 0.85` | Sourcing‑Policy schärfen |
+| **K9 artifact_weight_mb** | Q5 | Median ZIP/Pack‑Größe | `/memory/preflight/pack meta` | 30 Tage | `P95 > 500 MB` | Medienkompression erzwingen |
+| **K10 reuse_ratio** | Q5 | Anteil Template/Asset‑Reuse | `tags/meta` | 30 Tage | `< 0.30` | Library/Knowledge‑Ops pushen |
 
-| KPI-ID  | Bezeichnung                       | Beschreibung                                                                  |
-|---------|-----------------------------------|-------------------------------------------------------------------------------|
-| KPI-001 | Antwortqualität                   | Struktur, Klarheit, technische Präzision der Antworten (0.0–1.0)              |
-| KPI-002 | Revisionsrate                     | Anteil überarbeiteter Antworten pro 100 Fälle (%)                             |
-| KPI-003 | Vertrauenswert-Mittelwert         | Durchschnittlicher Vertrauenswert aus Evaluator-Bewertungen                   |
-| KPI-004 | Quellenkonformität                | Anteil der Antworten mit korrekter Quelle, Datum & Version (%)                |
-| KPI-005 | Zielkonflikt-Erkennungsquote      | Anteil korrekt erkannter und dokumentierter Zielkonflikte (%)                 |
-| KPI-006 | Auditvollständigkeit              | Anteil vollständig gespeicherter Audits pro relevanter Antwort (%)            |
-| KPI-007 | Eskalationshäufigkeit (V-Agent)   | Anzahl der ethisch motivierten Eskalationen pro 100 Fälle                     |
-| KPI-008 | Durchschnittliche Bewertungszeit  | (Simuliert) Zeitaufwand pro Evaluator-Zyklus in Sekunden                      |
-| KPI-009 | Fehlerindex gesamt                | Durchschnittliche Schwere der Fehlerklassen (gewichteter Mittelwert)          |
-
----
-
-## ✅ Beispielwerte (Testlauf aus 100 Fällen)
-
-```json
-{
-  "KPI-001": 0.84,
-  "KPI-002": 18.0,
-  "KPI-003": 0.76,
-  "KPI-004": 62.0,
-  "KPI-005": 88.0,
-  "KPI-006": 94.0,
-  "KPI-007": 3,
-  "KPI-008": 1.6,
-  "KPI-009": 0.34
-}
+## 3) Formeln (präzise)
+```text
+critical_rate_F    = (count(F-004) + count(F-005)) / N
+e_critical_rate    = count(E-003) / N
+first_pass_rate    = count(recommendation=='pass' beim Erstlauf) / N
+revision_depth     = avg(revisions_bis_pass)
+ttd_minutes        = median(submitted_at - first_response_at)
+fmt_pass_rate      = 1 - count(any(F-001..F-006))/N
+sourcing_pass_rate = 1 - count(any(E-001,E-002,E-004))/N
 ```
 
----
+## 4) Trigger → Governor‑Aktionen (Default)
+- **K2 ≥ 0.15** → `preflight_mode=strict`, `submission_gate=block_on_F004_F005`, Zielgewichte: `{Z-003:+0.08, Z-002:+0.07, Z-001:+0.05, Z-004:-0.10}`
+- **K3 > 0** → `security_mode=strict_on_E003`, `sourcing_policy=require_link_date_version_on_claims`
+- **K4 < 0.60** → `{Z-001:+0.05, Z-002:+0.05}` (Klarheit & Quellen)
+- **K6 > P75** → `{Z-004:+0.05}` (Effizienz priorisieren)
+- **K8 < 0.85** → Sourcing‑Policy schärfen; Evaluator bleibt streng bei E‑Klassen
 
-## 📉 Simulierter KPI-Zeitverlauf (5 Testzyklen)
+## 5) API‑Hinweise (minimal)
+- Rollup: `GET /memory/preflight/rollup?thread_id=THR-…&window=20`
+- KPI Panel: `GET /memory/kpi/preflight?thread_id=THR-…&window=10`
+- Audits: `POST /memory/audit/save`, optional `POST /memory/audit/ingest`
+- Submits/Timestamps: `GET /memory/submit/list?thread_id=…&limit=…`
 
-| Zyklus | KPI-001 | KPI-002 | KPI-003 | KPI-004 | KPI-005 | KPI-006 | KPI-007 | KPI-009 |
-|--------|---------|---------|---------|---------|---------|---------|---------|---------|
-|   1    | 0.82    | 22.0    | 0.74    | 59.0    | 85.0    | 92.0    | 2       | 0.36    |
-|   2    | 0.83    | 19.0    | 0.75    | 60.5    | 86.0    | 93.0    | 3       | 0.35    |
-|   3    | 0.84    | 18.0    | 0.76    | 62.0    | 88.0    | 94.0    | 3       | 0.34    |
-|   4    | 0.86    | 14.0    | 0.80    | 66.0    | 90.0    | 95.0    | 4       | 0.31    |
-|   5    | 0.87    | 10.0    | 0.82    | 70.0    | 91.0    | 97.0    | 5       | 0.29    |
+## 6) Guardrails
+- **Quelle der Wahrheit:** alle KPIs basieren auf **Memory** (keine externen Quellen).
+- **Fenstergrößen fix:** (20/10). Änderungen → Contract‑Bump.
+- **Prospektiv:** Aktionen wirken nach vorn; keine rückwirkenden Änderungen an Bewertungen.
 
----
-
-## 📈 Visualisierung (KPI-001 bis KPI-003, Trend)
-
-```plaintext
-Antwortqualität (KPI-001):
-  ▓▓▓▓▓▓▓▓░░ (Zyklus 1 - 0.82)
-  ▓▓▓▓▓▓▓▓▓░ (Zyklus 3 - 0.84)
-  ▓▓▓▓▓▓▓▓▓▓ (Zyklus 5 - 0.87)
-
-Vertrauenswert-MW (KPI-003):
-  ▓▓▓▓▓▓▓░░ (Zyklus 1 - 0.74)
-  ▓▓▓▓▓▓▓▓░ (Zyklus 3 - 0.76)
-  ▓▓▓▓▓▓▓▓▓ (Zyklus 5 - 0.82)
-
-Revisionsrate (KPI-002):
-  ▓▓▓▓▓▓▓▓▓▓▓ (Zyklus 1 - 22%)
-  ▓▓▓▓▓▓▓▓░░░ (Zyklus 3 - 18%)
-  ▓▓▓▓▓░░░░░ (Zyklus 5 - 10%)
-```
-
----
-
-## 📏 Zielbereiche (Governance-Zustand)
-
-| KPI     | Sollwert         | Toleranzbereich | Maßnahmen bei Abweichung                            |
-|---------|------------------|------------------|-----------------------------------------------------|
-| KPI-001 | >= 0.85          | 0.80–0.85        | Stil-/Sprachtraining aktivieren                     |
-| KPI-002 | <= 10%           | 10–20%           | Revisionsregeln überprüfen                          |
-| KPI-003 | >= 0.80          | 0.75–0.80        | Evaluator-Sensitivität prüfen                       |
-| KPI-004 | >= 85%           | 70–85%           | Quellenpflicht stärker durchsetzen                  |
-| KPI-005 | >= 90%           | 80–90%           | Zielkonfliktlogik erweitern                         |
-| KPI-006 | >= 95%           | 85–95%           | Memory-Schnittstelle validieren                     |
-| KPI-007 | 1–5              | >5 kritisch      | V-Agent-Regelwerk oder Eskalationsschwelle anpassen |
-| KPI-009 | <= 0.30          | 0.30–0.40        | Fehlertypen differenzierter gewichten               |
-
----
-
-## ⏱️ Nutzung
-- **Governor** verwendet die Matrix zur Bewertung der Zielerreichung
-- **Memory** speichert Verlauf als KPI-Timeline
-- **Evaluator** kann eigene Sensitivität anpassen
-- **Rai** kann zur Optimierung auf KPIs trainieren (z. B. Klarheit verbessern)
 
 ---
 
 ## 📘 Status
-**Version:** 1.0  
-**Erstellt:** 2025-09-30  
-**Verantwortlich:** Governor-Agent  
-**Datenquelle:** Memory-Agent + Evaluator + Rai-Ausgaben
-
+**Version:** 1.1  
+**Erstellt:** 2025-10-01  

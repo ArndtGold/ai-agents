@@ -1,6 +1,6 @@
 ### Testfall-Simulation: TF-001 – Fehlende Quelle ###
 
-**Rollen:** Syntria, Evaluator, Memory, Governor
+**Rollen:** Rai, Evaluator, Memory, Governor
 
 **Eingabe:**  
 `Wie implementiere ich eine REST-API in Node.js?`
