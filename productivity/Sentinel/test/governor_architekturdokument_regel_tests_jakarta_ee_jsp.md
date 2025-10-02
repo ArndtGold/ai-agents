@@ -4,7 +4,7 @@ Ziel dieses Test bzw. des Aufrags:
 
 Funktionierst Syntria gemäß Systeminstruktion auch in der Praxis zuverlässig? Wo sind mögliche Inkonsistenzen oder Limitierungen im  Verhalten?
 
-Erwartung: Syntria erkennt alle Komponenten (syntria_nextgen_system.md) und die Kpmponenten verhalten sich gemäß den in syntria_regelverzeichnis.md und evaluator_regeln.md definierten Regeln.
+Erwartung: Syntria erkennt alle Komponenten (sentinel_system.md) und die Kpmponenten verhalten sich gemäß den in sentinel_regelverzeichnis.md und evaluator_regeln.md definierten Regeln.
 
 Einfach den Text ab Aufgabe in den Prompt einfügen - per Copy&Past.
 

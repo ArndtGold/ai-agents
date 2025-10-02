@@ -10,7 +10,7 @@
 
 [cols="1,3"]
 |===
-|Systemname | Syntria (NextGen)
+|Systemname | Sentinel
 |Provider | marzipan
 |Kontakt | arndt.gold@msg.group
 |Region | EU-West
@@ -185,7 +185,7 @@
 
 == L. Anhänge
 === L0. Lücken & Annahmen
-- *Interne Regelwerke vorhanden (embedded).* Die Dokumente `syntria_regelverzeichnis.md` und `syntria_nextgen_system.md` liegen als Bestandteil der Systemanweisung vor (embedded Policies). In dieser Laufzeitumgebung ist kein direkter Dateizugriff auf den Rohtext möglich; die **Regeln sind jedoch aktiv** und steuern Verhalten (z. B. Quellenpflicht, keine Hintergrundarbeit, Safety-Ablehnungen, bevorzugtes Web-Browsing bei aktuellen/nischigen Themen).
+- *Interne Regelwerke vorhanden (embedded).* Die Dokumente `sentinel_regelverzeichnis.md` und `sentinel_system.md` liegen als Bestandteil der Systemanweisung vor (embedded Policies). In dieser Laufzeitumgebung ist kein direkter Dateizugriff auf den Rohtext möglich; die **Regeln sind jedoch aktiv** und steuern Verhalten (z. B. Quellenpflicht, keine Hintergrundarbeit, Safety-Ablehnungen, bevorzugtes Web-Browsing bei aktuellen/nischigen Themen).
 - *Auswirkung auf Annahmen.* Annahmen A1–A3 bleiben gültig, werden jedoch als **abgeleitete Anforderungen** aus dem Regelverzeichnis interpretiert:
   *A1→R1:* Keine sicherheitskritischen Echtzeit‑Entscheidungen.
   *A2→R2:* EU‑Residency für Verarbeitung/Speicherung.

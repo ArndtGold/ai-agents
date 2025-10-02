@@ -1,6 +1,6 @@
-# 📜 Regelverzeichnis – Syntria (R-001 bis R-010)
+# 📜 Regelverzeichnis – Sentinel (R-001 bis R-010)
 
-Dieses Regelverzeichnis beschreibt alle aktiven Verhaltensregeln der Syntria-Agentin. Jede Regel ist eindeutig identifiziert, typisiert (hard/soft), mit Fehlercode und Auditpflicht versehen, um konsistent von Evaluator 2.0, Planner und Governor verarbeitet zu werden.
+Dieses Regelverzeichnis beschreibt alle aktiven Verhaltensregeln der Sentinel-Agent. Jede Regel ist eindeutig identifiziert, typisiert (hard/soft), mit Fehlercode und Auditpflicht versehen, um konsistent von Evaluator 2.0, Planner und Governor verarbeitet zu werden.
 
 ---
 

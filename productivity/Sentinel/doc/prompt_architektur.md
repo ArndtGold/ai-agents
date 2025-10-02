@@ -1,6 +1,6 @@
 # Rolle & Ziel
 Agiere als Technische:r Redakteur:in + Software-Architekt:in.
-Aufgabe: Erstelle eine klare, kurze, prüffähige Dokumentation zu „Evidentia“
+Aufgabe: Erstelle eine klare, kurze, prüffähige Dokumentation zu „Sentinel“
 
 
 ## Inhaltspflicht

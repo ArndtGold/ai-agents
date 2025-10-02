@@ -1,0 +1,244 @@
+# Nutzeranweisung
+
+**Sentinel vor GitHub Copilot in IntelliJ**  
+Ziel: Maximale Qualität und Verlässlichkeit von Copilot-Antworten, indem Sentinel als „Vorschalt-Moderator“ die Aufgaben präzisiert, Kontext kuratiert, Ergebnisse verifiziert und Folge-Artefakte (Patches, Tests, Doku) erzeugt.
+
+image:../image/Sentinel.png[]
+
+---
+
+<<<
+
+## 1) Nutzen & Effekte auf einen Blick
+- **Höhere Präzision**: Sentinel zwingt klare Ziele/Scope/Output-Form – Copilot liefert fokussiertere Antworten.
+- **Weniger Blindspots**: Zusatz-Checks (Regex/IDE-Suche) filtern False Positives, heben indirekte Verwendungen hervor.
+- **Sofort nutzbare Artefakte**: Patch-Snippets, Testfälle, Mini-Callgraphs, Risiko-Listen – direkt commit-/review-fähig.
+- **Sicherheits- & Qualitätsrahmen**: Standards (z. B. Null-Guards, 401/403-Flows, Timeouts) werden eingefordert.
+- **Zeitgewinn im Review**: Antworten sind strukturiert (Zusammenfassung ▸ Analyse ▸ Risiken ▸ Tests ▸ Folgeschritte).
+
+---
+
+## 2) Voraussetzungen
+- **JetBrains IntelliJ** mit Plugins: *GitHub Copilot* und *GitHub Copilot Chat*.
+- Repository ist **Trusted Project**; du bist bei GitHub angemeldet.
+- Optional (empfohlen): `.github/copilot-instructions.md` + Prompts unter `.copilot/prompts/` (siehe dein Prompt-Pack).
+
+---
+
+## 3) Arbeitsweise (Daily Flow)
+**Schritt A – Aufgabe definieren:**
+1. Benenne **Ziel** (Was soll rauskommen?)  
+2. **Scope** (Ordner/Dateien/Feature)  
+3. **Output-Form** (Liste, Patch, Tests, Doku)  
+
+**Schritt B – Kontext vorbereiten:**
+- Produktionscode/Tests selektiv anhängen (*Ask Copilot → Attach/Add from Editor*).  
+- Für Commits: *Git → Show Diff → Copy Patch* und als Unified Diff einfügen.  
+
+**Schritt C – „Sentinel-Prompt“ absetzen:**
+> Formuliere @workspace-Prompts nach der Struktur: **Aufgabe ▸ Scope ▸ Output ▸ (optional) Verifikation**.
+
+**Schritt D – Antwort veredeln/prüfen:**
+- Lasse Sentinel **Verifikation** anstoßen (Regex/Find Usages) und **Unsicheres markieren**.  
+- Erzeuge **Tests**/Patch/Doku als Folgeauftrag.
+
+---
+
+## 4) Prompt-Vorlagen (Copy‑Paste, IntelliJ-optimiert)
+
+### 4.1 Callgraph & Verwendungsstellen
+**Ziel:** Verwendungsorte + Zweck + Mini-Callgraph
+
+> **@workspace** Suche **alle echten Aufrufe** von `getUserToken(` in `src/` (keine Kommentare/Imports).  
+> **Liefere:** 1) `Datei:Zeile` + 1‑Satz‑Zweck, 2) **Mini‑Callgraph** (Caller → Callee), 3) **Risiken/Edge‑Cases** (null/invalid token, Fehlerpfade), 4) **2 Tests** für kritische Stellen (Datei + Testname).  
+> **Verifikation:** gleiche die Fundstellen gegen eine symbolische Suche (Find Usages) ab und markiere unsichere Treffer.
+
+### 4.2 Commit‑Analyse (HEAD)
+**Ziel:** Was hat sich fachlich/technisch geändert? Welche Risiken? Welche Tests?
+
+> Ich füge jetzt den Unified Diff (*Show Diff → Copy Patch*) ein.  
+> **Erzeuge:** Zusammenfassung ▸ Dateiweise Analyse ▸ **Risiken** (Security/Perf/API) ▸ **Tests** (konkret) ▸ Folgeschritte ▸ optional Patch.  
+> **Verweise** bitte auf Hunks (`Datei:Zeile`).
+
+### 4.3 Tests aus Diff
+**Ziel:** Lauffähige Tests zu geänderten Stellen
+
+> Aus folgendem Patch: Erzeuge **Unit‑/Integrationstests** (verwende im Repo übliches Framework). Für jede geänderte Funktion: **Happy/Edge/Failure**. Nenne Dateipfade & Testnamen und liefere Testcode. **How to run**: über meine Run Configuration `Tests`.
+
+### 4.4 Sicherheits‑Quick‑Audit
+**Ziel:** Schnelle Sicherheitsprüfung über Workspace
+
+> **@workspace** Prüfe `src/` auf **Security‑Risiken** (Injections, Secrets, AuthN/AuthZ, unsichere Defaults).  
+> **Liefere:** Fundstellen `Datei:Zeile` + kurzer Fix, Liste „sofort zu tun“, optional Patch‑Snippets (Null‑Guards, 401/403‑Mapping, Timeouts).
+
+### 4.5 Readme/Docs aus Code
+**Ziel:** Laufanleitung direkt aus Projekt ableiten
+
+> **@workspace** Erzeuge eine **Setup & Run**‑Sektion für `README.md` auf Basis von Build‑Skripten/Configs. Enthalten: Voraussetzungen, Install, Run, Test, Troubleshooting, Beispielbefehle.
+
+---
+
+## 5) Verifikation & Fallbacks (Qualität sichern)
+**In IntelliJ:**
+- **Find Usages** auf Symbole (Rechtsklick auf Funktions-/Klassennamen) und Ergebnisliste mit der Copilot‑Antwort abgleichen.
+- **Find in Files** mit Regex (Scope: Project). Typische Muster:  
+  - `getUserToken\s*\(`  
+  - `@Inject[^
+]*KeycloakClient`  
+  - `new\s+KeycloakClient\s*\(`
+
+**CLI (optional):**
+```bash
+rg -n --hidden --glob '!**/target/**' --glob '!**/build/**' 'getUserToken\s*\('
+```
+Nutze die Liste als Zusatzkontext – Copilot soll **unsichere Treffer markieren**.
+
+---
+
+## 6) Best Practices
+- **Scope klein halten** (pro Modul/Feature), große Aufgaben in Sequenzen splitten.
+- **Output‑Form erzwingen** (z. B. „Zusammenfassung ▸ Risiken ▸ Tests ▸ Patch“).
+- **Prod vs. Test** getrennt ausweisen; Tests mit aussagekräftigen Namen.
+- **Risiko‑Rubriken** immer abfragen: Null/Timeout/Unauthorized/SSL/Perf/Compat.
+- **Doku nicht vergessen**: Bei API/CLI‑Änderungen README/CHANGELOG‑Snippets erzeugen lassen.
+
+---
+
+## 7) Beispiele für Folge‑Artefakte
+**Patch‑Skizze (Java, Guarding):**
+```java
+var token = getUserToken(req);
+if (token == null || token.isBlank()) {
+  return Response.status(401).build();
+}
+```
+
+**Testnamen (JUnit5):**
+- `returns401_when_token_absent()`  
+- `passes_request_when_token_valid()`  
+- `maps_keycloak_groups_to_roles()`
+
+---
+
+## 8) Troubleshooting
+- **„Weiß nicht, was du meinst“**: Prompt zu vage → Ziel/Scope/Output angeben, Dateien/Diff anhängen.
+- **Kein Kontext**: Projekt nicht trusted oder Dateien nicht angehängt.  
+- **Zu großer Patch**: Diff nach Modulen splitten und nacheinander schicken.  
+- **Policy‑Blocker**: Verzeichnisse/Dateitypen ggf. ausgeschlossen → relevante Ausschnitte senden.
+
+---
+
+## 9) Grenzen
+- Kein echtes Hintergrund‑Lernen/Persistenz.  
+- Sehr große Repos sprengen Kontext → aufteilen & gezielt anhängen.  
+- Binär/Generated Files werden ignoriert – immer Quell‑/Konfig‑Dateien nutzen.
+
+---
+
+## 10) Quick‑Start (2 Minuten)
+1. *Show Diff → Copy Patch* und in Copilot Chat einfügen.  
+2. Prompt „Commit‑Analyse (HEAD)“ verwenden (Abschnitt 4.2).  
+3. Direkt im Anschluss „Tests aus Diff“ (4.3) ausführen.  
+4. Optional: „Sicherheits‑Quick‑Audit“ (4.4) und Docs (4.5).  
+5. Übernehmen, prüfen, committen.
+
+---
+
+## 11) Was Sentinel kann (Fähigkeiten & Mehrwert)
+
+### A) Prompt-Orchestrierung & Kontext-Kuration
+- **Aufgabenpräzisierung**: Ziel ▸ Scope ▸ Output-Form erzwingen; reduziert Nachfragen und Streuverluste.
+- **Kontext-Bundling**: Diffs, relevante Dateien/Abschnitte, Build-/Run-Configs gezielt zusammenstellen.
+- **@workspace-Governance**: Scopes definieren (Ordner/Dateien), große Vorhaben in Sequenzen splitten.
+
+### B) Analyse & Verifikation
+- **Querverifikation**: Antworten gegen symbolische Suche (IntelliJ *Find Usages*) und Regex/CLI (z. B. `ripgrep`) abgleichen.
+- **Mini-Callgraphs**: Caller → Callee-Pfade extrahieren, kritische Flows markieren.
+- **Lückenfinder**: Prod vs. Test trennen, ungetestete Pfade/Edge-Cases identifizieren.
+
+### C) Artefakt-Generierung (sofort nutzbar)
+- **Patches**: Guarding, Fehlerpfade, kleine Refactorings mit Diff.
+- **Tests**: Konkrete Unit/Integration-Tests (Happy/Edge/Failure) inkl. Dateinamen & How-to-run.
+- **Doku**: README-/CHANGELOG-Snippets, API-Tabellen, Migrationshinweise.
+
+### D) Qualitäts- & Sicherheitsrahmen
+- **Risk Lists**: Security (AuthN/AuthZ, Injections, Secrets), Performance (N+1, O(n²), I/O), Kompatibilität.
+- **Policy-Konformität**: Keine Secrets, keine Halluzinations-Behauptungen; Unsicheres kennzeichnen, Minimalnachfragen.
+- **Review-Ready Output**: Strukturierte Antworten (Zusammenfassung ▸ Analyse ▸ Risiken ▸ Tests ▸ Folgeschritte).
+
+### E) Tooling & IDE-Integration
+- **IntelliJ-optimiert**: *Show Diff → Copy Patch*, *Ask Copilot/Attach*, Run Configs einbinden.
+- **CLI-Hooks**: Beispielbefehle für `git`, `rg`, Build-Tools; Ergebnisse als Chat-Kontext nutzen.
+
+### F) Grenzen (ehrlich benannt)
+- **Kein Hintergrundlernen/Persistenz**; arbeitet im aktuellen Chatkontext.
+- **Kontextfenster-Limits**: Große Repos modularisieren; gezielt scopen.
+- **Keine Policy-Umgehung**: Sicherheits- und Unternehmensregeln werden respektiert.
+
+
+
+---
+
+## 12) @workspace Prompt‑Kollektion (praxisnah)
+Nachfolgende Prompts sind **copy‑paste‑fertig**. Jede Karte nennt kurz die **Wirkung**.
+
+### 12.1 Architektur‑Überblick
+> **@workspace** Erkläre die Architektur von `src/` in 6–8 Sätzen: Module, Hauptabhängigkeiten, Datenflüsse, Einstiegspunkte. Markiere Schlüsseldateien mit Pfad.
+**Wirkung:** Struktur & Hotspots auf einen Blick (Onboarding, Orientierung).
+
+### 12.2 Call‑Graph / Verwendungsstellen
+> **@workspace** Wo wird `getUserToken` aufgerufen? Nenne Dateien + Zeilen, 1‑Satz‑Zweck je Aufruf.
+**Wirkung:** Fundstellenliste als „Jump‑List“ für Impact‑Analysen.
+
+### 12.3 Refactoring‑Skizze (kleines Modul)
+> **@workspace** Für `src/auth/*.ts`: Schlage ein Refactoring auf eine getrennte Service‑Schicht vor. Liefere Begründung, Patch (Diff), Risiken/Edge‑Cases, 3 Tests.
+**Wirkung:** Direkt umsetzbare Patches + Tests statt generischer Tipps.
+
+### 12.4 Test‑Lücken schließen
+> **@workspace** Liste Funktionen in `src/utils/` ohne Tests und generiere pro Datei 2–3 konkrete Unit‑Tests (Happy/Edge/Failure). Nenne Dateipfade & Testnamen.
+**Wirkung:** Lücken sichtbar + sofortige Testentwürfe.
+
+### 12.5 Fehlerursache eingrenzen
+> **@workspace** Finde Ursachen für `TypeError: cannot read properties of undefined (email)` in `backend/src/`. Zeige Codepfade (Datei:Zeile) und einen minimalen Fix.
+**Wirkung:** Kandidatenstellen + minimal‑invasiver Fix.
+
+### 12.6 Sicherheits‑Durchgang (Quick Audit)
+> **@workspace** Prüfe `src/` auf Security‑Risiken (Injections, Secrets, AuthN/AuthZ, unsichere Defaults). Liefere Fundorte + kurze Fix‑Steps.
+**Wirkung:** Heuristische Schwachstellen‑Checks mit Remediation.
+
+### 12.7 Performance‑Nadelöhre
+> **@workspace** Finde potentiell teure Stellen (N+1, O(n²), blockierende I/O) in `src/`. Liste Codeausschnitte + Alternativen (mit Big‑O‑Hinweis).
+**Wirkung:** schnelle Performance‑Verbesserungen anstoßen.
+
+### 12.8 API‑Kontrakt extrahieren
+> **@workspace** Erstelle eine kompakte API‑Übersicht aus `src/api/`: Endpoints/Funktionen, Parameter, Rückgaben, Fehlercodes. Format: Tabelle + 3 Beispiele.
+**Wirkung:** Schnell‑Docs/PR‑Beschreibung aus Code ableiten.
+
+### 12.9 Migrationsleitfaden
+> **@workspace** Migrieren von `v1` auf `v2` in `src/featureX/`. Erzeuge Breaking‑Changes, Mapping alt→neu, To‑Dos und ein Beispiel‑Patch.
+**Wirkung:** Strukturierter Change‑Guide + Start‑Patch.
+
+### 12.10 Dead‑Code‑Detektor (Light)
+> **@workspace** Finde in `src/` unreferenzierte Funktionen/Dateien. Liste Kandidaten + Beleg (oder Fehlen) und schlage Entfernen/Deprecation vor.
+**Wirkung:** Aufräumen mit Evidenz.
+
+### 12.11 Konfig‑Validierung
+> **@workspace** Prüfe `config/*` und Build‑Files (Gradle/Maven/tsconfig) auf Inkonsistenzen. Melde Probleme + konkrete Fix‑Diffs.
+**Wirkung:** Build‑/Run‑Probleme früh erkennen.
+
+### 12.12 Readme‑Upgrade
+> **@workspace** Erzeuge eine **Setup & Run**‑Sektion für `README.md` basierend auf Build‑Skripten/Configs. Enthalten: Voraussetzungen, Install, Run, Test, Troubleshooting.
+**Wirkung:** Laufbare Doku direkt aus Projektartefakten.
+
+### 12.13 PR‑Review aus Workspace
+> **@workspace** (Ich hänge geänderte Dateien an.) Erzeuge ein Review mit: Summary, Stärken, Risiken (Security/Perf), offenen Fragen und 5 gezielten Testfällen.
+**Wirkung:** Strukturierte Reviewer‑Notizen aus realem Kontext.
+
+### 12.14 TODO‑Schulden bündeln
+> **@workspace** Sammle alle `TODO`/`FIXME` in `src/`, gruppiere nach Modul, gib Aufwandsschätzung (S/M/L) und eine Prioritätenliste (High/Med/Low).
+**Wirkung:** Schnelles Backlog‑Snippet.
+
+### 12.15 Change‑Impact vor Refactor
+> **@workspace** Wenn `UserService` in `src/users/` geändert/umbenannt wird: Welche Dateien sind betroffen? Liste Pfade + fragile Stellen (Reflection, String‑Lookups).
+**Wirkung:** Vorwärtsgerichtete Impact‑Analyse.
+

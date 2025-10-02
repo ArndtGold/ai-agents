@@ -1,0 +1,85 @@
+= Aktuelle Aussagen (von Sentinel)
+:toc:
+:sectnums:
+
+== Praxisnahe Prompt-Beispiele für `#git`
+`#git` liefert Copilot Chat Git-Kontext aus deinem aktuellen Repo (z. B. Branch, geänderte Dateien). Für präzise Reviews zusätzlich Unified Diff einfügen.
+
+=== PR-Beschreibung aus aktuellen Änderungen
+> Erzeuge aus **#git** eine PR-Beschreibung mit: **Summary ▸ Why ▸ Implementation ▸ Risks (Security/Perf/API) ▸ Testplan ▸ Rollback**.
+
+=== Commit-Historie zusammenfassen
+> Fasse **#git** der letzten 10 Commits in 5 Stichpunkten zusammen; markiere Breaking Changes & Migrationshinweise.
+
+=== Tests aus Änderungen ableiten
+> Leite aus **#git** **konkrete Unit-/Integrationstests** ab (Dateinamen, Testnamen, kurze Codeblöcke). Nenne auch „How to run“.
+
+=== Changelog-Snippet generieren
+> Erzeuge aus **#git** ein `CHANGELOG`-Fragment (Keep a Changelog-Stil): **Added/Changed/Fixed/Deprecated**.
+
+=== Risiko-Scan
+> Prüfe **#git** auf **Security/Performance/API**-Risiken. Liste Fundstellen mit Datei:Zeile und kurzen Fix-Vorschlägen.
+
+=== Commit-Message-Verbesserung
+> Verbessere die aktuelle Commit-Message basierend auf **#git** im **Conventional Commits**-Format; liefere 3 Varianten.
+
+=== Review-Checkliste automatisch füllen
+> Erstelle aus **#git** eine Review-Checkliste: **kritische Hunks**, betroffene Services/Endpoints, offene TODOs, empfohlene Tests.
+
+=== Release-Notes (Kurz)
+> Baue aus **#git** Release-Notes (1. Absatz Summary, dann Bulletpoints). Markiere Breaking/Deprecations.
+
+=== Impact-Analyse zu einer Klasse/Funktion
+> Aus **#git**: Welche Dateien interagieren mit `UserService`? Liste `Datei:Zeile` und den Zweck in 1 Satz.
+
+=== Refactoring-Patch vorschlagen
+> Schlage basierend auf **#git** einen **Unified Diff** zur Fehlerbehandlung vor (Null-Guards/Timeout/401/403), plus 3 Tests.
+
+=== PR-Review-Kommentar-Pakete
+> Erzeuge aus **#git** 5 präzise Review-Kommentare mit Hunk-Bezug (Datei:Zeile), je **Problem → kurzer Fix**.
+
+=== Dokumentation aktualisieren
+> Welche Doku-Stellen sind laut **#git** betroffen? Erzeuge Snippets für `README.md`/`API.md` (Parameter/Beispiele).
+
+<<<
+
+== Kombi-Prompts (`#git` + `@workspace`)
+
+=== Commit-Analyse + Cross-Check
+> **#git** zusammenfassen. Danach **@workspace**: prüfe die referenzierten Dateien auf **ungedeckte Edge-Cases** und liefere 2 zusätzliche Tests.
+
+=== Tests + genaue Hunks
+> Erzeuge Tests aus **#git**. **Wenn unklar**, fordere den **Unified Diff** an und beziehe ihn ein.
+
+=== Hinweise
+* Chat-Variablen (`#git`, `#file`, `#selection`, `#editor`, `#codebase`) geben gezielt Kontext; `#` zeigt die verfügbare Liste in der IDE.
+* Für reproduzierbare Reviews den **Unified Diff** einfügen: *Show Diff → Copy Patch*.
+
+<<<
+
+
+== Tipp: Was mit Sentinel besser wird
+
+* **Gezielter Kontext**: Ich kuratiere `#git` + Unified‑Diff + relevante Dateien, damit Copilot präziser antwortet.
+* **Struktur statt Fluff**: Ich erzwinge Ausgabeformate (Zusammenfassung ▸ Risiken ▸ Tests ▸ Folgeschritte), die du direkt in PR/Issue kopieren kannst.
+* **Verifikation**: Ich lasse Ergebnisse gegen *Find Usages*/Regex querprüfen und markiere unsichere Treffer.
+* **Sofort nutzbare Artefakte**: Patch‑Snippets, Testcode, README‑Updates – weniger Ping‑Pong im Review.
+* **Sicherheitsnetz**: Standard‑Guards (401/403, Timeouts, Null‑Checks) und Risiko‑Checklisten werden automatisch eingefordert.
+
+
+
+=== Wer oder was ist „Sentinel“?
+*Sentinel* ist ein speziell angepasster Chat‑Assistent (ein "GPT"), der als **Orchestrator und Reviewer** vor GitHub Copilot arbeitet.
+
+image::../image/Sentinel.png[align=center, width=200]
+Er
+
+* präzisiert Aufgaben (Ziel ▸ Scope ▸ Output‑Form) und kuratiert Kontext (@workspace, `#git`, Unified Diff),
+* erzeugt **sofort nutzbare Artefakte** (Patches, Tests, Doku‑Snippets) und fordert Struktur in Antworten ein,
+* macht **Risiken & Edge‑Cases** explizit (Security/Performance/API/Resilienz),
+* stößt **Verifikationen** an (z. B. Find Usages, Regex‑Checks) und markiert unsichere Treffer,
+* respektiert Policies/Projektgrenzen und arbeitet **ohne Hintergrund‑Lernen** – nur im aktuellen Chatkontext.
+
+Kurz: Sentinel liefert aus deinem Repo‑Kontext **review‑taugliche Ergebnisse** (Zusammenfassung ▸ Analyse ▸ Risiken ▸ Tests ▸ Folgeschritte) und holt aus Copilot messbar mehr heraus.
+
+

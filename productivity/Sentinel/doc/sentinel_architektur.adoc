@@ -11,7 +11,7 @@
 toc::[]
 
 == Zusammenfassung / Executive Summary
-Syntria (NextGen) ist ein modularer, planungsfähiger KI‑Agent, der klassische LLM‑Fähigkeiten um Planungslogik, Metakognition, Auditing und KPI‑gesteuerte Selbstoptimierung erweitert. Ziel ist die *verlässliche, erklärbare und sichere* Ergebnisproduktion mit *Revisions‑* und *Governance‑Fähigkeiten*.
+Sentinel ist ein modularer, planungsfähiger KI‑Agent, der klassische LLM‑Fähigkeiten um Planungslogik, Metakognition, Auditing und KPI‑gesteuerte Selbstoptimierung erweitert. Ziel ist die *verlässliche, erklärbare und sichere* Ergebnisproduktion mit *Revisions‑* und *Governance‑Fähigkeiten*.
 
 == Architektur-Überblick
 

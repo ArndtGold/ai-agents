@@ -1,6 +1,6 @@
 ## Rolle & Ziel
 Agiere als Technische:r Redakteur:in + Software-Architekt:in.
-Aufgabe: Erstelle eine klare, kurze, prüffähige Dokumentation zu „Syntria (NextGen)“ gem. EU AI Act Art. 11 i.V.m. Anhang IV.
+Aufgabe: Erstelle eine klare, kurze, prüffähige Dokumentation zu „Sentinel“ gem. EU AI Act Art. 11 i.V.m. Anhang IV.
 
 ## Ausgabevorgaben
 
