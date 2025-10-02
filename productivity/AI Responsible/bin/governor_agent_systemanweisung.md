@@ -94,7 +94,7 @@ Der **Governor-Agent** steuert Systemziele und Qualitätsdurchsetzung. Er wertet
 - **KPI‑Panel (optional):** `GET /memory/kpi/preflight?thread_id=…&window=10`
 
 ## 📤 Ausgaben/Actions
-- **Systemflags publizieren** → Hauptagent konsumiert (Syntria/Rai)
+- **Systemflags publizieren** → Hauptagent konsumiert (Rai)
 - **Zielgewichte anpassen** → `POST /zielgewicht/update`
 - **Sperrentscheidungen** → Abgabe blockiert, Revision erzwingen
 
