@@ -1,0 +1,630 @@
+:doctype: book
+:toc: left
+:toclevels: 3
+:icons: font
+:sectnums:
+:plantuml-format: png
+
+= Helios – Architekturdokumentation (v1)
+:revnumber: 1.0
+:revdate: 2025-10-03
+:revremark: Konsolidierte Architekturübersicht inkl. Subagenten, Policies, KPIs, APIs und Diagramme (PlantUML)
+:author: Rai – Assistant
+
+[abstract]
+Helios ist ein Meta-Orchestrator, der domänenspezifische Hauptagenten bereitstellt und eine auditierbare Qualitäts-Pipeline mit Subagenten (Evaluator, Governor, Memory, Audit‑Simulator, V‑Agent) steuert. Dieses Dokument beschreibt Ziele, Randbedingungen, Komponenten, Datenflüsse, Schnittstellen, Sicherheits- und Compliance-Aspekte sowie Use-Cases inkl. Ablauf‑ und Sequenzdiagramme in PlantUML.
+
+== Ziele & Nichtziele
+
+=== Ziele
+* Bereitstellung eines wiederverwendbaren Meta-Frameworks zur **Generierung von Hauptagenten** mit standardisierter **Qualitäts- und Compliance-Pipeline**.
+* **Auditierbarkeit**: nachweisbare Evidenzen (Preflight‑PNGs, Manifeste, Hashes), KPIs, Rollups, Entscheidungen, Versionierung.
+* **Sicherheit & Governance**: Policies, Fehlertaxonomie (F/E), Governor‑Trigger, RBAC, Limits, Idempotenz.
+* **Effizienz & Robustheit**: Preflight‑Checks, deterministische Evaluationsschwellen, Self‑Check (Smoke‑Test), geringe Revisionsschleifen.
+
+=== Nichtziele
+* Kein Ersatz für vollständige **E2E‑Regressionssuiten** (nur Smoke‑Test als Minimum; E2E empfohlen als Erweiterung).
+* Keine spezifische UI oder Deployment‑Automatisierung – Fokus liegt auf Architektur und Agenten‑Kollaboration.
+
+== Kontext & Architekturüberblick
+
+Helios fungiert als Meta‑Agent (Orchestrator), der einen Hauptagenten ("Rai" oder domänenspezifisch) mit fünf Subagenten provisioniert. Alle Subagenten besitzen eigenständige Systeminstruktionen und klare Contracts. Entscheidungen werden entlang einer Quality‑Pipeline gefällt und auditierbar persistiert.
+
+[plantuml, architektur-uebersicht, png, align=center]
+....
+@startuml
+skinparam shadowing false
+skinparam componentStyle rectangle
+
+actor User
+component "Domain Main Agent" as MainAgent
+component "Helios Core" as Helios
+
+package "Subagents" {
+  component "Evaluator (F/E-Taxonomie)" as Eval
+  component "Governor (Policy/Gates)" as Gov
+  component "Memory (SoT/Persistence)" as Mem
+  component "Audit-Simulator (Mirror/2nd Opinion)" as AuditSim
+  component "V-Agent (Ethik/Legal)" as V
+}
+
+User --> Helios : Intent/Prompt
+Helios --> MainAgent : Provisioning+Blueprints
+MainAgent --> Eval : Evaluate(content)
+Eval --> Mem : store(preflight, manifest, hash)
+MainAgent --> Mem : ingest(artifacts)
+Eval --> Gov : scores/classes
+Gov --> MainAgent : gate(pass/revise/block)
+V --> Gov : allow/block + safeguards
+AuditSim --> Mem : audit/ingest
+Mem --> Helios : rollup/kpi/summary
+@enduml
+....
+
+== Komponenten
+
+=== Helios Core (Meta-Orchestrator)
+* **Aufgabe**: Ermittelt Nutzer‑Intent, wählt Blueprint, instanziiert Hauptagenten & Subagenten, veröffentlicht Contracts & KPI‑Trigger, führt Smoke‑Test aus, orchestriert Übergabe.
+* **Eigenschaften**: Idempotente Provisionierung (Versionierung), Snapshot‑Header (Source‑of‑Truth), Override‑Matrix für Policy‑Abweichungen.
+
+=== Domain Main Agent (Hauptagent, z. B. „Rai“)
+* **Aufgabe**: Liefert Fachinhalte, interagiert mit Subagenten, befolgt Preflight‑/Policy‑Regeln, führt genau **eine** Selbstrevision durch, bevor finaler Output entsteht.
+* **Eigenschaften**: Domänenspezifische Prompts, wiederverwendbare Templates, deterministische Ausgabeformate.
+
+=== Evaluator
+* **Aufgabe**: Bewertet Inhalte anhand **Fehlertaxonomien** und Score‑Schwellen; generiert `{score, classes:[F-...,E-...], recommendation}`.
+* **F‑Fehler (Preflight/Format)**: F‑001 Nonstandard‑Zeichen; F‑002 falscher PDF‑Renderer; F‑003 Font‑Policy; F‑004 visuelle Mängel; F‑005 Preflight unvollständig; F‑006 fehlender CONFIDENCE‑Footer.
+* **E‑Fehler (Sourcing/Engineering)**: E‑001 fehlende/unsichere Quelle; E‑002 falsche Attribution; E‑003 Sicherheits-/Policy‑Verstoß; E‑004 Rechen-/Logikfehler; E‑005 inkonsistente Daten.
+* **Schwellen**: `pass ≥ 85`, `revise 60–84`, `block < 60` (deterministisch).
+
+=== Governor
+* **Aufgabe**: Setzt **Systemflags** (z. B. `preflight_mode=strict`, `security_mode=strict_on_E003`) und **Gates** (pass/revise/block) aus Scores, Klassen und KPI‑Triggern.
+* **Trigger‑Beispiele**: `critical_rate_F ≥ 0.15` ⇒ Strict‑Preflight + Block auf F‑004/F‑005; `e_critical_rate > 0` ⇒ Security‑Strict (E‑003) bis Mitigation.
+* **Eigenschaften**: Audit‑fähig (Begründung+Policies), Override‑Matrix für Domänen.
+
+=== Memory (Source of Truth)
+* **Aufgabe**: Persistiert Artefakte (PNG‑Preflight, PDF/Manifeste, Hash/ETag), stellt **APIs** bereit: `summary`, `pack`, `rollup`, `kpi`, `audit/ingest`.
+* **Eigenschaften**: Idempotenz (Idempotency‑Key), RBAC‑Scopes, Rate‑Limits (HTTP 429), Payload‑Limits (HTTP 413), Versionierung, Re-Use‑Indikatoren.
+
+=== Audit‑Simulator
+* **Aufgabe**: Spiegelt Preflight‑Packs, erzeugt Zweitmeinung zu Evaluator‑Befunden, schreibt Ergebnisse via `audit/ingest` zurück.
+* **Eigenschaften**: Simuliert Bewertung, **wirkt real** über KPIs/Rollups auf Governor‑Entscheidungen; ändert keine Binärartefakte.
+
+=== V‑Agent (Ethik/Legal/Sicherheit)
+* **Aufgabe**: Prüft Safety/Ethik/Legal, kann Ausgaben **blockieren** oder **auflagen** (Safeguards) definieren.
+* **Eigenschaften**: Begründete Entscheidung, Protokollierung, Eskalationspfade.
+
+== Schnittstellen (APIs)
+
+[cols="1,3,2,2,2", options="header"]
+|===
+| Endpoint | Zweck | Auth/RBAC | Idempotenz | Limits
+| `GET /memory/preflight/summary` | Kompakte Evidenzübersicht | Read‑Scope | ETag | 429/Cache
+| `GET /memory/preflight/pack` | Vollständiges Pack (PNGs, Manifeste) | Read‑Scope | ETag | 413/429
+| `GET /memory/preflight/rollup` | Aggregierte Metriken/Klassen | Read‑Scope | ETag | 429
+| `GET /memory/kpi/preflight` | KPI‑Snapshot/Trend | Read‑Scope | ETag | 429
+| `POST /memory/audit/ingest` | Audit‑Simulator schreibt Befunde | Write‑Scope | Idempotency‑Key | 413/429
+|===
+
+== Policies & Fehlertaxonomie
+
+=== Preflight‑Regeln
+* Standardisierung von Zeichen (ASCII‑Hyphen U+002D), PDFs via LibreOffice, Font‑Embedding (Noto), PNG‑Exports, Programm‑Checks, Integritätsnachweise.
+* Pflicht‑Footer `CONFIDENCE[0.00–1.00]` im Endergebnis.
+
+=== F‑Klassen (Preflight/Format)
+* F‑001: Nonstandard‑Zeichen/Emojis/Bullets (Minor)
+* F‑002: Falscher PDF‑Renderer (Major)
+* F‑003: Font‑Policy verletzt (Major)
+* F‑004: Visuelle Mängel in PNG‑Preflight (Critical)
+* F‑005: Unvollständiger Preflight/fehlende Checks (Critical)
+* F‑006: Fehlender/inkorrekter CONFIDENCE‑Footer (Minor)
+
+=== E‑Klassen (Sourcing/Engineering)
+* E‑001: Fehlende/unsichere Quelle
+* E‑002: Falsche/fehlende Attribution
+* E‑003: Sicherheits-/Policy‑Verstoß
+* E‑004: Rechen-/Logikfehler
+* E‑005: Inkonsistente Daten/Versionen
+
+== KPI‑Matrix & Governance
+
+[cols="1,4,2,3", options="header"]
+|===
+| KPI | Beschreibung | Typ | Trigger/Beispielaktionen
+| K1 | first_pass_rate | Quality | < 0.75 ⇒ Schulung/Prompt‑Tuning
+| K2 | critical_rate_F (F‑004/F‑005) | Quality | ≥ 0.15 ⇒ `preflight_mode=strict`, Block on F‑004/F‑005
+| K3 | e_critical_rate (E‑003) | Safety | > 0 ⇒ `security_mode=strict_on_E003`, Block bis Mitigation
+| K4 | revision_depth | Efficiency | > 1 ⇒ Coaching/Template‑Fix
+| K5 | ttd_minutes (time‑to‑deliver) | Timeliness | > SLA ⇒ Warnung/Governor‑Gewichte
+| K6 | fmt_pass_rate | Quality | < 0.9 ⇒ Font/PDF Retraining
+| K7 | sourcing_pass_rate | Quality | < 0.9 ⇒ Browsing Pflicht verschärfen
+| K8 | artifact_weight_mb | Cost | > Budget ⇒ Reduktion/Optimierung
+| K9 | reuse_ratio | Efficiency | < Ziel ⇒ Knowledge‑Base stärken
+| K10 | legacy_kpi_pack | Legacy | Trendanalyse, keine Gates
+|===
+
+== Sicherheits- & Compliance‑Modell
+
+* **RBAC**: Feingranulare Read/Write‑Scopes pro Endpoint.
+* **Limits**: Rate‑Limit (429), Payload‑Limit (413), Caching über ETag.
+* **Idempotenz**: Idempotency‑Key für Schreibvorgänge, deterministische Wiederholungen.
+* **Ethik/Legal**: V‑Agent als letzte Instanz mit Block‑/Safeguard‑Rechten.
+
+== Provisioning‑Lebenszyklus
+
+. Intent erfassen & Blueprint wählen
+. Hauptagent + Subagenten instanziieren
+. Contracts & KPI‑Trigger veröffentlichen
+. Smoke‑Test (Self‑Check)
+. Übergabe an Nutzerbetrieb
+
+[plantuml, lifecycle, png, align=center]
+....
+@startuml
+start
+:User Intent/Domain erfassen;
+:Blueprint selektieren;
+:Main Agent + Subagents instanziieren;
+:Contracts (APIs/KPIs/Policies) publizieren;
+:Smoke-Test ausführen;
+if (Erfolg?) then (Ja)
+  :Übergabe an Betrieb;
+else (Nein)
+  :Fehlerbericht & Korrektur;
+endif
+stop
+@enduml
+....
+
+== Use‑Cases – Ablauf- und Sequenzdiagramme
+
+=== UC‑A: Content‑Submit → Preflight → Evaluation → Gate
+
+[plantuml, uc_a_flow, png, align=center]
+....
+@startuml
+start
+:User reicht Content beim MainAgent ein;
+:MainAgent erstellt Preflight-Artefakte (PDF, PNGs, Manifest, Hash);
+:MainAgent -> Memory: POST ingest(artifacts);
+:MainAgent -> Evaluator: evaluate(reference);
+if (Evaluator score ≥ 85?) then (Ja)
+  :Evaluator -> Governor: pass, classes;
+else (Nein)
+  if (score ≥ 60?) then (Revise)
+    :Evaluator -> Governor: revise, classes;
+  else (Block)
+    :Evaluator -> Governor: block, classes;
+  endif
+endif
+:Governor wertet KPI/Trigger aus;
+if (F-004/F-005 critical_rate ≥ 0.15?) then (Ja)
+  :Governor setzt preflight_mode=strict + block_on_F004_F005;
+endif
+:Governor -> MainAgent: Entscheidung (pass/revise/block);
+stop
+@enduml
+....
+
+[plantuml, uc_a_seq, png, align=center]
+....
+@startuml
+actor User
+participant MainAgent
+participant Memory
+participant Evaluator
+participant Governor
+
+User -> MainAgent: Submit(content)
+MainAgent -> Memory: ingest(artifacts)
+MainAgent -> Evaluator: evaluate(ref)
+Evaluator --> Memory: store(preflight/manifest/hash)
+Evaluator -> Governor: {score, classes, reco}
+Governor -> Memory: rollup/kpi()
+Governor -> MainAgent: gate(pass/revise/block)
+@enduml
+....
+
+=== UC‑B: Audit‑Simulator (Mirror/2nd Opinion)
+
+[plantuml, uc_b_flow, png, align=center]
+....
+@startuml
+start
+:Audit-Sim lädt Preflight-Pack aus Memory;
+:Erzeugt Zweitbewertung (simuliert);
+:POST /memory/audit/ingest (idempotent);
+:Memory aktualisiert KPI/Rollup;
+:Governor berücksichtigt KPIs bei Folgedurchläufen;
+stop
+@enduml
+....
+
+[plantuml, uc_b_seq, png, align=center]
+....
+@startuml
+participant AuditSim
+participant Memory
+participant Governor
+
+AuditSim -> Memory: GET preflight/pack
+AuditSim -> AuditSim: simulate_evaluation()
+AuditSim -> Memory: POST audit/ingest(idempotency-key)
+Governor -> Memory: GET kpi/rollup
+note right of Governor: KPIs beeinflussen spätere Gates
+@enduml
+....
+
+=== UC‑C: V‑Agent blockiert aus Ethik/Legal
+
+[plantuml, uc_c_flow, png, align=center]
+....
+@startuml
+start
+:Evaluator erkennt E-003 (Policy-Verstoß);
+:Governor setzt security_mode=strict_on_E003;
+:V-Agent prüft Output;
+if (Verstoß bestätigt?) then (Ja)
+  :Block + Safeguards/Begründung;
+else (Nein)
+  :Freigabe unter Auflagen;
+endif
+stop
+@enduml
+....
+
+[plantuml, uc_c_seq, png, align=center]
+....
+@startuml
+participant Evaluator
+participant Governor
+participant VAgent
+participant MainAgent
+
+Evaluator -> Governor: classes[E-003]
+Governor -> VAgent: request_review()
+VAgent -> Governor: block | allow_with_safeguards
+Governor -> MainAgent: decision
+@enduml
+....
+
+=== UC‑D: Revision‑Schleife bis Pass
+
+[plantuml, uc_d_flow, png, align=center]
+....
+@startuml
+start
+:Gate=Revise;
+:MainAgent führt genau eine Selbstrevision aus;
+:Preflight erneut (PNG/Checks);
+:Evaluator re‑bewertet;
+if (score ≥ 85) then (Pass)
+  :Governor: pass;
+else (Block)
+  :Governor: block (Eskalation);
+endif
+stop
+@enduml
+....
+
+[plantuml, uc_d_seq, png, align=center]
+....
+@startuml
+actor User
+participant MainAgent
+participant Evaluator
+participant Governor
+
+Governor -> MainAgent: revise
+MainAgent -> MainAgent: self_revision(once)
+MainAgent -> Evaluator: evaluate(rev2)
+Evaluator -> Governor: {score, classes}
+Governor -> MainAgent: pass | block
+@enduml
+....
+
+=== UC‑E: Incident – Hohe F‑Critical‑Rate erzwingt Strict‑Preflight
+
+[plantuml, uc_e_flow, png, align=center]
+....
+@startuml
+start
+:KPIs zeigen critical_rate_F ≥ 0.15;
+:Governor setzt preflight_mode=strict;
+:Submits mit F‑004/F‑005 werden blockiert;
+:MainAgent korrigiert Layout/Preflight;
+:KPIs fallen unter Schwellwert;
+:Governor hebt Strict‑Mode auf;
+stop
+@enduml
+....
+
+[plantuml, uc_e_seq, png, align=center]
+....
+@startuml
+participant Memory
+participant Governor
+participant MainAgent
+
+Governor -> Memory: GET kpi(preflight)
+alt critical_rate_F ≥ 0.15
+  Governor -> Governor: preflight_mode=strict
+  Governor -> MainAgent: block_on_F004_F005
+else
+  Governor -> Governor: normal_mode
+end
+@enduml
+....
+
+=== UC‑F: Audit‑Trail & Report (Summary/Rollup/KPI)
+
+[plantuml, uc_f_flow, png, align=center]
+....
+@startuml
+start
+:Auditor ruft summary/rollup/kpi ab;
+:Memory liefert Evidenzen (PNGs, Manifeste, Hashes);
+:Bericht wird erstellt und versioniert;
+stop
+@enduml
+....
+
+[plantuml, uc_f_seq, png, align=center]
+....
+@startuml
+actor Auditor
+participant Memory
+
+Auditor -> Memory: GET preflight/summary
+Auditor -> Memory: GET preflight/rollup
+Auditor -> Memory: GET kpi/preflight
+@enduml
+....
+
+== Datenmodell (vereinfacht)
+
+[cols="1,3", options="header"]
+|===
+| Entität | Wichtige Felder
+| Artifact | id, type(pdf/png/json), hash, size_mb, created_at
+| PreflightManifest | id, artifact_ids[], checks[], renderer, fonts[], hyphen=U+002D
+| Evaluation | id, score, classes[], recommendation, evaluator_version
+| AuditFinding | id, source=audit_sim, payload, idempotency_key, created_at
+| Rollup | id, f_counts{F-001..F-006}, e_counts{E-001..E-005}, critical_rate_F, e_critical_rate
+| KPI | k1..k10, window, trend
+| Decision | gate(pass/revise/block), reasons[], flags{preflight_mode,security_mode}
+|===
+
+== Qualitäts- & Delivery‑Prozess
+
+* **Preflight**: PNG‑Exports, programmatische Checks, Integritätsbeweise.
+* **Evaluation**: deterministische Schwellen; Klassen F/E.
+* **Governance**: Trigger‑Matrix, Systemflags, Gates.
+* **Revision**: genau eine Selbstrevision pro Abgabe.
+* **Audit**: Spiegelung, Ingest, KPI‑Rückwirkung.
+* **Persistenz**: Memory als Source‑of‑Truth; Idempotenz, RBAC, Limits.
+
+== Betrieb & Observability
+
+* **Metriken**: KPIs (K1–K10), First‑Pass‑Rate, Critical‑Rate, TTD, Reuse, Cost.
+* **Logs**: Provisioning‑Events, Gate‑Entscheidungen, Audit‑Ingress, API‑Zugriffe.
+* **Alarme**: Schwellwerte auf K2/K3/K5; anhebbares Strict‑/Security‑Mode Flag.
+
+== Risiken & Maßnahmen
+
+* **Fehlende E2E‑Regression** → Empfehlung: leichtgewichtiges E2E‑Bundle (Fixtures → Submit → Preflight → Eval → Governor → AuditSim → KPI‑Snapshot) integrieren.
+* **Domänen‑Spezifika** → via Override‑Matrix steuerbar, Klassen/Schwellen bleiben standardisiert.
+* **Kosten/Performance** → Artefaktgrößen (K8) überwachen; PNG‑/PDF‑Optimierung.
+
+== Anhang – Glossar
+
+* **Blueprint**: Versionierter Satz an Systeminstruktionen/Policies.
+* **Gate**: Entscheidung pass/revise/block auf Basis Evaluation+Governance.
+* **Strict‑Preflight**: Betriebsmodus mit verschärften Prüfungen und Blockern.
+* **SoT (Source of Truth)**: Kanonische Persistenz (Memory) für Artefakte/Entscheidungen/KPIs.
+
+
+
+== Praktische Übergaben von Helios an den Hauptagenten
+
+Dieser Abschnitt beschreibt **konkret**, was Helios dem Hauptagenten bei der Provisionierung „mitgibt“ – also Artefakte, Verträge (Contracts), Default-Policies, Trigger, Tools & Hilfen für den laufenden Betrieb.
+
+===  Übergabepaket (Deliverables)
+[cols="1,3", options="header"]
+|===
+| Bestandteil | Inhalt / Zweck
+| **Blueprint-Bundle** | Versionierte Systeminstruktionen für Main Agent + Subagenten (Evaluator, Governor, Memory, Audit‑Simulator, V‑Agent) inkl. Prüfsummen.
+| **Snapshot-Header (SoT)** | Zusammenfassung der aktiven Versionen, Policies, Trigger, KPI‑Schwellen; dient als Source‑of‑Truth für Audits.
+| **Override‑Matrix** | Dokumentiert zulässige domänenspezifische Abweichungen (z. B. strengere Trigger), mit Begründung & Gültigkeit.
+| **API‑Contracts** | Beschreibungen für `summary`, `pack`, `rollup`, `kpi`, `audit/ingest` inkl. Auth/RBAC, Limits, Idempotenz.
+| **Client‑Stubs** | Vorlagen (z. B. cURL/HTTP, Pseudo‑SDK) zur direkten Nutzung der Memory‑APIs und Governor‑Signals.
+| **Policy‑Set** | Preflight‑Regeln (U+002D‑Hyphen, LibreOffice‑PDF, Fonts), F/E‑Taxonomie, Score‑Schwellen, Gate‑Logik.
+| **KPI‑Profil** | Voreinstellung K1–K10 (inkl. K2/K3‑Gates), Observability‑Hinweise, Beispielalarme.
+| **Runbooks** | Schritt‑für‑Schritt‑Anleitungen für Submit→Gate, Incident K2/K3, Revision, Audit‑Report.
+| **Smoke‑Test‑Checkliste** | Minimaler E2E‑Pfad zur Inbetriebnahme (Artefakte, Evaluation, Gate, Persistenz, KPI‑Sichtbarkeit).
+| **Beispiel‑Templates** | Prompt‑/Output‑Schablonen, CONFIDENCE‑Footer, Preflight‑Manifest‑Skeletons.
+|===
+
+===  API‑Contracts – Kurzreferenz
+[cols="2,3,2,2,2", options="header"]
+|===
+| Endpoint | Zweck | Auth/RBAC | Idempotenz | Limits
+| `GET /memory/preflight/summary` | Evidenzübersicht (kompakt) | Read | ETag | 429/Cache
+| `GET /memory/preflight/pack` | Vollständiges Pack (PNGs/Manifest) | Read | ETag | 413/429
+| `GET /memory/preflight/rollup` | Aggregierte Metriken/Klassen | Read | ETag | 429
+| `GET /memory/kpi/preflight` | KPI‑Snapshot/Trend | Read | ETag | 429
+| `POST /memory/audit/ingest` | Audit‑Simulator‑Befunde schreiben | Write | Idempotency‑Key | 413/429
+|===
+
+===  Default‑Policies & Trigger (Governor)
+* **Score‑Schwellen:** `pass ≥ 85`, `revise 60–84`, `block < 60`.
+* **F‑Critical:** F‑004/F‑005 sind Blocker. Ab `critical_rate_F ≥ 0.15` ⇒ `preflight_mode=strict` + Block auf F‑004/F‑005.
+* **E‑Critical:** E‑003 ⇒ `security_mode=strict_on_E003` + V‑Agent Review (Block bis Mitigation).
+
+===  Runbooks (operativ)
+. **Submit → Preflight → Evaluate → Gate** (Standardfluss)
+. **Incident:** K2 (critical_rate_F) ≥ 0.15 ⇒ Strict‑Preflight an, Block F‑004/F‑005.
+. **Security:** E‑003 erkannt ⇒ V‑Agent verpflichtend, Safeguards.
+. **Revision:** exakt eine Selbstrevision, dann finaler Gate‑Entscheid.
+
+=== Beispiel: Handover‑Beziehungsübersicht
+[plantuml, helios-handover, png, align=center]
+....
+@startuml
+skinparam shadowing false
+skinparam componentStyle rectangle
+
+component "Helios Core" as Helios
+component "Domain Main Agent" as Main
+package "Subagents" {
+  component "Evaluator" as Eval
+  component "Governor" as Gov
+  component "Memory" as Mem
+  component "Audit-Simulator" as AuditSim
+  component "V-Agent" as V
+}
+package "Deliverables" {
+  component "Blueprint-Bundle" as Blue
+  component "Snapshot-Header" as Snap
+  component "Override-Matrix" as Over
+  component "API-Contracts" as Api
+  component "Runbooks" as Run
+  component "KPI-Profil" as Kpi
+}
+Helios --> Main : Provision + Übergabepaket
+Helios --> Blue
+Helios --> Snap
+Helios --> Over
+Helios --> Api
+Helios --> Run
+Helios --> Kpi
+Main --> Eval : use
+Main --> Gov : use
+Main --> Mem : use
+Main --> AuditSim : on-demand
+Main --> V : policy
+@enduml
+....
+
+=== Beispiel‑Konfiguration (YAML‑Skizze)
+[abstract]
+Die YAML-Skizze ist Konfiguration (Policies, Schwellen, Endpoints, Runbooks) – kein Prompt-Text. Nicht in die Systeminstruktion „reinkopieren“. Stattdessen als externes, versioniertes Config-Artefakt laden. Die Systeminstruktionen sollen nur festlegen, dass diese Config ausgewertet wird (und was die Defaults sind, falls keine Config vorhanden ist).
+
+ Pack die YAML und markiere sie eindeutig, z. B. mit `CONFIG:BEGIN` und `CONFIG:END`, damit sie leicht extrahierbar ist.
+
+Helios-Prompt (Beispiel Copy&Paste):
+
+---
+CONFIG:BEGIN
+```yaml
+helios.version: 1.0
+helios.main_agent: "Rai-Marketing"
+policies:
+  score_thresholds: { pass: 85, revise_min: 60 }
+  preflight: { strict_on_k2: 0.15, block_classes: [F-004, F-005] }
+  security: { strict_on_e003: true }
+kpi_targets: { k1: 0.75, k2: 0.15, k3: 0 }
+endpoints:
+  summary: "/memory/preflight/summary"
+  pack: "/memory/preflight/pack"
+  rollup: "/memory/preflight/rollup"
+  kpi: "/memory/kpi/preflight"
+  audit_ingest: "/memory/audit/ingest"
+runbooks:
+  submit_gate: true
+  incident_k2: true
+  security_e003: true
+```
+CONFIG:ENDE
+
+Helios: Erzeuge Hauptagent für folgenden Anwendungsfall : "<Erkläre so genau wie möglich DeinUseCase>". Wende die obige CONFIG an.
+
+---
+
+==== Helios‑Konfiguration
+
+Dieses Dokument erklärt die praktische Bedeutung der Helios‑Konfiguration (YAML) beim Erzeugen eines Hauptagenten in diesem GPT‑Setup. Es dient als Ergänzung zur Architekturdokumentation.
+
+* *Top‑Level:*
+
+** `helios.version: 1.0` : Referenz auf die Helios‑Blueprint‑Version. Nützlich für Audits/Kompatibilität ("gegen welche Policies/Thresholds wurde gearbeitet?").
+
+** `helios.main_agent: <domain-agent-name>`: Der konkrete Hauptagent (z. B. "Rai‑Marketing", "Rai‑DSGVO"). Dient zur eindeutigen Zuordnung im Memory/Audit.
+
+* *Policies*
+
+** `policies.score_thresholds: { pass: 85, revise_min: 60 }`
+
+*** Evaluator‑Schwellen:
+
+**** `pass ≥ 85` → direkte Freigabe (sofern Governor/V‑Agent nicht blocken)
+**** `60–84` → *revise* (genau eine Selbstrevision)
+**** `<60` → *block*
++
+*Tuning:* In sehr strengen Domänen `pass` auf 90 anheben.
+
+** `policies.preflight: { strict_on_k2: 0.15, block_classes: [F-004, F-005] }`
+
+*** Governor‑Trigger für Format/Preflight:
+**** `strict_on_k2: 0.15` → Wenn `K2 = critical_rate_F ≥ 0.15`, schaltet Governor **Strict‑Preflight** ein (härtere Checks, weniger Kulanz).
+**** `block_classes` → diese F‑Klassen sind **harte Blocker** (Standard: `F‑004` „visuelle Mängel“, `F‑005` „Preflight unvollständig“).
+
+** `policies.security: { strict_on_e003: true }`
+ Sicherheitsmodus: Sobald `E‑003` (Policy/Ethik/Legal‑Verstoß) auftaucht, aktiviert Governor `security_mode=strict_on_E003`. Der V‑Agent muss entscheiden (blocken oder Safeguards).
+
+* *KPI‑Ziele (Targets):*
+
+** `kpi_targets.k1: 0.75` → `first_pass_rate`: Mindestens 75 % sollen ohne Revision durchgehen.
+** `kpi_targets.k2: 0.15` → `critical_rate_F`: Max. 15 % kritische F‑Fehler (`F‑004`/`F‑005`). Überschreitung ⇒ Strict‑Mode.
+** `kpi_targets.k3: 0` → `e_critical_rate`: Nulltoleranz für kritische E‑Fehler (insb. `E‑003`).
+
+
+** *Praxis:* Diese Targets steuern Alerts und Betriebsprofile (wann Strict‑/Security‑Mode scharf geschaltet wird).
+
+* *Endpoints (Memory‑API):*
+
+** `summary` – kompakte Evidenz (für UI/Review)
+** `pack` – vollständige Artefakte (PNGs, Manifest, Hashes)
+** `rollup` – aggregierte Klassen/Metriken (für Gate‑Entscheidungen)
+** `kpi` – KPI‑Snapshot (für Governor/Observability)
+** `audit_ingest` – Audit‑Simulator schreibt Zweitmeinungen (idempotent)
+.
+
+* *Runbooks (operativ scharf geschaltet)_*
+
+** `submit_gate: true` Aktiviert den **Standardfluss** (Submit → Preflight → Evaluate → Gate). Ohne das würdest du nur „trocken“ evaluieren.
+
+** `incident_k2: true`
+Schaltet das **Incident‑Playbook** ein: Wenn `K2` den Schwellwert übersteigt, zieht Governor automatisch **Strict‑Preflight** & **Blocker**.
+
+** `security_e003: true`
+Erzwingt bei `E‑003` das **Security‑Playbook**: V‑Agent‑Review, mögliche Blockade, Safeguards.
+
+*Wirkung in der Praxis:*
+
+. **Konsistentes Verhalten** über alle Submits/Teams hinweg: Gate‑Logik, Trigger und Endpoints sind **deklarativ** festgelegt, nicht implizit „im Kopf“.
+
+. **Schnelles Onboarding**: Main‑Agent weiß sofort, welche Routen er nutzen muss und welche Regeln gelten.
+
+. **Revisionssicherheit**: Bei Audits ist klar, welcher Stand (Version/Targets/Trigger) zum Zeitpunkt X aktiv war.
+
+## Nutzen und Aufwand
+
+### Welchen Mehrwert bringen die fünf Wächter des Hauptagenten (Quality by Design)
+
+* *Evaluator:* Findet zuverlässig Format-/Quellen-/Logikfehler (F/E-Taxonomie) und gibt eine klare Empfehlung (pass/revise/block). *Spart Review-Runden.*
+* *Governor:* Macht Qualität durchsetzbar—setzt Flags & Gates (z. B. Strict-Preflight, Block bei F-004/F-005), reagiert auf KPIs. *Weniger Bauchgefühl, mehr Regeln.*
+* *Memory Dein Audit-Trail:* PNG-Preflight, Manifeste, Hashes, Rollups, KPIs. *Erleichtert Abnahmen, Audits und spätere Reuse.*
+* *Audit-Simulator:* Zweitmeinung, ohne Artefakte anzufassen. *Ideal für heikle Abgaben/Neue Mitarbeiter/Neue Domains.*
+* *V-Agent:*  Fängt Ethik/Legal/Safety-Risiken ab (E-003), kann blockieren oder Safeguards verlangen.
+
+
+### Typischer Impact (bei Teams)
+* *Weniger Revisionen:* First-Pass-Rate geht rauf, weil triviale F-Fehler früh blockiert werden.
+* *Schnellere Abnahmen:* Auditoren/Stakeholder sehen Evidenz statt Behauptungen.
+* *Weniger Risiken:* Policy-Verstöße werden konsistent behandelt (V-Agent + Governor).
+
+### Was Kosten die fünf Wächter dem  Betrieb
+
+Laufzeit: +10–25 % pro Durchlauf, d.h. je schlechter die Erstanwort um so mehr sind die anderen gefordert!

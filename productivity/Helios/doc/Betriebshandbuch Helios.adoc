@@ -1,0 +1,81 @@
+== Betriebshandbuch Helios
+
+=== Zweck & Geltungsbereich
+Dieses Kapitel fixiert die praktische Nutzung der Subagenten (Evaluator, Governor, Memory, Audit-Simulator, V-Agent) inkl. Betriebsprofile, Gates, KPIs und Nachweise.
+
+=== Rollen & Verantwortlichkeiten (RACI)
+[cols="1,2,2,2,2", options="header"]
+|===
+| Aktivität | Verantwortlich (R) | Ausführend (A) | Konsultiert (C) | Informiert (I)
+| Content-Erstellung | Fachautor | Main Agent | Evaluator | Auditor
+| Gate-/Policy-Setzung | Governor | Governor | V-Agent | Teamlead
+| Evidenz & KPIs | Memory | Memory | Auditor | Team
+| Audit-Zweitmeinung | Auditor | Audit-Simulator | Evaluator | Governor
+| Eskalation Policy/Ethik | V-Agent | V-Agent | Legal/Compliance | Governor
+|===
+
+=== Betriebsprofile
+* **Prod (Default):** Evaluator, Governor, Memory **an**; V-Agent **an**; Audit-Simulator **on-demand**.
+* **Staging:** alles **an**, Audit-Simulator **periodisch** (Sampling).
+* **Dev:** Evaluator+Memory **an**, Governor „revise bevorzugt“, Audit-Sim **aus**.
+
+=== Gates & Trigger (verbindlich)
+* **Score-Schwellen:** `pass ≥ 85`, `revise 60–84`, `block < 60`.
+* **F-Critical:** F-004/F-005 ⇒ Blocker. Bei `critical_rate_F ≥ 0.15` ⇒ `preflight_mode=strict`.
+* **E-Critical:** E-003 ⇒ `security_mode=strict_on_E003` + V-Agent Review (Block bis Mitigation).
+
+=== KPIs & Schwellen
+[cols="1,3,1,3", options="header"]
+|===
+| KPI | Beschreibung | Schwellwert | Reaktion
+| K1 | first_pass_rate | < 0.75 | Template-/Prompt-Tuning
+| K2 | critical_rate_F | ≥ 0.15 | Strict-Preflight + Block F-004/F-005
+| K3 | e_critical_rate | > 0 | Security-Strict + V-Agent Pflicht
+| K8 | artifact_weight_mb | > Budget | Preflight/Assets optimieren
+|===
+
+=== Nachweis & Evidenz (Audit-Trail)
+* Pflichtartefakte: **PNG-Preflight**, **PDF/Manifeste**, **Hashes/ETag**, **Rollup**, **KPI-Snapshot**.
+* Abruf: `summary`, `pack`, `rollup`, `kpi`, `audit/ingest`.
+
+=== Runbooks
+. **Standard-Submit → Gate**
++
+[plantuml, runbook-standard, png, align=center]
+....
+@startuml
+actor Author
+participant "Main Agent" as Main
+participant Evaluator as Eval
+participant Governor as Gov
+participant Memory as Mem
+participant "V-Agent" as V
+
+Author -> Main: Submit(content+artifacts)
+Main -> Mem: ingest(preflight/png, manifest, hash)
+Main -> Eval: evaluate(ref)
+Eval -> Gov: {score, classes, reco}
+Gov -> Mem: rollup/kpi()
+alt classes contains E-003
+  Gov -> V: request_review()
+  V --> Gov: allow | block_with_safeguards
+end
+Gov --> Main: gate(pass | revise | block)
+@enduml
+....
+
+. **Incident: K2 (critical_rate_F) ≥ 0.15**
+* Governor schaltet `preflight_mode=strict`.
+* Block bei F-004/F-005 bis K2 < 0.15 über 20 Submits.
+
+=== Exceptions & Risk Acceptance
+* Ausnahme nur mit **V-Agent** + Begründung + Gültigkeitsfenster.
+* Memory speichert Entscheidung + Safeguards.
+
+=== Change Management
+* Änderungen an Gates/Triggern via **Override-Matrix** (Version, Datum, Begründung).
+* Jede Änderung erzeugt einen neuen **Snapshot-Header**.
+
+=== E2E-Tests (empfohlen)
+* Szenarien: Happy Path (Pass), Revise→Pass, Block (F-004), Security-Block (E-003), Audit-Sim-Ingress.
+* Artefakte: Fixtures (PDF/PNG), erwartete Klassen/Gates, KPI-Delta.

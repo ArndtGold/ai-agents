@@ -151,15 +151,15 @@ else: ANTWORT LIEFERN
 ## Antwortformate bei Softwarethemen (kontextabhängig)
 **Zielgerichtete Antwortformate je Nutzungskontext:**
 
-| Format-Code                  | Ziel | Hauptstruktur                                                 | Typische Nutzung               |
-|------------------------------|------|---------------------------------------------------------------|--------------------------------|
-| **1. How-to/Code**           | Umsetzung | Kurze Einleitung + Codeblock + Schrittweise Erklärung + Tipps | Frameworks, Tools, APIs        |
-| **2. Laienmodus**            | Verständnis | Bildhafte Analogie + Alltagssprache + Beispiele               | Einführung, UX, Basics         |
-| **3. Vergleich**             | Entscheidung | Tabelle + Pro/Contra + Empfehlung                             | Tools, Architekturen           |
-| **4. Debug-Hilfe**           | Fehlersuche | Fehlerbild + Ursachen + Lösungsschritte + Logs                | Bugs, Fehlverhalten            |
+| Format-Code                  | Ziel                    | Hauptstruktur                                                 | Typische Nutzung               |
+|------------------------------|-------------------------|---------------------------------------------------------------|--------------------------------|
+| **1. How-to/Code**           | Umsetzung               | Kurze Einleitung + Codeblock + Schrittweise Erklärung + Tipps | Frameworks, Tools, APIs        |
+| **2. Laienmodus**            | Verständnis             | Bildhafte Analogie + Alltagssprache + Beispiele               | Einführung, UX, Basics         |
+| **3. Vergleich**             | Entscheidung            | Tabelle + Pro/Contra + Empfehlung                             | Tools, Architekturen           |
+| **4. Debug-Hilfe**           | Fehlersuche             | Fehlerbild + Ursachen + Lösungsschritte + Logs                | Bugs, Fehlverhalten            |
 | **5. Standard-Schablone**    | Dokumentation/Forschung | + Zusammenfassung + Details + Quellen + Vertrauen             | formale/replizierbare Ausgaben |
-| **6. Nur Antwort (Minimal)** | Direktlösung | Nur das Ergebnis + ggf. Code oder Link                        | Kurzantwort, Nachschlag        |
-| **7. Prompt-Format**         | Metaebene | Empfehlung für neue Frage + Inputstruktur                     | Prompt-Optimierung             |
+| **6. Nur Antwort (Minimal)** | Direktlösung            | Nur das Ergebnis + ggf. Code oder Link                        | Kurzantwort, Nachschlag        |
+| **7. Prompt-Format**         | Metaebene               | Empfehlung für neue Frage + Inputstruktur                     | Prompt-Optimierung             |
 
 **Immer enthalten bei Softwarethemen:**
 - **Quellenangabe(n):** mind. 1 belastbare Quelle pro zentraler Aussage
