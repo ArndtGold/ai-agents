@@ -1,5 +1,57 @@
 # Changelog – Helios Systeminstruktion
 
+## Version 1.3 (2025‑10‑04)
+**Status:** Released  
+**Scope:** Systeminstruktion (Meta‑Agent) + Policy‑Pack; Blueprints kompatibel
+
+### Summary
+v1.3 ergänzt zwei Verhaltensregeln – **EV‑001 Evidenz‑Platzierung** und **UO‑001 Unsichere Ausgabe vermeiden** – und hebt das Policy‑Pack auf **`helios.security.v3`** (extends `v2`). Ziel: saubere, rechtssichere Zitationen und Vermeidung von „copy‑paste‑gefährlichen“ Outputs.
+
+---
+
+### Added
+- **§5 Policies:**
+    - **Evidenz‑Platzierung (NEU):** Zitate **nach** dem betreffenden Satz; **keine Roh‑URLs**; **Domain‑Diversität**; kurze Direktzitate.
+    - **Unsichere Ausgabe vermeiden (NEU):** Keine ungefragten, direkt ausführbaren Snippets (Shell/`<script>`). Bei Bedarf: Warnhinweis, Voraussetzungen, Rollback‑Tipps, Platzhalter.
+- **§14 Policy‑Pack v3:**
+    - **EV‑001** mit Checks (`position=after_sentence`, `raw_urls=false`, `domain_diversity=true`, `quote_length_words_max=25`) und `audit_log: evidence_fixup`.
+    - **UO‑001** mit `transform.neutralize`, `insert_warning`, `require_prereqs`, `use_placeholders`; Routing zu Governor/Evaluator; `audit_log: unsafe_output_mitigated`.
+
+### Changed
+- **Snapshot‑Header (§11):** `sysint_version → 1.3` (kein Breaking Change).
+- **Policy‑Pack:** `helios.security.v3` **erweitert** `v2`; Reihenfolge `AE‑001 → PB‑001 → EV‑001 → UO‑001`.
+
+### Security Impact
+- **OWASP LLM02 Insecure Output Handling:** Stärker adressiert durch **UO‑001** (Neutralisierung, Warnung, Placeholders).
+- **OWASP LLM09 Overreliance / Evidence Hygiene:** **EV‑001** erzwingt saubere, positionsgebundene Zitationen und Quelle‑Diversität.
+
+### Backward Compatibility
+- **Kompatibel** zu v1.2; `v3` ist additive Erweiterung. Systeme ohne `v3` verhalten sich wie v1.2 (ohne neue Durchsetzungen).
+
+### Migration Notes
+1. **Policy‑Pack aktivieren:** `policy_pack: helios.security.v3` im Deployment setzen; `extends: [helios.security.v2]` beachten.
+2. **Governor/Evaluator‑Routing:** Neue Events `evidence_fixup`, `unsafe_output_mitigated` akzeptieren; Gates für `risk_zone=ELEVATED` prüfen.
+3. **Renderer/Publisher:** Roh‑URLs in Ausgaben unterbinden; Zitat‑Formatter bereitstellen.
+4. **CI‑Tests:** Zwei neue Tests hinzufügen (EV‑001 Position/Raw‑URL, UO‑001 Neutralisierung/Warnhinweis).
+
+### Notable Diffs (semantisch)
+- **§5 Policies:** `+ Evidenz‑Platzierung (NEU)`, `+ Unsichere Ausgabe vermeiden (NEU)`
+- **§14:** `+` v3‑Regeln **EV‑001**, **UO‑001** inkl. JSON‑Definitionen
+- **Header:** `sysint_version 1.2 → 1.3`
+
+### JSON Patch (orientierend)
+```json
+[
+  { "op": "replace", "path": "/meta/version", "value": "1.3" },
+  { "op": "add", "path": "/policies/-", "value": "Evidenz-Platzierung (NEU)" },
+  { "op": "add", "path": "/policies/-", "value": "Unsichere Ausgabe vermeiden (NEU)" },
+  { "op": "add", "path": "/security/policy_pack", "value": "helios.security.v3" },
+  { "op": "add", "path": "/security/rules", "value": ["EV-001", "UO-001"] }
+]
+```
+
+---
+
 ## Version 1.2 (2025‑10‑04)
 **Status:** Released  
 **Scope:** Systeminstruktion (Meta‑Agent), Blueprints unverändert kompatibel
