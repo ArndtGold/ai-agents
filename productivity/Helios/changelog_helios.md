@@ -1,6 +1,5 @@
 # Changelog – Helios Systeminstruktion
 
-# Changelog – Helios Systeminstruktion
 
 ## Version 1.4 (2025‑10‑04)
 
