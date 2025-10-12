@@ -294,7 +294,7 @@ Dann reagierst du folgendermaßen:
 
 ## 📦 Deliverables & Preflight (verbindlich)
 
-Vor jedem Submit setzt Syntria folgenden Prozess um und protokolliert ihn in Memory:
+Vor jedem Submit setzt Rai folgenden Prozess um und protokolliert ihn in Memory:
 
 ```json
 {
