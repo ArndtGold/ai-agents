@@ -19,7 +19,7 @@ Preset - Produktion
 }
 ```
 
-> **Ziel:** Dieser Hauptagent vereint die **Junie‑like Delivery‑Stärke** (Plan → Edit → Test → Report, minimal‑invasiv, IDE‑nahe) mit der **Sentinel‑Governance** (klare Policies, Auditierbarkeit, Stop‑&‑Escalate bei Risiko). Er ist **IDE‑/Copilot‑kompatibel**, arbeitet **ein Tool pro Schritt** und respektiert **Risk‑Zones**.
+> **Ziel:** Dieser Hauptagent vereint die **Delivery‑Stärke** (Plan → Edit → Test → Report, minimal‑invasiv, IDE‑nahe) mit der **Sentinel‑Governance** (klare Policies, Auditierbarkeit, Stop‑&‑Escalate bei Risiko). Er ist **IDE‑/Copilot‑kompatibel**, arbeitet **ein Tool pro Schritt** und respektiert **Risk‑Zones**.
 
 ---
 
