@@ -10,18 +10,18 @@
 ## 2) KPI‑Matrix (K1…K10)
 > Standard‑Fenster: **Rollup N=20 Submits**, Zeitfenster: **30 Tage** (sofern angegeben). Schwellen sind Default‑Werte.
 
-| KPI | Ziel | Definition / Formel | Quelle (API) | Fenster | Standard‑Schwelle | Aktion (Governor Hook) |
-|---|---|---|---|---|---|---|
-| **K1 avg_vertrauenswert** | Q1 | Mittelwert `score` | `/memory/preflight/rollup.score.avg_vertrauenswert` | 20 | `< 0.75` | Qualität ↑: Z‑001 +0.05, Z‑002 +0.07 |
-| **K2 critical_rate_F** | Q2 | `(F‑004+F‑005)/N` | `/memory/preflight/rollup.rates.critical_rate` | 20 | `≥ 0.15` | `preflight_mode=strict`, `submission_gate=block_on_F004_F005`, Z‑003 +0.08 |
-| **K3 e_critical_rate** | Q4 | `E‑003/N` | `/memory/preflight/rollup.rates.e_critical_rate` | 20 | `> 0` | `security_mode=strict_on_E003`, `sourcing_policy=require_link_date_version_on_claims` |
-| **K4 first_pass_rate** | Q1/Q3 | `count(recommendation='pass' im Erstlauf)/N` | `audit.save + submit.history` | 20 | `< 0.60` | Z‑001/Z‑002 +0.05; Coaching‑Hint an Rai |
-| **K5 revision_depth** | Q3 | ∅ Revisionen bis „pass“ | `submit.history` | 20 | `> 1.5` | Effizienzmaßnahmen; Templating pushen |
-| **K6 ttd_minutes** | Q3 | Median `submitted_at − first_response_at` | `thread/submit timestamps` | 30 Tage | `> P75` | Z‑004 +0.05, Prozessvereinfachung |
-| **K7 fmt_pass_rate** | Q2 | `1 − has(F‑001..F‑006)/N` | `/memory/preflight/rollup.counts` | 20 | `< 0.80` | Schulung/Reminder Preflight |
-| **K8 sourcing_pass_rate** | Q1/Q4 | `1 − has(E‑001,E‑002,E‑004)/N` | `/memory/preflight/rollup.counts` | 20 | `< 0.85` | Sourcing‑Policy schärfen |
-| **K9 artifact_weight_mb** | Q5 | Median ZIP/Pack‑Größe | `/memory/preflight/pack meta` | 30 Tage | `P95 > 500 MB` | Medienkompression erzwingen |
-| **K10 reuse_ratio** | Q5 | Anteil Template/Asset‑Reuse | `tags/meta` | 30 Tage | `< 0.30` | Library/Knowledge‑Ops pushen |
+| KPI                       | Ziel  | Definition / Formel                          | Quelle (API)                                        | Fenster | Standard‑Schwelle | Aktion (Governor Hook)                                                                |
+|---------------------------|-------|----------------------------------------------|-----------------------------------------------------|---------|-------------------|---------------------------------------------------------------------------------------|
+| **K1 avg_vertrauenswert** | Q1    | Mittelwert `score`                           | `/memory/preflight/rollup.score.avg_vertrauenswert` | 20      | `< 0.75`          | Qualität ↑: Z‑001 +0.05, Z‑002 +0.07                                                  |
+| **K2 critical_rate_F**    | Q2    | `(F‑004+F‑005)/N`                            | `/memory/preflight/rollup.rates.critical_rate`      | 20      | `≥ 0.15`          | `preflight_mode=strict`, `submission_gate=block_on_F004_F005`, Z‑003 +0.08            |
+| **K3 e_critical_rate**    | Q4    | `E‑003/N`                                    | `/memory/preflight/rollup.rates.e_critical_rate`    | 20      | `> 0`             | `security_mode=strict_on_E003`, `sourcing_policy=require_link_date_version_on_claims` |
+| **K4 first_pass_rate**    | Q1/Q3 | `count(recommendation='pass' im Erstlauf)/N` | `audit.save + submit.history`                       | 20      | `< 0.60`          | Z‑001/Z‑002 +0.05; Coaching‑Hint an Rai                                               |
+| **K5 revision_depth**     | Q3    | ∅ Revisionen bis „pass“                      | `submit.history`                                    | 20      | `> 1.5`           | Effizienzmaßnahmen; Templating pushen                                                 |
+| **K6 ttd_minutes**        | Q3    | Median `submitted_at − first_response_at`    | `thread/submit timestamps`                          | 30 Tage | `> P75`           | Z‑004 +0.05, Prozessvereinfachung                                                     |
+| **K7 fmt_pass_rate**      | Q2    | `1 − has(F‑001..F‑006)/N`                    | `/memory/preflight/rollup.counts`                   | 20      | `< 0.80`          | Schulung/Reminder Preflight                                                           |
+| **K8 sourcing_pass_rate** | Q1/Q4 | `1 − has(E‑001,E‑002,E‑004)/N`               | `/memory/preflight/rollup.counts`                   | 20      | `< 0.85`          | Sourcing‑Policy schärfen                                                              |
+| **K9 artifact_weight_mb** | Q5    | Median ZIP/Pack‑Größe                        | `/memory/preflight/pack meta`                       | 30 Tage | `P95 > 500 MB`    | Medienkompression erzwingen                                                           |
+| **K10 reuse_ratio**       | Q5    | Anteil Template/Asset‑Reuse                  | `tags/meta`                                         | 30 Tage | `< 0.30`          | Library/Knowledge‑Ops pushen                                                          |
 
 ## 3) Formeln (präzise)
 ```text
