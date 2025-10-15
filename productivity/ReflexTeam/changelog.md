@@ -2,6 +2,24 @@
 
 > Zeitzone: Europe/Berlin
 
+## [1.3.1] – 2025-10-15
+
+### Added
+- **Observability by Contract (vollständig)**: Gate‑Spans **pro Gate** (Evaluator → V‑Agent → Role‑Governor → Global‑Governor → Memory.ingest → Transfer). Pflicht‑Attribute: `handoff.gate`, `reason_code`, `risk`, `ssot.prev_version`, `ssot.cur_version`, `coverage`, `artifact.count`, `latency_ms`, `cpu_pct`, `mem_mb`, `trace_id` (Propagation aus Transfer‑Contract).
+- **KPI‑Drill‑downs**: `audit_disagreement_rate` (Evaluator vs. Simulator), `false_positive_F_rate` (Evaluator‑F‑Findings, die sich als false positiv erweisen), `span_coverage_rate` (gültige Gate‑Spans/alle Gate‑Runs) im KPI‑Snapshot.
+- **OTel‑Collector‑Profil (Minimal)**: OTLP/HTTP‑Exporter, Batch‑Processor, 100 % Sampling für Gate‑Spans.
+
+### Changed
+- **Transfer‑Contract**: Gate‑Span‑Werte werden in `telemetry.*` gespiegelt; Trace‑Propagation (`trace_id` → `traceparent`) verbindlich.
+- **KPI‑Snapshot** um `audit_disagreement_rate`, `false_positive_F_rate`, `span_coverage_rate` erweitert.
+
+### Migration
+1) OTel‑SDK in allen Subagenten aktivieren; Gate‑Span‑Helper einbinden.
+2) Transfer‑Producer/Consumer: `telemetry.*` aus Gate‑Span schreiben; `traceparent` durchreichen.
+3) KPI‑Job erweitern: neue Kennzahlen berechnen, Simulator‑Rohsignale einlesen.
+
+---
+
 ## [1.3.0] – 2025-10-15
 
 ### Added
@@ -104,5 +122,4 @@
 - Komplexen Job triggern, bewusst eine Abhängigkeit blockieren → Es entstehen **`SPEC_MIN.md`, `STUBS/`, `RISKS.md`**, und im Transfer‑Log steht `status:"fallback"` + `reason_code`.
 - Eine SSOT‑Änderung durchführen → **`spec_diff.md`** generiert, KPI‑Snapshot aktualisiert.
 - Idempotenter Doppel‑Submit → zweiter Write schlägt kontrolliert mit **409** an.
-
 

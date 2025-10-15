@@ -4,13 +4,17 @@
 > **Tagline:** Auditierbare, policy‑geführte Multi‑Agenten‑Orchestrierung in einer Instanz.  
 > **Zweck:** Innerhalb **einer Instanz** (ein Prozess) ein Multi‑Agenten‑Team orchestrieren – PM, Designer, Frontend, Backend, Tester – überwacht von **Role‑Guardians** (Evaluator, V‑Agent, Role‑Governor) und einem **Global‑Governor**. Alle Artefakte werden **versionssicher im Memory (CAS)** gespeichert; jeder Handoff ist **auditierbar**.
 
+> **Version:** 1.3.1 · **Datum:** 2025‑10‑15 · **Status:** active  
+> **Hinweis zur Fassung:** Dies ist das **Original‑Dokument**, in das die Verbesserungen (SSOT/Traceability‑Gate, erweiterter Transfer‑Contract, Observability by Contract, KPI‑Drill‑downs, Runtime‑Robustheit) **inline** eingearbeitet wurden.
+
 ---
 
 ## 1) Laufzeit & Prinzipien
 - **Single‑Instance**: Alle Subagenten und Wächter laufen im selben Prozess/Container; keine externen Services notwendig.
-- **Reflexiv**: Vor jedem Handoff: **Evaluator → V‑Agent → Role‑Governor → Global‑Governor → Memory.ingest() → Transfer**.
-- **SSOT (hartgezogen)**: `REQUIREMENTS.md`, `TEST.md`, `AGENT_TASKS.md` nur durch **PM** änderbar; **jede Änderung** erzwingt **SemVer‑Bump** + **`spec_diff.md`** (siehe §6).
+- **Reflexiv (Handoff‑Kette)**: **Evaluator → V‑Agent → Role‑Governor → Global‑Governor → Memory.ingest() → Transfer**.
+- **SSOT (hartgezogen)**: `REQUIREMENTS.md`, `TEST.md`, `AGENT_TASKS.md` nur durch **PM** änderbar; **jede Änderung** erzwingt **SemVer‑Bump** + **`spec_diff.md`** (siehe §5).
 - **Determinismus**: Keine zufälligen Nebenwirkungen; alle Entscheidungen werden geloggt.
+- **Observability by Contract**: **Jeder Gate‑Übergang erzeugt genau einen OpenTelemetry‑Span** (siehe §6a) mit Pflicht‑Attributen und **Trace‑Propagation** aus dem Transfer‑Contract.
 
 ---
 
@@ -25,7 +29,7 @@
 
 **Assumptions‑Registry (Pflicht):**
 - Eintragsschema: ``A-### — Annahme — *Owner* — *Impact* — *Status* (open/validated/invalidated)``
-- Änderungen an Assumptions ⇒ **Version‑Bump** der SSOT + automatischer **`spec_diff.md`** (siehe §6).
+- Änderungen an Assumptions ⇒ **Version‑Bump** der SSOT + automatischer **`spec_diff.md`** (siehe §5).
 
 **Vorgehen:**
 - Lücken mit **minimalen, plausiblen Annahmen** füllen (Assumptions mit ID/Owner/Impact).
@@ -74,12 +78,20 @@ GATE_PRECONDITIONS:
       enforce_fields: [
         "from_role","to_role","artifact_refs",
         "reason_code","risk",
-        "spec_version_from","spec_version_to"
+        "spec_version_from","spec_version_to",
+        "trace_id"
       ]
     ssot_drift_check:
       required: true
       block_on_unreviewed_diff: true
       block_on_missing_links: ["requirements_id_map","tests_ref"]
+    observability:
+      gate_span_required: true
+      span_attributes_required: [
+        "handoff.gate","trace_id","reason_code","risk",
+        "ssot.prev_version","ssot.cur_version",
+        "coverage","artifact.count","latency_ms","cpu_pct","mem_mb"
+      ]
 ```
 
 **Gate‑Konsequenz:** Evaluator setzt `recommendation = block|revise|pass`; Governor erzwingt Entscheidung, inkl. erhöhter Preflight‑Strenge bei Häufung.
@@ -102,6 +114,7 @@ Checksum: <sha256>
 Memory-Ref: <urn:cas:sha256:...>
 Date: <ISO8601>
 Change-Reason: <gate/fix>
+TRACE_ID: <trace_id>
 -->
 ```
 
@@ -183,13 +196,14 @@ Jeder `transfer_to_*` erzeugt eine JSON‑Zeile in `/audit/transfer_log.jsonl` *
   "handoff": {
     "gate": "<Gx_*>",
     "from": "<role>",
-    "to": "<role>",
+    "to":   "<role>",
+    "trace_id": "<uuid>",
     "artifacts": [{"path":"…","version":"…","checksum":"sha256:…","memory_ref":"urn:cas:sha256:…"}],
-    "sources": [{"path":"REQUIREMENTS.md","version":"…"},{"path":"AGENT_TASKS.md","version":"…"}]
+    "sources":   [{"path":"REQUIREMENTS.md","version":"…"},{"path":"AGENT_TASKS.md","version":"…"}]
   },
   "result": {
     "status": "pass|fail|fallback",
-    "reason_code": "PM_BUMP_MAJOR|PM_BUMP_MINOR|PM_BUMP_PATCH|DESIGN_CHANGE|TASK_RESCOPING|TEST_UPDATE|BUGFIX|HOTFIX|POLICY_UPDATE|DEPENDENCY_UPDATE",
+    "reason_code": "PM_BUMP_MAJOR|PM_BUMP_MINOR|PM_BUMP_PATCH|DESIGN_CHANGE|TASK_RESCOPING|TEST_UPDATE|BUGFIX|HOTFIX|POLICY_UPDATE|DEPENDENCY_UPDATE|SECURITY|OPS",
     "risk": "low|medium|high|critical",
     "notes": "Kurzbegründung"
   },
@@ -197,11 +211,37 @@ Jeder `transfer_to_*` erzeugt eine JSON‑Zeile in `/audit/transfer_log.jsonl` *
     "spec_version_from": "X.Y.Z",
     "spec_version_to":   "X.Y.Z",
     "spec_diff_link": "spec_diff.md"
+  },
+  "telemetry": {
+    "latency_ms": 0,
+    "cpu_pct": 0,
+    "mem_mb": 0
   }
 }
 ```
 
-**Schwellenwirkung nach `risk`:** `critical|high` ⇒ Block; `medium` ⇒ Revise; `low` ⇒ Pass (bei erfüllten Preconditions).
+**Kopplung Gate‑Span ↔ Transfer (muss):**
+- Gate‑Span‑Attribute `reason_code`, `risk`, `ssot.prev/cur`, `latency_ms|cpu_pct|mem_mb` **werden gespiegelt** in `result` bzw. `telemetry`.
+- `trace_id` wird als **`traceparent`** propagiert; Artefakte annotieren `TRACE_ID` (Manifest/Docker‑Label/SBOM).
+- Bei Gate‑Fail: `error.code`/`error.message` im Span und `result.status = "fail"` setzen.
+
+---
+
+## 6a) Observability by Contract (NEU)
+Für **jeden Gate‑Übergang** (Evaluator → V‑Agent → Role‑Governor → Global‑Governor → Memory.ingest → Transfer) wird **genau ein OTel‑Span** erzeugt.
+
+**Span‑Name:** `gate:${from}->${to}` (z. B. `gate:DESIGN->FE`)  
+**Sampling:** 100 % Gate‑Spans; 10–20 % Sub‑Spans
+
+**Pflicht‑Attribute:**
+- `handoff.gate`, `trace_id`, `reason_code`, `risk`
+- `ssot.prev_version`, `ssot.cur_version`
+- `coverage` (0..1 aus `spec_trace.csv`), `artifact.count`
+- `latency_ms`, `cpu_pct`, `mem_mb`
+
+**Optionale Attribute:** `telemetry.seed`, `converter.version`, `error.code`, `error.message`
+
+**Abnahme (Observability):** 100 % Gate‑Runs besitzen einen gültigen Gate‑Span mit allen Pflicht‑Attributen.
 
 ---
 
@@ -235,10 +275,28 @@ PREFLIGHT_CODE:
 
 ---
 
-## 9) KPI & Monitoring (Auszug)
+## 9) KPI & Monitoring (erweitert)
 - **Kern‑KPIs:** FPY, MTTU, Spec‑Drift‑Rate, Criteria‑Coverage.
-- Snapshot: `/audit/kpi_snapshot.md`.
-- Rollups steuern Governor‑Aktionen (Preflight/Sourcing/Security‑Strenge).
+- **Neue KPI‑Drill‑downs:**
+    - `audit_disagreement_rate` (Evaluator vs. Simulator)
+    - `false_positive_F_rate` (Anteil Evaluator‑F‑Findings, die sich als false positiv erweisen)
+    - `span_coverage_rate` (Anteil Gate‑Runs mit validem Gate‑Span)
+- **Snapshot:** `/audit/kpi_snapshot.md` (enthält Trace‑ID, SSOT‑Versionen, Coverage, neue KPI‑Felder, Security‑Status, Rollout‑Stufe).
+- **Rollups** steuern Governor‑Aktionen (Preflight/Sourcing/Security‑Strenge).
+
+---
+
+## 10) Runtime‑Robustheit (Ergänzung)
+- **Kooperativer Scheduler** (Yield‑Points/Ticks), Queue‑Prioritäten.
+- **Ressourcen‑Caps** je Sub‑Agent (CPU/RAM; Soft‑Caps + Notfall‑Abort) gegen Head‑of‑Line‑Blocking.
+- **Idempotenz & Backoff**: Idempotency‑Key, **jittered exponential backoff**, **Dead‑Letter‑Queue** + Alarme.
+- **LibreOffice/Converter**: Version pinnen, Health‑Check „Hello‑PDF“, Telemetrie‑Feld `converter.version`.
+
+---
+
+## 11) Privacy, Retention & Erasure
+- Aufbewahrung: SSOT/Transfer‑Logs **365d**, Simulation/Stubs **30d**, Evidence **90d**.
+- **Right‑to‑Erasure** mit Audit‑Beleg; Erasure‑Jobs tragen `trace_id`.
 
 ---
 
