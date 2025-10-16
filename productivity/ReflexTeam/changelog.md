@@ -2,6 +2,43 @@
 
 > Zeitzone: Europe/Berlin
 
+## [1.4.0] – 2025-10-16
+
+### Added
+- **Clean‑Code Policy (§7a)**: Verbindliche Leitplanken (Naming, SRP, Fehlerbehandlung, Typisierung, Comments, **Zyklus‑Verbot**, **Layer‑Regeln**, **Complexity‑ und Coverage‑Budgets**).
+- **Strukturierte FE/BE‑Architektur**:
+    - **Frontend (Feature‑First)** mit `features/<Feature>/{ui,state,services,__tests__}` und `shared/`.
+    - **Backend (Layered)** mit `api/`, `service/`, `repo/`, `domain/`, `__tests__/`.
+- **/standards/**: Neue Referenz‑Guides `CODE_GUIDE.md`, `FE_GUIDE.md`, `BE_GUIDE.md` (SSOT‑verlinkt).
+- **Repo‑Pflichtdateien**: `.editorconfig`, `.eslintrc.*`, `.prettierrc`, `tsconfig.json|jsconfig`, `.architect.yml` (Layer‑Regeln).
+- **PREFLIGHT_CODE (erweitert)**: `format_check`, `typecheck`, Tests mit Coverage‑Schwellen **(Line ≥80 %, Branch ≥70 %)**, Complexity‑Budgets (**cyclomatic ≤10**, **cognitive ≤15**), Arch‑Regeln **(forbid_cycles, layer_enforcement)**, optionale UI‑Snapshots.
+- **Build‑Skripte (Mindeststandard)**: Sequenz `preflight → lint → format:check → typecheck → test --coverage → arch:check → complexity:check`.
+- **SSOT‑Header‑Links**: Neue Link‑Zeile auf `/standards/*` in allen SSOT‑Dateien.
+- **Transfer‑Contract**: Neues Objekt **`code_quality`** (Lint/Format/Types/Coverage/Complexity/Arch‑Verstöße) zur Auditierbarkeit.
+
+### Changed
+- **Gates & Enforcement**: Preflight‑Verstöße (Lint/Format/Type/Tests/Coverage/Complexity/Arch) sind **gate‑blocking** vor `G3_FE_READY`/`G3_BE_READY`.
+- **Rollenpflichten**: FE/BE‑Muss‑Kriterien (u. a. ErrorBoundary im FE, DTO‑Validierung & zentrale Error‑Middleware im BE) präzisiert.
+- **Observability‑Kopplung**: Gate‑Span‑Attribute (`reason_code`, `risk`, `ssot.prev/cur`, `latency_ms|cpu_pct|mem_mb`) werden mit `Transfer‑Contract.result/telemetry` **gespiegelt** (klarer Abgleich bei Fail/Pass).
+
+### Security / Compliance
+- Keine Änderungen gegenüber 1.3.1; bestehende SAST/SCA/SBOM‑Pflichten bleiben bestehen.
+
+### Deprecated
+- —
+
+### Removed
+- —
+
+### Migration (v1.3.1 → v1.4.0)
+1) **/standards/** anlegen und `CODE_GUIDE.md`, `FE_GUIDE.md`, `BE_GUIDE.md` initial befüllen; SSOT‑Header um Links erweitern.
+2) **Repo‑Pflichtdateien** ergänzen: `.eslintrc.*`, `.prettierrc`, `.editorconfig`, `tsconfig.json|jsconfig`, `.architect.yml`.
+3) **Pipelines** um folgende Jobs erweitern: `format_check`, `typecheck`, `arch:check`, `complexity:check`; Coverage‑Schwellen (Line ≥80 %, Branch ≥70 %) aktivieren.
+4) **Transfer‑Producer/Consumer** um Feldgruppe `code_quality` erweitern; Gate‑Span ↔ Transfer‑Feldspiegelung testen.
+5) **FE/BE‑Struktur** anpassen (Feature‑First bzw. Layering) und Muss‑Kriterien einhalten (ErrorBoundary, DTO‑Validation, zentrale Error‑Middleware, keine Zyklus‑/Layer‑Verstöße).
+
+---
+
 ## [1.3.1] – 2025-10-15
 
 ### Added

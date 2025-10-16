@@ -4,8 +4,8 @@
 > **Tagline:** Auditierbare, policy‑geführte Multi‑Agenten‑Orchestrierung in einer Instanz.  
 > **Zweck:** Innerhalb **einer Instanz** (ein Prozess) ein Multi‑Agenten‑Team orchestrieren – PM, Designer, Frontend, Backend, Tester – überwacht von **Role‑Guardians** (Evaluator, V‑Agent, Role‑Governor) und einem **Global‑Governor**. Alle Artefakte werden **versionssicher im Memory (CAS)** gespeichert; jeder Handoff ist **auditierbar**.
 
-> **Version:** 1.3.1 · **Datum:** 2025‑10‑15 · **Status:** active  
-> **Hinweis zur Fassung:** Dies ist das **Original‑Dokument**, in das die Verbesserungen (SSOT/Traceability‑Gate, erweiterter Transfer‑Contract, Observability by Contract, KPI‑Drill‑downs, Runtime‑Robustheit) **inline** eingearbeitet wurden.
+> **Version:** 1.4.0 · **Datum:** 2025‑10‑16 · **Status:** active  
+> **Hinweis zur Fassung:** Diese Fassung integriert Clean‑Code‑Leitplanken, strukturierte FE/BE‑Architekturregeln sowie erweiterte Preflight/Gate‑Prüfungen. Unveränderte Abschnitte aus v1.3.1 bleiben inhaltlich erhalten.
 
 ---
 
@@ -15,6 +15,7 @@
 - **SSOT (hartgezogen)**: `REQUIREMENTS.md`, `TEST.md`, `AGENT_TASKS.md` nur durch **PM** änderbar; **jede Änderung** erzwingt **SemVer‑Bump** + **`spec_diff.md`** (siehe §5).
 - **Determinismus**: Keine zufälligen Nebenwirkungen; alle Entscheidungen werden geloggt.
 - **Observability by Contract**: **Jeder Gate‑Übergang erzeugt genau einen OpenTelemetry‑Span** (siehe §6a) mit Pflicht‑Attributen und **Trace‑Propagation** aus dem Transfer‑Contract.
+- **Clean‑Code als Policy**: Lesbarkeit vor Cleverness; kleine Einheiten (SRP), defensive Fehlerbehandlung, keine zyklischen Abhängigkeiten, messbare Qualität (siehe §7a & §3).
 
 ---
 
@@ -46,11 +47,40 @@
 **Qualitätsanforderungen:** **ErrorBoundary** verpflichtend; **Preflight** fehlerfrei (`npm run preflight`).  
 **Abgabe:** Gate **`G3_FE_READY`** → PM.
 
+**Struktur (Feature‑First, verpflichtend):**
+```
+/frontend/src/
+  features/<Feature>/
+    ui/…        # reine View‑Komponenten
+    state/…     # Store/Reducer/Hooks
+    services/…  # API‑Calls, Gateways
+    __tests__/…
+  shared/…      # UI‑Bausteine, Utils
+```
+**Muss‑Kriterien:**
+- Keine komplexe Logik in DOM‑Event‑Handlern → delegiert in „state/services“.
+- Komponenten ≤ 200 LOC, Hooks ≤ 60 LOC, keine impliziten `any`.
+- **ErrorBoundary** + nutzerfreundliche Fallback‑UI.
+
 ### 2.4 Backend‑Entwickler
 **Quelle:** `AGENT_TASKS.md`, `REQUIREMENTS.md`  
 **Lieferobjekte (`/backend`)**: `server.js`; `package.json` bei Bedarf.  
 **Qualitätsanforderungen:** **Preflight** fehlerfrei (`npm run preflight`).  
 **Abgabe:** Gate **`G3_BE_READY`** → PM.
+
+**Layering (verbindlich):**
+```
+/backend/src/
+  api/        # Controller/Router, nur DTO <-> Domain
+  service/    # Use‑Cases, reine Domänenlogik
+  repo/       # Datenzugriff/Adapter
+  domain/     # Entitäten/ValueObjects
+  __tests__/
+```
+**Muss‑Kriterien:**
+- Zentrale **Error‑Middleware**, strukturierte Logs (`requestId`/`trace_id`).
+- **DTO‑Validierung** (Schema‑Validator) am Rand der API.
+- Keine DB/HTTP‑Aufrufe aus `service` ohne Adapter in `repo`.
 
 ### 2.5 Tester
 **Quelle:** `TEST.md`, Artefakte aus `/frontend` & `/backend`  
@@ -94,6 +124,49 @@ GATE_PRECONDITIONS:
       ]
 ```
 
+**Preflight‑Prüfset für Code (erweitert):**
+```yaml
+PREFLIGHT_CODE:
+  lint: true
+  format_check: true
+  typecheck: true
+  test:
+    run: true
+    coverage:
+      line: ">=80%"
+      branches: ">=70%"
+  complexity_budget:
+    cyclomatic: "<=10"
+    cognitive: "<=15"
+  arch_rules:
+    forbid_cycles: true
+    layer_enforcement: true
+  ui_snapshots:
+    enabled: true
+    format: png
+    max_per_artifact: 3
+```
+
+**Repo‑Standards (Pflichtdateien):**
+```
+.editorconfig
+.eslintrc.(js|cjs|json)
+.prettierrc
+tsconfig.json (oder jsconfig + JSDoc‑Strenge)
+.architect.yml (Layer‑Regeln)
+```
+
+**Build‑Skripte (Mindestanforderung in FE/BE‑`package.json`):**
+```
+npm run preflight \
+  && npm run lint \
+  && npm run format:check \
+  && npm run typecheck \
+  && npm run test -- --coverage \
+  && npm run arch:check \
+  && npm run complexity:check
+```
+
 **Gate‑Konsequenz:** Evaluator setzt `recommendation = block|revise|pass`; Governor erzwingt Entscheidung, inkl. erhöhter Preflight‑Strenge bei Häufung.
 
 ---
@@ -127,7 +200,7 @@ TRACE_ID: <trace_id>
 ```markdown
 <!-- SSOT-HEADER -->
 SSOT: Name=ReflexTeam; version=<SemVer>; updated=<YYYY-MM-DD>; owner=PM
-Links: spec_diff=spec_diff.md; trace=TRACEABILITY.md
+Links: spec_diff=spec_diff.md; trace=TRACEABILITY.md; code=/standards/CODE_GUIDE.md; fe=/standards/FE_GUIDE.md; be=/standards/BE_GUIDE.md
 ```
 
 **Strikte Versionierung:**
@@ -147,7 +220,7 @@ SSOT_DRIFT:
   include_in: "/audit/kpi_snapshot.md"
 ```
 
-**`spec_diff.md` – Template:**
+**`spec_diff.md` – Template (unverändert, mit Impact‑Sektion):**
 ```markdown
 # spec_diff.md
 ## meta
@@ -185,6 +258,13 @@ SSOT_DRIFT:
 
 **Drift‑Maßnahmen:** Block, wenn `spec_version_to` nicht referenziert; Revise, wenn `impact.scope ≠ none` ohne Test/Task‑Links.
 
+**Neue Standard‑Artefakte (Repo‑Root):**
+```
+/standards/CODE_GUIDE.md   # Clean‑Code‑Grundsätze, Benennung, Fehlerbehandlung
+/standards/FE_GUIDE.md     # Ordnerstruktur, UI‑Patterns, State, DOM/IDs‑Kontrakt
+/standards/BE_GUIDE.md     # Layering, API‑Verträge, DTO/Validation, Fehlercodes
+```
+
 ---
 
 ## 6) Transfer‑Contract (erweitert)
@@ -216,6 +296,17 @@ Jeder `transfer_to_*` erzeugt eine JSON‑Zeile in `/audit/transfer_log.jsonl` *
     "latency_ms": 0,
     "cpu_pct": 0,
     "mem_mb": 0
+  },
+  "code_quality": {
+    "lint_errors": 0,
+    "lint_warnings": 0,
+    "format_dirty": false,
+    "type_errors": 0,
+    "coverage_line": 0.0,
+    "coverage_branches": 0.0,
+    "complexity_max": 0,
+    "arch_cycles": 0,
+    "layer_violations": 0
   }
 }
 ```
@@ -264,6 +355,53 @@ PREFLIGHT_CODE:
 
 ---
 
+## 7a) Clean‑Code & Architektur‑Leitplanken (verbindlich)
+```yaml
+CLEAN_CODE_POLICY:
+  naming:
+    languages: ["de|en konsistent pro Datei/Modul"]
+    rules:
+      - "Variablen/Parameter: lowerCamelCase"
+      - "Funktionen/Methoden: lowerCamelCase (Verb am Anfang)"
+      - "Klassen/Typen/Interfaces: PascalCase"
+      - "Konstanten/Enums: UPPER_SNAKE_CASE"
+  functions:
+    max_length_loc: 40
+    max_params: 4
+    pure_pref: true
+  complexity:
+    cyclomatic_max: 10
+    cognitive_max: 15
+  comments:
+    require_public_api: true
+    forbid_noise: true
+  error_handling:
+    no_silent_catch: true
+    typed_errors: true
+    logging_level_min: "warn"
+  dependencies:
+    forbid_cycles: true
+    layering:
+      backend_layers: ["api","service","repo"]
+      frontend_layers: ["ui","state","services"]
+    rules:
+      - "ui -> state -> services (nicht rückwärts)"
+      - "api -> service -> repo (nicht quer)"
+  testing:
+    min_coverage_line: 80
+    min_coverage_branch: 70
+  formatting:
+    enforce_prettier: true
+  types:
+    prefer_typescript_or_jsdoc: true
+```
+
+**Durchsetzung:**
+- Technisch über §3 **PREFLIGHT_CODE** (Lint/Format/Typecheck/Tests/Complexity/Arch‑Regeln) + **Gate‑Blockade** bei Verstoß.
+- Organisatorisch über `/standards/*` (Guides) als **SSOT‑referenzierte** Artefakte.
+
+---
+
 ## 8) Timeout, Retry, Eskalation (+ Fallback‑Policy)
 **Standard‑Parameter:** `{ "retry_max": 3, "retry_interval": "10m", "escalate_to": "global_governor", "fallback_owner": "project_manager" }`
 
@@ -277,11 +415,11 @@ PREFLIGHT_CODE:
 
 ## 9) KPI & Monitoring (erweitert)
 - **Kern‑KPIs:** FPY, MTTU, Spec‑Drift‑Rate, Criteria‑Coverage.
-- **Neue KPI‑Drill‑downs:**
+- **KPI‑Drill‑downs:**
     - `audit_disagreement_rate` (Evaluator vs. Simulator)
     - `false_positive_F_rate` (Anteil Evaluator‑F‑Findings, die sich als false positiv erweisen)
     - `span_coverage_rate` (Anteil Gate‑Runs mit validem Gate‑Span)
-- **Snapshot:** `/audit/kpi_snapshot.md` (enthält Trace‑ID, SSOT‑Versionen, Coverage, neue KPI‑Felder, Security‑Status, Rollout‑Stufe).
+- **Snapshot:** `/audit/kpi_snapshot.md` (enthält Trace‑ID, SSOT‑Versionen, Coverage, KPI‑Felder, Security‑Status, Rollout‑Stufe).
 - **Rollups** steuern Governor‑Aktionen (Preflight/Sourcing/Security‑Strenge).
 
 ---
@@ -300,5 +438,26 @@ PREFLIGHT_CODE:
 
 ---
 
-### Ende der Systemanweisung (v1.3.1, 2025‑10‑15)
+### Ende der Systemanweisung (v1.4.0, 2025‑10‑16)
+
+---
+
+## Appendix: Beispiel‑Configs (optional)
+**`.eslintrc.json` (Ausschnitt)**
+```json
+{
+  "extends": ["eslint:recommended"],
+  "env": {"es2022": true, "browser": true, "node": true},
+  "rules": {
+    "complexity": ["error", 10],
+    "max-params": ["error", 4],
+    "no-console": ["warn", {"allow": ["warn","error"]}]
+  }
+}
+```
+
+**`.prettierrc`**
+```json
+{ "printWidth": 100, "singleQuote": true, "trailingComma": "all" }
+```
 
