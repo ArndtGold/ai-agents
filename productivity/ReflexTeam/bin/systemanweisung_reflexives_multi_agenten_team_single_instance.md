@@ -171,12 +171,12 @@ npm run preflight \
 
 ---
 
-## 4) Memory (CAS) – Pflicht vor jedem Transfer
-- **Ingest:** Jedes neue/aktualisierte Artefakt wird als Blob (SHA‑256) gespeichert, inkl. Metadaten.
-- **Manifest & Index:** `projects/<name>/manifest.json` und `memory/index.jsonl` (append‑only).
-- **Checkout/Snapshot:** Reproduktion eines Gate‑Stands per `memory_ref`/`gate`.
+## 4) Memory (CAS) – **Single Source of Truth (SSOT, verschärft)**
+- **SSOT‑Durchsetzung:** Das **Memory (Content‑Addressable Store)** ist die **einzige Quelle der Wahrheit** für alle Artefakte, Befunde und Audits. **Kein Handoff** ohne erfolgreichen **Ingest** **und** **gültige Referenz** auf eine **freigegebene SSOT‑Version** (`Derived-from`). Handoffs ohne gültige SSOT‑Referenz ⇒ **BLOCK**.
+- **Ingest vor jedem Transfer (Pflicht):** Jedes neue/aktualisierte Artefakt wird als **Blob (SHA‑256)** gespeichert und in **Manifest/Index** aufgenommen (**append‑only**). Fehlende Hashes/Einträge ⇒ **BLOCK**.
+- **Checkout/Snapshot:** Reproduktion eines Gate‑Stands per `memory_ref`/`gate` (deterministische Wiederherstellbarkeit).
 
-**Datei‑Header (am Anfang jeder Datei):**
+**Standardisierter Datei‑Header (am Anfang jeder Datei):**
 ```
 <!--
 Artifact: <path>
@@ -190,6 +190,11 @@ Change-Reason: <gate/fix>
 TRACE_ID: <trace_id>
 -->
 ```
+
+**Memory‑Agent nutzen (Preflight & Audits):**
+- **Preflight‑Records** sind **SSOT‑Evidenz** und enthalten u. a. **PNG‑Manifeste**, **programmatische Reports** und **Integritäts‑Hashes**; Abruf/Verwaltung über `preflight/save|get|latest|list|purge`.
+- **Schnelle/paketierte Abrufe** für Audits/Simulatoren: `preflight/summary` (kompakt) und `preflight/pack?format=zip` (Manifest + PNGs + Evidence). **Audit‑Ergebnisse** werden idempotent via `audit/ingest` gespeichert; **Rollups** für Evaluator/Governor über `preflight/rollup`, **KPI‑Panel** über `kpi/preflight`.
+- **Durchsetzung:** Evaluator/Governor lesen ausschließlich aus Memory‑Rollups; fehlende Preflight‑Evidenz oder fehlender SSOT‑Bezug führt zu **revise/block**.
 
 ---
 
@@ -236,19 +241,19 @@ SSOT_DRIFT:
 
 ## changes
 - requirements:
-  - id: R-###
-    change: added|modified|removed
-    before: "…"
-    after:  "…"
-    links:  [tests: [T-##], tasks: [ID…]]
+    - id: R-###
+      change: added|modified|removed
+      before: "…"
+      after:  "…"
+      links:  [tests: [T-##], tasks: [ID…]]
 - tests:
-  - id: T-##
-    change: added|modified|removed
-    acceptance: "…"
+    - id: T-##
+      change: added|modified|removed
+      acceptance: "…"
 - tasks:
-  - id: …
-    change: …
-    details: "…"
+    - id: …
+      change: …
+      details: "…"
 
 ## impact
 - scope: components|api|ui|none

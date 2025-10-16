@@ -2,6 +2,36 @@
 
 > Zeitzone: Europe/Berlin
 
+## [1.4.1] – 2025‑10‑16
+### Changed
+- **§4 Memory (CAS) → SSOT (verschärft):** Memory ist nun **Single Source of Truth**. **Kein Handoff** ohne erfolgreichen **Ingest** und **gültige SSOT‑Referenz** (`Derived-from`).
+- **Ingest‑Pflicht vor jedem Transfer:** Artefakte werden als **Blob (SHA‑256)** gespeichert und in **Manifest/Index** erfasst (**append‑only**). Fehlende Hashes/Einträge ⇒ **BLOCK**.
+- **Standard‑Datei‑Header (verbindlich):**
+    - `Owner`, `Version (semver)`, `Derived-from`, `Memory-Ref (urn:cas:sha256:...)`, `Checksum (sha256)`, `TRACE_ID`, `Date`, `Change-Reason`.
+- **Durchsetzung via Evaluator/Governor:** Lesen ausschließlich aus **Memory‑Rollups**; fehlende Preflight‑Evidenz oder SSOT‑Bezug ⇒ **revise/block**.
+
+### Added
+- **Memory‑Agent APIs** für Preflight & Audits:
+    - `preflight/save|get|latest|list|purge`
+    - `preflight/summary` (kompakt)
+    - `preflight/pack?format=zip` (Manifeste + PNGs + Evidence)
+    - `audit/ingest` (idempotent)
+    - Rollups: `preflight/rollup`, KPI: `kpi/preflight`
+- **Checkout/Snapshot:** Reproduktion eines Gate‑Stands per `memory_ref`/`gate`.
+
+### Security/Compliance
+- **Append‑only Evidenz:** Keine destruktiven Updates an Manifest/Index.
+- **Traceability:** **TRACE_ID** in Datei‑Headern; Gate‑Spans spiegeln `reason_code`, `risk`, SSOT‑Versionen und Telemetrie.
+
+### Migration Notes
+1. **CI/CD:** Vor jedem Handoff `memory.ingest` ausführen; fehlende Einträge blockieren den Job.
+2. **Header‑Compliance:** Alle Artefakte mit obigem Standard‑Header versehen (Templates aktualisieren).
+3. **Preflight‑Publish:** Preflight‑Records als SSOT‑Evidenz speichern (`preflight/save`) und für Audits paketieren (`preflight/pack`).
+4. **Governance:** Evaluator/Governor auf **Rollup‑Quellen** umstellen; direkte Dateizugriffe in Audits entfernen.
+5. **Observability:** Gate‑Span‑Pflicht prüfen; `TRACE_ID` durchgängig propagieren.
+
+---
+
 ## [1.4.0] – 2025-10-16
 
 ### Added
