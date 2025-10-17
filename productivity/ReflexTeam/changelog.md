@@ -2,6 +2,30 @@
 
 > Zeitzone: Europe/Berlin
 
+## [1.5.0] – 2025‑10‑17
+### Added
+- **Browser‑First / Edge‑only Support:** Neue Leitplanken für reine Browser‑Apps bzw. Edge‑basierte Deployments (PWA, IndexedDB‑Persistenz, Offline‑Flows, RUM/Web‑Vitals, Release‑/Cache‑Strategie). Siehe **§2.3.a** und **§2.6** der Systemanweisung.
+- **PREFLIGHT_BROWSER:** Verbindliche Ziele für **Lighthouse** (Performance ≥90, PWA ≥90, Accessibility ≥95), **Core Web Vitals** (LCP ≤2.5s, INP ≤200ms, CLS ≤0.1), **Bundle‑Guard** (≤200KB initial JS, ≤60KB kritische Route), **CSP‑Test** (Report‑Only sauber), **Offline‑E2E** (Create/Edit/Delete mit Sync pass).
+- **Edge‑Proxy/API (optional):** Dünner Proxy für Secrets, Raten/Quoten, personalisierte Daten, Webhooks, server‑seitige Suche/AI‑Inference – Gate‑Flow & SSOT bleiben verbindlich.
+- **Security‑Erweiterungen (Browser‑First):** **CSP** mit Nonce/Hash & `strict-dynamic`, **SRI** für externe Assets, **Permissions‑Policy**, **COOP/COEP** bei Wasm/WebGL, „keine Secrets im FE“ als harte Policy.
+- **/standards/FE_GUIDE.md (Erweiterung):** PWA‑Update‑Flow, IndexedDB‑Konfliktstrategie, CWV‑Budgets, CSP/Permissions‑Policy Beispiele, RUM‑Setup inkl. PII‑Filter & Sampling.
+
+### Changed
+- **Rollen & Gates:** Frontend‑Rolle um Browser‑First‑Pflichten ergänzt (Service Worker, Manifest, Offline‑UX, ErrorBoundary weiterhin Pflicht). **Gate‑Preflight** erweitert um `PREFLIGHT_BROWSER`.
+- **Release & Caching:** Immutable Assets mit Content‑Hash; HTML kurzlebig, **Rollback via Deploy‑Alias** empfohlen.
+
+### Security / Compliance
+- **Hardening:** Clickjacking‑Schutz, strenge CSP‑Defaults, keine Geheimnisse im Client‑Bundle; nur Edge‑Proxy mit kurzlebigen Tokens.
+
+### Migration (v1.4.1 → v1.5.0)
+1) **FE**: Service Worker (Workbox), Web App Manifest, Offline‑Routen & Update‑Flow implementieren; IndexedDB (Dexie) für Offline‑Persistenz einführen, Sync‑Konfliktregeln dokumentieren.
+2) **CI/Preflight**: Jobs für `lighthouse:ci`, `cwv:check`, `bundle:guard`, `csp:test`, `e2e:offline` ergänzen; Schwellen aktivieren (siehe **PREFLIGHT_BROWSER**).
+3) **Security**: CSP (Nonce/Hash, `strict-dynamic`) aktivieren, SRI für CDNs, Permissions‑Policy definieren; COOP/COEP bei Bedarf.
+4) **Edge‑Proxy (falls nötig)**: Secrets/Schreibrechte aus dem FE herauslösen; kurze Token‑Laufzeiten; Logs ohne PII.
+5) **Standards**: `/standards/FE_GUIDE.md` aktualisieren und in SSOT‑Headern verlinken.
+
+---
+
 ## [1.4.1] – 2025‑10‑16
 ### Changed
 - **§4 Memory (CAS) → SSOT (verschärft):** Memory ist nun **Single Source of Truth**. **Kein Handoff** ohne erfolgreichen **Ingest** und **gültige SSOT‑Referenz** (`Derived-from`).
@@ -189,4 +213,3 @@
 - Komplexen Job triggern, bewusst eine Abhängigkeit blockieren → Es entstehen **`SPEC_MIN.md`, `STUBS/`, `RISKS.md`**, und im Transfer‑Log steht `status:"fallback"` + `reason_code`.
 - Eine SSOT‑Änderung durchführen → **`spec_diff.md`** generiert, KPI‑Snapshot aktualisiert.
 - Idempotenter Doppel‑Submit → zweiter Write schlägt kontrolliert mit **409** an.
-

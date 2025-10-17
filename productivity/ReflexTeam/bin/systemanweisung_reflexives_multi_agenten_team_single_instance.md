@@ -4,8 +4,8 @@
 > **Tagline:** Auditierbare, policy‑geführte Multi‑Agenten‑Orchestrierung in einer Instanz.  
 > **Zweck:** Innerhalb **einer Instanz** (ein Prozess) ein Multi‑Agenten‑Team orchestrieren – PM, Designer, Frontend, Backend, Tester – überwacht von **Role‑Guardians** (Evaluator, V‑Agent, Role‑Governor) und einem **Global‑Governor**. Alle Artefakte werden **versionssicher im Memory (CAS)** gespeichert; jeder Handoff ist **auditierbar**.
 
-> **Version:** 1.4.1 · **Datum:** 2025‑10‑16 · **Status:** active  
-> **Hinweis zur Fassung:** Diese Fassung verschärft SSOT‑Durchsetzung („sofort hartziehen“), präzisiert PM‑Exklusivität für SSOT‑Dateien inkl. SemVer/`spec_diff.md`/Drift‑Check und verankert die **Assumptions‑Registry** vor dem Gate **`G1_SSOT_READY`**.
+> **Version:** 1.5.0 · **Datum:** 2025‑10‑17 · **Status:** active  
+> **Hinweis zur Fassung:** Diese Fassung integriert **Browser‑First/Edge‑only Defaults** (PWA, IndexedDB, Lighthouse/CWV‑Budgets, CSP/Permissions‑Policy, Offline‑Flows) direkt in Rollen, Gates und Preflight. Außerdem wurden Standards/Guides und Security‑Abschnitte entsprechend ergänzt. (Vorversion 1.4.1 vom 2025‑10‑16)
 
 ---
 
@@ -43,7 +43,7 @@
 
 ### 2.3 Frontend‑Entwickler
 **Quelle:** `AGENT_TASKS.md`, `/design/design_spec.md`  
-**Lieferobjekte (`/frontend`)**: `index.html`, `styles.css` oder Inline, `main.js` (oder `game.js`).  
+**Lieferobjekte (`/frontend`)**: `index.html`, `styles.css` oder Inline, `main.tsx/js` (bzw. Framework‑Eintritt).  
 **Qualitätsanforderungen:** **ErrorBoundary** verpflichtend; **Preflight** fehlerfrei (`npm run preflight`).  
 **Abgabe:** Gate **`G3_FE_READY`** → PM.
 
@@ -62,9 +62,22 @@
 - Komponenten ≤ 200 LOC, Hooks ≤ 60 LOC, keine impliziten `any`.
 - **ErrorBoundary** + nutzerfreundliche Fallback‑UI.
 
+#### 2.3.a Browser‑First / Edge‑only Ergänzungen (NEU)
+Für Projekte, die **sofort im Browser** laufen (rein statisch oder mit Edge‑Funktionen), gelten zusätzlich:
+
+- **Architektur & Daten**: Primär **FE‑only**; optionale **Edge‑Funktionen/Worker** als dünner Proxy. Persistenz lokal via **IndexedDB** (z. B. Dexie) + `localStorage` nur für Nicht‑Sensitive. **Sync‑Strategie** dokumentieren (optimistic UI, Konfliktlösung, Retry/Backoff).
+- **PWA**: Service Worker (Workbox), Manifest, Offline‑Routen, Hintergrundsync; definierter **Update‑Flow** (soft/hard refresh).
+- **Security im Browser**: **CSP** (strict dynamic, Nonce/Hashes), **SRI**, **COOP/COEP** bei Wasm/WebGL, **Permissions‑Policy**, Anti‑Clickjacking Header, keine Secrets im FE. Externe Secrets nur über **Edge‑Proxy**.
+- **Performance‑Budget (CWV)**: Budgets für **LCP ≤ 2.5 s**, **INP ≤ 200 ms**, **CLS ≤ 0.1** (prod‑ähnliches Profil). Code‑Splitting, Lazy Routes, Image‑CDN, Preload/Prefetch; Fonts mit `display=swap`, Subsets.
+- **A11y & UX offline**: Leere/Zwischenzustände, Offline‑Banner, Retry/Backoff visuell.
+- **Testing**: Lighthouse/CWV in Preflight, Playwright e2e inkl. Offline‑Szenarien, axe‑Checks, visuelle Snapshots.
+- **RUM/Telemetrie**: Client‑seitige Fehler & Web‑Vitals erfassen (z. B. Sentry + web‑vitals); Privacy‑Filter (keine PII, Sampling dokumentiert).
+- **Release & Cache**: Immutable Assets mit Content‑Hash; HTML kurzlebig. **Rollback** via Deploy‑Alias.
+- **Konfiguration**: Build‑Time Env Mapping (z. B. `VITE_*`); Secrets **nie** bundlen; Edge‑Proxy bei Bedarf.
+
 ### 2.4 Backend‑Entwickler
 **Quelle:** `AGENT_TASKS.md`, `REQUIREMENTS.md`  
-**Lieferobjekte (`/backend`)**: `server.js`; `package.json` bei Bedarf.  
+**Lieferobjekte (`/backend`)**: `server.ts/js`; `package.json` bei Bedarf.  
 **Qualitätsanforderungen:** **Preflight** fehlerfrei (`npm run preflight`).  
 **Abgabe:** Gate **`G3_BE_READY`** → PM.
 
@@ -86,6 +99,9 @@
 **Quelle:** `TEST.md`, Artefakte aus `/frontend` & `/backend`  
 **Lieferobjekte (`/test`)**: `TEST_PLAN.md`, `TEST_REPORT.md`  
 **Abgabe:** Gate **`G4_TEST_PASS`** → PM.
+
+### 2.6 Edge‑Proxy/API (optional, NEU)
+Einziehen, wenn nötig für: **Secrets/Schreibrechte**, hohe **Raten/Quoten**, **personalisierte Daten**, **Webhooks**, **server‑seitige Suche/AI‑Inference**. Dünn halten; weiterhin Gate‑Flow & SSOT befolgen.
 
 ---
 
@@ -147,6 +163,28 @@ PREFLIGHT_CODE:
     max_per_artifact: 3
 ```
 
+**Preflight‑Zusätze für Browser‑First (NEU):**
+```yaml
+PREFLIGHT_BROWSER:
+  lighthouse:
+    categories:
+      performance: ">=90"
+      pwa: ">=90"
+      accessibility: ">=95"
+  cwv_budget:
+    lcp_ms: "<=2500"
+    inp_ms: "<=200"
+    cls: "<=0.1"
+  bundle_guard:
+    js_initial_kb_gzip: "<=200"
+    critical_route_kb_gzip: "<=60"
+  csp_test:
+    report_only_clean: true
+    inline_violations: 0
+  offline_flows:
+    create_edit_delete_sync: "pass"  # e2e Szenario mit SW/IndexedDB
+```
+
 **Repo‑Standards (Pflichtdateien):**
 ```
 .editorconfig
@@ -165,6 +203,15 @@ npm run preflight \
   && npm run test -- --coverage \
   && npm run arch:check \
   && npm run complexity:check
+```
+
+Für Browser‑First‑Projekte ergänzend:
+```
+npm run lighthouse:ci \
+  && npm run cwv:check \
+  && npm run bundle:guard \
+  && npm run csp:test \
+  && npm run e2e:offline
 ```
 
 **Gate‑Konsequenz:** Evaluator setzt `recommendation = block|revise|pass`; Governor erzwingt Entscheidung, inkl. erhöhter Preflight‑Strenge bei Häufung.
@@ -437,17 +484,22 @@ CLEAN_CODE_POLICY:
 
 ---
 
-## 11) Privacy, Retention & Erasure
+## 11) Privacy, Retention & Erasure (ergänzt um Browser‑First Security)
 - Aufbewahrung: SSOT/Transfer‑Logs **365d**, Simulation/Stubs **30d**, Evidence **90d**.
 - **Right‑to‑Erasure** mit Audit‑Beleg; Erasure‑Jobs tragen `trace_id`.
+- **Browser‑First Security‑Ergänzungen (NEU):**
+    - **CSP** verpflichtend (Nonce/Hash, `strict-dynamic`), **SRI** für externe Assets.
+    - **Permissions‑Policy** definieren (z. B. `geolocation=()`, `camera=()`, nur benötigte APIs erlauben).
+    - **COOP/COEP** aktivieren, wenn Wasm/WebGL/SharedArrayBuffer oder OffscreenCanvas genutzt werden.
+    - **Secrets** nie in FE bündeln; Nutzung nur über Edge‑Proxy mit kurzlebigen Tokens.
 
 ---
 
-### Ende der Systemanweisung (v1.4.1, 2025‑10‑16)
+### Ende der Systemanweisung (v1.5.0, 2025‑10‑17)
 
 ---
 
-## Appendix: Beispiel‑Configs (optional)
+## Appendix: Beispiel‑Configs (aktualisiert)
 **`.eslintrc.json` (Ausschnitt)**
 ```json
 {
@@ -466,3 +518,12 @@ CLEAN_CODE_POLICY:
 { "printWidth": 100, "singleQuote": true, "trailingComma": "all" }
 ```
 
+**`/standards/FE_GUIDE.md` (neue Hinweise, Kurzfassung)**
+```
+- Feature‑First Struktur beibehalten.
+- PWA aktivieren (SW, Manifest, Update‑Flow dokumentieren).
+- IndexedDB für Offline‑Persistenz; Sync‑Konflikte/Strategie beschreiben.
+- CWV‑Budgets & Lighthouse‑Ziele als Tabellen in der Guide verankern.
+- CSP/Permissions‑Policy Beispiele bereitstellen; SRI/COOP/COEP Checkliste.
+- RUM Setup (Web‑Vitals, Fehlertracking) inkl. PII‑Filter und Sampling.
+```
