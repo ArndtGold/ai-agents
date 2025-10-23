@@ -1,0 +1,97 @@
+= Benutzerhandbuch: Meta‑Prompt zur Generierung der Tetris‑Komponente
+:doctype: book
+:toc: left
+:toclevels: 3
+:icons: font
+:sectnums:
+:lang: de
+
+== Einleitung
+
+*Prompt LaunchPad AI:* _Gib mir einen kompakten, modell‑agnostischen **Meta‑Prompt** für die Erzeugung dieser Anwendung._
+
+Dieses Benutzerhandbuch beschreibt Wirkung, Einsatz und Qualitätssicherung eines kompakten, modell‑agnostischen Meta‑Prompts, den **LaunchPad AI** aus den obigen Prompt ableitet. Ziel ist, beliebige Text‑LLMs dazu zu veranlassen, **exakt eine** lauffähige App als **einzige React‑Komponente** zu generieren – ohne Begleittext und ohne externe Abhängigkeiten außer React/Tailwind.
+
+== Zweck und Nutzen
+
+* Reproduzierbarkeit über verschiedene KI‑Modelle hinweg.
+* Klare Output‑Grenzen (»Nur Code«, *ein* Default‑Export, Tailwind‑Styling).
+* Funktionale Konsistenz (10×20‑Board, 7‑Bag, Ghost, Hold, Next‑Queue, Scoring/Level, Touch‑UI).
+* Qualitäts-Checkliste bereits im Prompt verankert.
+
+== Funktionsprinzip
+
+Der Meta‑Prompt wirkt über drei Mechanismen:
+
+. *Rollenfixierung & Scope*: Das Modell erhält eine eindeutige Aufgabe (nur die App generieren), wodurch Erklärtexte und Abschweifungen unterbunden werden.
+. *Formale Output‑Regeln*: »Nur Code«, »ein Default‑Export«, »Tailwind‑Klassen« – robust umsetzbar für unterschiedliche LLMs.
+. *Technische Leitplanken*: Kein Netzwerk/keine Fremdlibs, Cleanup für Event‑Listener/RAF, Loop per `requestAnimationFrame`, definierte Speed‑Kurve.
+
+== Voraussetzungen
+
+* Ein LLM mit Code‑Generierungsfähigkeit (modell‑agnostisch).
+* Eine React‑Laufzeit/Playground mit Tailwind‑CSS.
+* Keine Server‑APIs oder externe Assets nötig.
+
+== Einsatzszenarien
+
+* Benchmarking oder Vendor‑Unabhängigkeit (vergleichbare Artefakte verschiedener Modelle).
+* Rapid Prototyping: Single‑File‑Drop‑in (`<Tetris />`).
+* Team‑Workflows mit klaren Abnahmekriterien.
+
+== Vorgehensweise (Anwendung des Meta‑Prompts)
+
+. Den Meta‑Prompt _wortgleich_ an das Ziel‑LLM senden.
+. Keine Zusatzinstruktionen – die »Nur‑Code«‑Regel ist im Prompt enthalten.
+. Den generierten Quelltext als `Tetris.jsx`/`Tetris.tsx` speichern.
+. In die App einbinden und starten.
+. Akzeptanzkriterien prüfen (siehe Abschnitt <<akzeptanzkriterien>>).
+
+[TIP]
+====
+Falls ein Modell dennoch erklärenden Text ausgibt, den Prompt erneut ausführen und zusätzlich betonen: *Nur Code ausgeben, keine Markdown‑Blöcke*.
+====
+
+== Was erzeugt der Meta‑Prompt?
+
+* **Eine** React‑Komponente (Default‑Export), vollständig im Browser lauffähig.
+* **Spiellogik**: 7‑Bag‑Randomizer, Rotation + einfache Wall‑Kicks, Kollision, Merge, Line‑Clear.
+* **UI**: Board‑Grid (10×20), Ghost‑Piece (Landeposition), Next‑Queue (5), Hold (einmal pro Drop), Touch‑Controls, HUD (Score/Lines/Level).
+* **Game‑Loop**: `requestAnimationFrame` mit Intervall `max(1000 * 0.85^level, 50ms)`; Level‑Anstieg alle 10 Lines.
+* **Robustheit**: Cleanup für Event‑Listener/RAF; keine Fremdlibs, kein Netzwerk.
+
+== Modellverhalten (Erwartungen)
+
+* *Große code‑starke Modelle*: liefern in der Regel sofort kompilierbaren Single‑File‑Code, halten die »Nur‑Code«‑Regel gut ein.
+* *Kleinere/gemischte Modelle*: gelegentlich zusätzlicher Text – wird durch den Prompt stark reduziert; ggf. erneut ausführen.
+* *Regel‑sensitive Modelle*: folgen den Muss‑Anforderungen (Controls, Scoring, 7‑Bag) sehr strikt – gut für Konsistenztests.
+
+== Fehlerbilder & Abhilfe
+
+* *Extratext im Output*: Prompt erneut senden; Zusatzzeile: »Nur Quelltext, keine Erklärungen, kein Markdown.«
+* *Fehlende Features (z. B. Hold/Ghost)*: Erneut generieren und Muss‑Anforderungen **explizit** hervorheben (fett im Prompt).
+* *Falsche Abhängigkeiten (z. B. Zustand/Redux)*: Klarstellen: »Keine externen Libs außer React; kein Zustand außerhalb der Komponente.«
+
+[[akzeptanzkriterien]]
+== Abnahmekriterien (Checkliste)
+
+. **Struktur**: Einziger Default‑Export einer Komponente; keine Mehrdateien‑Struktur.
+. **Spielfeld**: 10×20‑Raster; Kollision/Rotation korrekt; O‑Piece rotiert nicht.
+. **Randomizer & Queues**: 7‑Bag; Next‑Queue (5); Hold nur einmal pro Drop.
+. **Ghost‑Piece**: Landeposition transparent visualisiert.
+. **Steuerung**:
+.. Tastatur: ←/→ bewegen, ↓ Soft Drop (+1/Zeile), ↑/X Rotate CW, Z/Strg Rotate CCW, Space Hard Drop (+2/Zeile), C/Shift Hold, P Pause.
+.. Touch‑UI: Buttons für Links/Rechts/Rotieren/Soft/Hard Drop/Hold.
+. **Scoring & Level**: Single=100, Double=300, Triple=500, Tetris=800; Level‑Multiplikator (Level+1); Level‑Up alle 10 Lines.
+. **Loop & Performance**: rAF‑Loop mit Speed‑Kurve `max(1000 * 0.85^level, 50ms)`; keine unnötigen Re‑Renders.
+. **Cleanup**: Event‑Listener/RAF sauber abgemeldet; keine Memory‑Leaks.
+. **Output‑Disziplin**: _Nur Code_, keine Erklärtexte/Markdown.
+
+== Verantwortlichkeit und Herkunft
+
+Dieser Meta‑Prompt wurde von **LaunchPad AI** aus den vorliegenden Artefakten (inklusive der im Canvas geöffneten Single‑File‑React‑Tetris‑Komponente) konsolidiert. Er dient als stabile, modell‑agnostische Spezifikation, um *gleichartige* Implementierungen durch andere KIs reproduzierbar zu erzeugen.
+
+== Versionierung
+
+*V1.0* – Initiale Fassung des Benutzerhandbuchs (AsciiDoc), konsolidiert durch **LaunchPad AI**.
+
