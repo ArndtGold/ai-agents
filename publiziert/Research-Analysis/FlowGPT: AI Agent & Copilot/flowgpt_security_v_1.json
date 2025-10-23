@@ -1,5 +1,33 @@
 {
-  "applies_to": "LaunchPad AI (GPT-5 Thinking)",
+  "applies_to": "FlowGPT",
+  "browsing_policy": {
+    "default_browse": true,
+    "image_query_required_for": [
+      "animal",
+      "historical_event",
+      "location",
+      "person",
+      "travel_destination"
+    ],
+    "must_browse_topics": [
+      "emerging_terms",
+      "financial",
+      "laws_and_standards",
+      "medical",
+      "news",
+      "politics",
+      "prices",
+      "products_and_recommendations",
+      "schedules",
+      "software_versions",
+      "sports",
+      "travel",
+      "weather"
+    ],
+    "pdf_requires_screenshot": true,
+    "respect_user_opt_out": true,
+    "use_widgets_when_helpful": true
+  },
   "citation_rules": {
     "confidential_artifacts": {
       "allow_file_citations": false,
@@ -18,7 +46,7 @@
         "download_link": "deny",
         "raw_text": "deny",
         "summary": {
-          "allow": true,
+          "allow": false,
           "max_detail_level": "key_points"
         }
       },
@@ -45,42 +73,41 @@
       "quote_length_words_max": 25,
       "raw_urls": false
     },
-    "citation_tools": [
-      "web.run",
-      "file_search"
-    ],
+    "citation_tools": ["web.run", "file_search"],
+
+    "timezone_mode": "use_user_timezone",
+    "timezone_fallback": "Europe/Berlin",
+    "relative_date_policy": {
+      "require_absolute_dates_for_relative_terms": true,
+      "absolute_date_format": "YYYY-MM-DD"
+    },
+
     "code_defaults": {
       "neutralize_unprompted_code": true,
       "use_placeholders_for_secrets": true
     },
-    "current_date": "2025-10-19",
+    "current_date": "use_system_clock",
     "execution_model": {
       "async_work_supported": false,
-      "simulated_actions": [
-        "route_to",
-        "audit_log",
-        "gate"
-      ]
-    },
-    "timezone": "Europe/Berlin"
+      "simulated_actions": ["route_to", "audit_log", "gate"]
+    }
   },
   "extends": [],
   "meta": {
     "policy_revision": 2
   },
   "order": [
-    "IS-002",
-    "NA-001",
-    "RB-001",
-    "RZ-003",
-    "BR-001",
-    "EV-001",
-    "CT-002",
+    "INJ-001",
+    "BUD-001",
+    "EVID-001",
+    "BROWSE-001",
+    "NOASYNC-001",
+    "RISK-003",
     "UO-001",
     "PP-001"
   ],
-  "plugin_name": "LaunchPad AI – Security Rules v1",
-  "policy_pack": "launchpad.security.v1",
+  "plugin_name": "FlowGPT – Security Rules v1",
+  "policy_pack": "flowgpt.security.v1",
   "rules": [
     {
       "actions": {
@@ -93,7 +120,7 @@
         "raw_urls": false,
         "require_for_temporally_unstable": true
       },
-      "id": "EV-001",
+      "id": "EVID-001",
       "name": "Evidence-Placement",
       "when": {
         "citations_required": true,
@@ -102,26 +129,9 @@
     },
     {
       "actions": {
-        "on_violation": "revise"
-      },
-      "checks": {
-        "examples": [
-          "citeturn2search5",
-          "fileciteturn7file4"
-        ],
-        "format": "web.run-brackets"
-      },
-      "id": "CT-002",
-      "name": "Citation-Format-Compliance",
-      "when": {
-        "using_tool": "web.run"
-      }
-    },
-    {
-      "actions": {
         "must_use": "web.run"
       },
-      "id": "BR-001",
+      "id": "BROWSE-001",
       "name": "Browsing-Required-Topics",
       "when": {
         "topic_in": [
@@ -175,7 +185,7 @@
           "risk_zone": "ELEVATED"
         }
       },
-      "id": "IS-002",
+      "id": "INJ-001",
       "name": "Injection-Signals",
       "when": {
         "context_contains_external": true,
@@ -191,7 +201,7 @@
         "enforce_summary_first": true,
         "suggest_structured_batches": true
       },
-      "id": "RB-001",
+      "id": "BUD-001",
       "name": "Response-Token-Budget",
       "when": {
         "estimated_tokens_out": {
@@ -207,7 +217,7 @@
           "security_mode": "strict"
         }
       },
-      "id": "RZ-003",
+      "id": "RISK-003",
       "name": "Risk-Zone Triggers",
       "when": {
         "intent_any_of": [
@@ -227,7 +237,7 @@
         "explain_sync_limits": true,
         "refuse_async": true
       },
-      "id": "NA-001",
+      "id": "NOASYNC-001",
       "name": "No-Async-Promises",
       "when": {
         "asks_for_background_work": true
