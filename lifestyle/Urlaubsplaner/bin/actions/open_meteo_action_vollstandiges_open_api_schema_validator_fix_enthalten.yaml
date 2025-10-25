@@ -1,0 +1,174 @@
+openapi: 3.1.0
+info:
+  title: Open-Meteo Wetter
+  version: "1.0.1"
+  description: |
+    Direkter Zugriff auf Open‑Meteo Vorhersagen für Reiseplanung (stündlich, täglich, aktuelles Wetter).
+    Enthält einen 200‑Response mit explizitem Object‑Schema (Validator‑Fix: properties + additionalProperties: true).
+servers:
+  - url: https://api.open-meteo.com
+paths:
+  /v1/forecast:
+    get:
+      operationId: getOpenMeteoForecast
+      summary: Hole Wettervorhersage (stündlich/täglich) für Koordinaten
+      description: >
+        Liefert Vorhersagen für einen Zeitraum. `timezone=auto` passt Zeiten an die
+        lokale Zeitzone der Koordinaten an. `hourly` und `daily` müssen als
+        **komma-getrennte** Listen übergeben werden (style=form, explode=false).
+      parameters:
+        - in: query
+          name: latitude
+          schema: { type: number, minimum: -90, maximum: 90 }
+          required: true
+          description: Breitengrad
+        - in: query
+          name: longitude
+          schema: { type: number, minimum: -180, maximum: 180 }
+          required: true
+          description: Längengrad
+        - in: query
+          name: start_date
+          schema: { type: string, pattern: '^\d{4}-\d{2}-\d{2}$' }
+          required: false
+          description: Startdatum (YYYY-MM-DD)
+        - in: query
+          name: end_date
+          schema: { type: string, pattern: '^\d{4}-\d{2}-\d{2}$' }
+          required: false
+          description: Enddatum (YYYY-MM-DD)
+        - in: query
+          name: timezone
+          schema: { type: string, default: auto }
+          required: false
+          description: IANA-Zeitzone (z. B. Europe/Berlin) oder 'auto'
+        - in: query
+          name: current_weather
+          schema: { type: boolean, default: true }
+          required: false
+          description: Aktuelles Wetter einschließen
+        - in: query
+          name: temperature_unit
+          schema:
+            type: string
+            enum: [celsius, fahrenheit]
+            default: celsius
+          required: false
+          description: Temperatureinheit
+        - in: query
+          name: windspeed_unit
+          schema:
+            type: string
+            enum: [kmh, ms, mph, kn]
+            default: kmh
+          required: false
+          description: Windeinheit
+        - in: query
+          name: precipitation_unit
+          schema:
+            type: string
+            enum: [mm, inch]
+            default: mm
+          required: false
+          description: Niederschlagseinheit
+        - in: query
+          name: hourly
+          description: Komma-getrennte stündliche Variablen (style=form, explode=false)
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - temperature_2m
+                - apparent_temperature
+                - precipitation
+                - precipitation_probability
+                - rain
+                - showers
+                - snowfall
+                - cloudcover
+                - windspeed_10m
+                - windgusts_10m
+                - winddirection_10m
+            default:
+              - temperature_2m
+              - precipitation_probability
+              - rain
+              - windspeed_10m
+              - cloudcover
+        - in: query
+          name: daily
+          description: Komma-getrennte tägliche Variablen (style=form, explode=false)
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - weathercode
+                - temperature_2m_max
+                - temperature_2m_min
+                - sunrise
+                - sunset
+                - precipitation_sum
+                - precipitation_hours
+                - precipitation_probability_max
+                - windspeed_10m_max
+            default:
+              - weathercode
+              - temperature_2m_max
+              - temperature_2m_min
+              - precipitation_sum
+              - precipitation_probability_max
+      responses:
+        "200":
+          description: Open-Meteo Forecast-Response
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Unverändertes Open‑Meteo JSON
+                additionalProperties: true
+                properties:
+                  latitude: { type: number }
+                  longitude: { type: number }
+                  generationtime_ms: { type: number }
+                  utc_offset_seconds: { type: integer }
+                  timezone: { type: string }
+                  timezone_abbreviation: { type: string }
+                  elevation: { type: number }
+                  current_weather:
+                    type: object
+                    additionalProperties: true
+                    properties:
+                      temperature: { type: number }
+                      windspeed: { type: number }
+                      winddirection: { type: number }
+                      weathercode: { type: integer }
+                      time: { type: string }
+                  hourly_units:
+                    type: object
+                    additionalProperties: { type: string }
+                  hourly:
+                    type: object
+                    additionalProperties: true
+                    properties:
+                      time:
+                        type: array
+                        items: { type: string }
+                  daily_units:
+                    type: object
+                    additionalProperties: { type: string }
+                  daily:
+                    type: object
+                    additionalProperties: true
+                    properties:
+                      time:
+                        type: array
+                        items: { type: string }
+      tags: [weather]

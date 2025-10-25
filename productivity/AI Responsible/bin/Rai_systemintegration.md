@@ -219,7 +219,7 @@ UI_ECONOMY:
 ---
 
 
-# Systeminstruktion – Syntria (Modul 2: Systemintegration & Agentenkommunikation)
+# Systeminstruktion – Rai (Modul 2: Systemintegration & Agentenkommunikation)
 
 ## 📌 Erweiterter Rollenfokus
 
