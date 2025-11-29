@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tetris Relaxed</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="wrapper">
+        <header>
+            <h1>Tetris Relaxed</h1>
+            <p>Atme tief durch, lehne dich zurück und lasse die Steine in deinem Tempo fallen.</p>
+        </header>
+        <main>
+            <section class="game-area">
+                <canvas id="game" width="300" height="600" aria-label="Tetris Spielfeld" role="img"></canvas>
+                <aside class="panel">
+                    <div class="scoreboard">
+                        <div class="score-item">
+                            <span>Punkte</span>
+                            <strong id="score">0</strong>
+                        </div>
+                        <div class="score-item">
+                            <span>Level</span>
+                            <strong id="level">1</strong>
+                        </div>
+                        <div class="score-item">
+                            <span>Linien</span>
+                            <strong id="lines">0</strong>
+                        </div>
+                    </div>
+                    <div class="controls">
+                        <h2>Steuerung</h2>
+                        <ul>
+                            <li>&larr; / &rarr; – Bewegen</li>
+                            <li>&darr; – Schnell fallen</li>
+                            <li>&uarr; – Drehen</li>
+                            <li>Leertaste – Fallen lassen</li>
+                        </ul>
+                    </div>
+                    <button id="relax-toggle" type="button">Relax-Modus: Aktiv</button>
+                </aside>
+            </section>
+        </main>
+        <footer>
+            <p>Eine kleine Auszeit mit klassischem Gameplay und sanften Farben.</p>
+        </footer>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
